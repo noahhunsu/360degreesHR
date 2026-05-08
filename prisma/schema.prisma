@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---- Company Model -----   //
+model Company {
+  id      String  @id @default(uuid()) @db.Uuid
+  name    String
+  email   String  @unique
+  address String?
+  phone   String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  //-- Relations --//
+  users       User[]
+  employees   Employee[]
+  departments Department[]
+
+  @@map("companies")
+}
+
+// ---- Employee Model -----   //
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum EmploymentStatus {
+  ACTIVE
+  TERMINATED
+  RESIGNED
+  SUSPENDED
+}
+
+model Employee {
+  id        String  @id @default(uuid()) @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.Uuid
+
+  employeeCode String
+  firstName String 
+  lastName String 
+  gender Gender
+
+  dateOfBirth DateTime?
+
+  address String?
+  hireDate DateTime @default(now())
+  employmentStatus EmploymentStatus @default(ACTIVE)
+  
+  headedDepartments Department[] @relation("DepartmentHead")
+
+ department   Department? @relation("DepartmentEmployees", fields: [departmentId], references: [id])
+  departmentId String?     @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User?
+
+  @@index([companyId])
+   @@index([departmentId])
+  @@map("employees")
+}
+
+// ---- User Model -----   //
+
+enum Role {
+  HR_ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+model User {
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String
+  email    String  @unique
+  password String
+  phone    String?
+
+  role     Role
+  isActive Boolean @default(true)
+
+  lastLogin  DateTime?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  employeeId String?   @unique @db.Uuid
+
+  // PASSWORD RESET
+  resetToken          String?
+  resetTokenExpiresAt DateTime?
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@map("users")
+}
+
+// ---- Department Model -----   //
+
+enum DepartmentStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Department {
+  id String @id @default(uuid()) @db.Uuid
+
+  // COMPANY OWNERSHIP
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.Uuid
+
+  // BASIC INFO
+  name        String
+  description String?
+
+  status DepartmentStatus @default(ACTIVE)
+
+  // =========================
+  // HIERARCHY (SELF RELATION)
+  // =========================
+
+  parentDepartment   Department? @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id])
+  parentDepartmentId String?     @db.Uuid
+
+  subDepartments Department[] @relation("DepartmentHierarchy")
+
+  // =========================
+  // HEAD OF DEPARTMENT
+  // =========================
+
+  headEmployee   Employee? @relation("DepartmentHead", fields: [headEmployeeId], references: [id])
+  headEmployeeId String?   @db.Uuid
+
+  // =========================
+  // EMPLOYEES IN DEPARTMENT
+  // =========================
+
+  employees Employee[] @relation("DepartmentEmployees")
+
+  // TIMESTAMPS
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([parentDepartmentId])
+  @@map("departments")
+}
+
+// model EmploymentHistory{
+//   id String @id @default(uuid()) @db.Uuid
+//   employee Employee @relation(fields: [EmployeeId] , references: [id])
+//   EmployeeId String @db.Uuid
+//   company Company @relation(fields: [CompanyId] , references: [id])
+//   CompanyId String @db.Uuid
+// }
