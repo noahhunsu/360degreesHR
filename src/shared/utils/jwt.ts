@@ -13,13 +13,11 @@ export const verifyToken = (token : string): TokenContent => {
     try {
 
         const data =  jwt.verify(token ,process.env.JWT_SECRET!) 
-        console.log(data)
         return data as TokenContent
         
         
     }
     catch(error){
-        console.log("error ", token)
         throw new Error("Invalid or expired token");
     }
 }

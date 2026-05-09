@@ -129,7 +129,6 @@ export class AuthService {
   static async authMeService(authToken : string ) {
     let data = verifyToken(authToken);
 
-    console.log("data is ", data )
     const user = await prismaClient.user.findUnique({
       where : {
         id : data.userId
