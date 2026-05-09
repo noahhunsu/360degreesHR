@@ -7,7 +7,6 @@ export class AuthController {
     static async register(
         req : Request, res : Response , next : NextFunction 
     ){
-        console.log("currently here creating accout")
         try {
             const result = await AuthService.registerService(req.body)
             return res.status(201).json({
@@ -35,3 +34,4 @@ export class AuthController {
         }
     }
 }
+

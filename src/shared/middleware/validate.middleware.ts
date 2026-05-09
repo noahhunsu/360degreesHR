@@ -6,9 +6,9 @@ export const validate =(schema : ZodObject) => {
     return (
         req : Request , res: Response , next : NextFunction
     ) => {
-        next()
         try {
             schema.parse(req.body)
+            next()
         } catch (error) {
             next(error)
         }
