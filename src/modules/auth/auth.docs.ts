@@ -71,3 +71,30 @@
  *       500:
  *         description: Internal server error
  */
+
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Get current authenticated user
+ *     description: Returns the details of the currently logged-in user based on the JWT token.
+ *     tags:
+ *       - Auth
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: User fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthMeResponse'
+ *
+ *       401:
+ *         description: Unauthorized (missing or invalid token)
+ *
+ *       500:
+ *         description: Internal server error
+ */

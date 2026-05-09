@@ -37,76 +37,192 @@ const options: swaggerJsdoc.Options = {
           ],
 
           properties: {
-             companyName: {
-          type: "string",
-          example: "360Degrees HR",
-        },
+            companyName: {
+              type: "string",
+              example: "360Degrees HR",
+            },
 
-        companyEmail: {
-          type: "string",
-          format: "email",
-          example: "info@360degrees.com",
-        },
+            companyEmail: {
+              type: "string",
+              format: "email",
+              example: "info@360degrees.com",
+            },
 
-        companyAddress: {
-          type: "string",
-          example: "Abuja, Nigeria",
-        },
+            companyAddress: {
+              type: "string",
+              example: "Abuja, Nigeria",
+            },
 
-        companyPhone: {
-          type: "string",
-          example: "+2348012345678",
-        },
+            companyPhone: {
+              type: "string",
+              example: "+2348012345678",
+            },
 
-        adminName: {
-          type: "string",
-          example: "Arthur",
-        },
+            adminName: {
+              type: "string",
+              example: "Arthur",
+            },
 
-        adminEmail: {
-          type: "string",
-          format: "email",
-          example: "arthur@360degrees.com",
-        },
+            adminEmail: {
+              type: "string",
+              format: "email",
+              example: "arthur@360degrees.com",
+            },
 
-        password: {
-          type: "string",
-          format: "password",
-          minLength: 8,
-          example: "SecurePass123",
-        },
+            password: {
+              type: "string",
+              format: "password",
+              minLength: 8,
+              example: "SecurePass123",
+            },
           },
         },
 
-         RegisterResponse: {
-      type: "object",
-    
-        properties: {
+        RegisterResponse: {
+          type: "object",
 
+          properties: {
             success: {
-          type: "boolean",
-          example: true,
-        },
-
-        message: {
-          type: "string",
-          example: "Company Registration Successful",
-        },
-
-        data : {
-            properties : {
-                token: {
-              type: "string",
-              example: "jwt.token.here",
+              type: "boolean",
+              example: true,
             },
 
-             user: {
-              type: "object",
-             properties: {
-                id: {
+            message: {
+              type: "string",
+              example: "Company Registration Successful",
+            },
+
+            data: {
+                type : "object" , 
+              properties: {
+                token: {
                   type: "string",
+                  example: "jwt.token.here",
                 },
 
+                user: {
+                  type: "object",
+                  properties: {
+                    id: {
+                      type: "string",
+                    },
+
+                    name: {
+                      type: "string",
+                    },
+
+                    email: {
+                      type: "string",
+                    },
+
+                    role: {
+                      type: "string",
+                      example: "HR_ADMIN",
+                    },
+                  },
+                },
+                company: {
+                  type: "object",
+
+                  properties: {
+                    id: {
+                      type: "string",
+                    },
+
+                    name: {
+                      type: "string",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        LoginRequest: {
+          type: "object",
+
+          required: ["userEmail", "password"],
+
+          properties: {
+            userEmail: {
+              type: "string",
+              format: "email",
+              example: "arthur@360degrees.com",
+            },
+
+            password: {
+              type: "string",
+              format: "password",
+              example: "SecurePass123",
+            },
+          },
+        },
+
+        LoginResponse: {
+          type: "object",
+
+          properties: {
+            success: {
+              type: "boolean",
+              example: true,
+            },
+
+            message: {
+              type: "string",
+              example: "Login Successful",
+            },
+
+            data: {
+              type: "object",
+
+              properties: {
+                token: {
+                  type: "string",
+                  example: "jwt.token.here",
+                },
+
+                user: {
+                  type: "object",
+
+                  properties: {
+                    userId: {
+                      type: "string",
+                    },
+
+                    role: {
+                      type: "string",
+                      example: "HR_ADMIN",
+                    },
+
+                    companyId: {
+                      type: "string",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        AuthMeResponse: {
+          type: "object",
+          properties: {
+            success: {
+              type: "boolean",
+              example: true,
+            },
+            message: {
+              type: "string",
+              example: "User fetched successfully",
+            },
+
+            data: {
+              type: "object",
+
+              properties: {
+                userId: {
+                  type: "string",
+                },
                 name: {
                   type: "string",
                 },
@@ -119,102 +235,18 @@ const options: swaggerJsdoc.Options = {
                   type: "string",
                   example: "HR_ADMIN",
                 },
-              },
-            },
-            company: {
-              type: "object",
 
-              properties: {
-                id: {
-                  type: "string",
-                },
-
-                name: {
+                companyId: {
                   type: "string",
                 },
               },
             },
-            }
-        }
-        }
-    },
-
-    LoginRequest: {
-  type: "object",
-
-  required: [
-    "userEmail",
-    "password"
-  ],
-
-  properties: {
-    userEmail: {
-      type: "string",
-      format: "email",
-      example: "arthur@360degrees.com"
-    },
-
-    password: {
-      type: "string",
-      format: "password",
-      example: "SecurePass123"
-    }
-  }
-},
-
-LoginResponse: {
-  type: "object",
-
-  properties: {
-    success: {
-      type: "boolean",
-      example: true
-    },
-
-    message: {
-      type: "string",
-      example: "Login Successful"
-    },
-
-    data: {
-      type: "object",
-
-      properties: {
-        token: {
-          type: "string",
-          example: "jwt.token.here"
+          },
         },
-
-        user: {
-          type: "object",
-
-          properties: {
-            userId: {
-              type: "string"
-            },
-
-            role: {
-              type: "string",
-              example: "HR_ADMIN"
-            },
-
-            companyId: {
-              type: "string"
-            }
-          }
-        }
-      }
-    }
-  }
-},
       },
     },
 
-    security: [
-      {
-        bearerAuth: [],
-      },
-    ],
+ 
   },
 
   apis: ["src/modules/**/*.ts", "src/modules/**/*.docs.ts"],

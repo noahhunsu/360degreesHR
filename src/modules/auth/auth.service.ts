@@ -4,11 +4,13 @@
 // forgot password
 // reset password
 
+import { error } from "node:console";
 import { Role } from "../../../generated/prisma/enums.js";
 import { prismaClient } from "../../config/db.js";
 import { comparePassword, hashpassword } from "../../shared/utils/hash.js";
-import { generateAccessToken } from "../../shared/utils/jwt.js";
+import { generateAccessToken, verifyToken } from "../../shared/utils/jwt.js";
 import type { LoginInput, RegisterInput } from "./auth.validation.js";
+import { UnauthorizedError } from "../../shared/exceptions/app.error.js";
 
 export class AuthService {
   static async registerService(payload: RegisterInput) {
@@ -90,7 +92,7 @@ export class AuthService {
     };
   }
 
-  static async login(payload : LoginInput) {
+  static async loginService(payload : LoginInput) {
     const {userEmail , password} = payload;
     // check if user exists from email 
 
@@ -123,4 +125,28 @@ export class AuthService {
         }
       };
   }
+
+  static async authMeService(authToken : string ) {
+    let data = verifyToken(authToken);
+
+    console.log("data is ", data )
+    const user = await prismaClient.user.findUnique({
+      where : {
+        id : data.userId
+      }
+    });
+
+    if (!user){
+      throw new UnauthorizedError();
+    }
+    return {
+      userId : user.id , 
+      name : user.name , 
+      email : user.email,
+      role : user.role , 
+      companyId : user.companyId , 
+    }
+  }
 }
+
+
