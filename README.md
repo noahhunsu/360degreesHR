@@ -57,7 +57,7 @@ Ensure PostgreSQL service is running.
 ## 1. Clone Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/noahhunsu/360degreesHR.git
 ```
 
 Navigate into the project:
@@ -85,7 +85,7 @@ Create a `.env` file at the root of the project.
 Example:
 
 ```env
-DATABASE_URL="postgresql://postgres:password@localhost:5432/hr_platform"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/degrees_360"
 JWT_SECRET="supersecret"
 PORT=5000
 ```
@@ -113,7 +113,7 @@ psql -U postgres
 Create database:
 
 ```sql
-CREATE DATABASE hr_platform;
+CREATE DATABASE degrees_360;
 ```
 
 ---
@@ -139,16 +139,6 @@ This command:
 * Creates database tables
 * Applies migrations
 * Syncs Prisma schema
-
----
-
-## 3. Open Prisma Studio (Optional)
-
-```bash
-npx prisma studio
-```
-
-This opens a visual database interface in the browser.
 
 ---
 
@@ -289,8 +279,6 @@ Ensure:
 * Username/password are correct
 
 ---
-
-## ts-node-dev Not Found
 
 Install dependencies:
 
