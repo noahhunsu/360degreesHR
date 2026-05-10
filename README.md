@@ -157,10 +157,7 @@ Server running on port 5000
 ```
 
 ---
-```bash for generating basic prisma data 
-npm run db:setup
-npm run dev
----
+
 
 # Available Scripts
 
