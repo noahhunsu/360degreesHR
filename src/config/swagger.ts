@@ -93,7 +93,7 @@ const options: swaggerJsdoc.Options = {
             },
 
             data: {
-                type : "object" , 
+              type: "object",
               properties: {
                 token: {
                   type: "string",
@@ -243,10 +243,50 @@ const options: swaggerJsdoc.Options = {
             },
           },
         },
+        ForgotPasswordRequest: {
+          type: "object",
+
+          required: ["email"],
+
+          properties: {
+            email: {
+              type: "string",
+              format: "email",
+              example: "arthur@360degrees.com",
+            },
+          },
+        },
+        ResetPasswordRequest: {
+          type: "object",
+
+          required: ["password"],
+
+          properties: {
+            password: {
+              type: "string",
+              format: "password",
+              minLength: 8,
+              example: "NewSecurePassword123",
+            },
+          },
+        },
+        GenericSuccessResponse: {
+          type: "object",
+
+          properties: {
+            success: {
+              type: "boolean",
+              example: true,
+            },
+
+            message: {
+              type: "string",
+              example: "Operation completed successfully",
+            },
+          },
+        },
       },
     },
-
- 
   },
 
   apis: ["src/modules/**/*.ts", "src/modules/**/*.docs.ts"],

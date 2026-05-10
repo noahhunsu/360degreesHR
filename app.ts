@@ -8,6 +8,7 @@ import cors from  "cors";
 import "dotenv/config"
 import authRouter from "./src/modules/auth/auth.routes.js";
 import { swaggerSpec } from "./src/config/swagger.js";
+import { errorMiddleware } from "./src/shared/middleware/error.middleware.js";
 
 const app = express();
 
@@ -19,6 +20,8 @@ app.use(express.json())
 app.get("/", (req , res ) => {
     res.send("Welcome to 360 degrees");
 })
+
+app.use(errorMiddleware)
 
 app.use("/api/v1/docs" , 
     swaggerUi.serve, swaggerUi.setup(swaggerSpec)

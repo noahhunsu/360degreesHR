@@ -9,9 +9,15 @@ import { Role } from "../../../generated/prisma/enums.js";
 import { prismaClient } from "../../config/db.js";
 import { comparePassword, hashpassword } from "../../shared/utils/hash.js";
 import { generateAccessToken, verifyToken } from "../../shared/utils/jwt.js";
-import type { LoginInput, RegisterInput } from "./auth.validation.js";
+import type {
+  ForgotPasswordInput,
+  LoginInput,
+  RegisterInput,
+  ResetPasswordInput,
+} from "./auth.validation.js";
 import { UnauthorizedError } from "../../shared/exceptions/app.error.js";
-
+import crypto from "crypto";
+import { sendEmail } from "../../shared/utils/sendEmail.js";
 export class AuthService {
   static async registerService(payload: RegisterInput) {
     // destructuring the payload
@@ -76,7 +82,7 @@ export class AuthService {
       companyId: result.company.id,
     });
 
-    // At this point , an email will be sent to them 
+    // At this point , an email will be sent to them
     return {
       token,
       user: {
@@ -92,60 +98,179 @@ export class AuthService {
     };
   }
 
-  static async loginService(payload : LoginInput) {
-    const {userEmail , password} = payload;
-    // check if user exists from email 
+  static async loginService(payload: LoginInput) {
+    const { userEmail, password } = payload;
+    // check if user exists from email
 
     const existingUser = await prismaClient.user.findUnique({
-        where : {
-            email : userEmail
-        }
-    })
+      where: {
+        email: userEmail,
+      },
+    });
 
-    if(!existingUser ){
-        throw new Error ("You are unauthorized to perform this action ")
+    if (!existingUser) {
+      throw new Error("You are unauthorized to perform this action ");
     }
-    const isPasswordMatch = await comparePassword(password , existingUser.password);
-    
+    const isPasswordMatch = await comparePassword(
+      password,
+      existingUser.password,
+    );
+
     if (!isPasswordMatch) {
-        throw new Error ("Password Mismatch")
+      throw new Error("Password Mismatch");
     }
-    const token =  generateAccessToken({
-        userId : existingUser.id , 
-        companyId : existingUser.companyId, 
-        role : existingUser.role
-    })
+    const token = generateAccessToken({
+      userId: existingUser.id,
+      companyId: existingUser.companyId,
+      role: existingUser.role,
+    });
     return {
-        token, 
-        user : {
-            userId : existingUser?.id , 
-            role : existingUser?.role, 
-            companyId : existingUser.companyId
-        
-        }
-      };
+      token,
+      user: {
+        userId: existingUser?.id,
+        role: existingUser?.role,
+        companyId: existingUser.companyId,
+      },
+    };
   }
 
-  static async authMeService(authToken : string ) {
+  static async authMeService(authToken: string) {
     let data = verifyToken(authToken);
 
     const user = await prismaClient.user.findUnique({
-      where : {
-        id : data.userId
-      }
+      where: {
+        id: data.userId,
+      },
     });
 
-    if (!user){
+    if (!user) {
       throw new UnauthorizedError();
     }
     return {
-      userId : user.id , 
-      name : user.name , 
-      email : user.email,
-      role : user.role , 
-      companyId : user.companyId , 
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      companyId: user.companyId,
+    };
+  }
+
+  static async forgotPasswordService(payload: ForgotPasswordInput) {
+
+    // check if user exists
+    const user = await prismaClient.user.findUnique({
+      where: {
+        email: payload.email,
+      },
+    });
+    //
+    if (!user) {
+      return {
+        success: true,
+        message: "If this email exists , a link will be sent to it",
+      };
     }
+
+    // generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    console.log(resetToken);
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+    console.log(hashedToken);
+
+    // update user table . Set the expiry and expiry date
+    await prismaClient.user.update({
+      where: {
+        id: user?.id,
+      },
+      data: {
+        resetToken: hashedToken,
+        resetTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 15),
+      },
+    });
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-token?token=${resetToken}`;
+    // next we send the email .
+    await sendEmail({
+      to: user.email,
+      subject: "Reset Your Password",
+      html: `
+    <h2>Password Reset</h2>
+
+    <p>You requested a password reset.</p>
+
+    <p>
+      Click the link below to reset your password:
+    </p>
+
+    <a href="${resetLink}">
+      Reset Password
+    </a>
+
+    <p>
+      This link expires in 15 minutes.
+    </p>
+  `,
+    });
+    return {
+      success: true,
+      message: "If this email exists , a link will be sent to it",
+    };
+  }
+
+  static async resetPasswordService(payload: ResetPasswordInput) {
+    let hashedToken = crypto
+      .createHash("sha256")
+      .update(payload.token)
+      .digest("hex");
+
+    // first we get the email from the payload and then check if it exists
+    console.log("the payload schema is "  , payload.token)
+    const user = await prismaClient.user.findFirst({
+      where: {
+        resetToken: hashedToken,
+        resetTokenExpiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Invalid or Expired Token",
+      };
+    }
+
+    const hashedPassword = await hashpassword(payload.password);
+
+    await prismaClient.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiresAt: null,
+      },
+    });
+
+    await sendEmail({
+      to: user.email,
+      subject: "Password Reset",
+      html: `
+    <h2>Password Reset</h2>
+
+    <p>You password has been reset successfully.</p> 
+  `
+    });
+    return {
+      success: true,
+      message: "Password Reset Successfully",
+    };
+
+    // next we compare the hash of the token sent with the one in the user's database
+
+    // Next we compare the two tokens . The one in database and the one that has been hashed
   }
 }
-
-
