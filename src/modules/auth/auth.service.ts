@@ -33,6 +33,7 @@ export class AuthService {
       companyAddress,
       companyPhone,
     } = payload;
+    // We take out every whitespace from input
 
     const normalizedCompanyEmail = companyEmail.toLocaleLowerCase().trim();
     const normalizedAdminEmail = adminEmail.toLocaleLowerCase().trim();
@@ -40,10 +41,13 @@ export class AuthService {
     const existingCompany = await prismaClient.company.findUnique({
       where: { email: normalizedCompanyEmail },
     });
+    // Throw an error if company exists 
+    // You shouldn't have two companies with the same email
 
     if (existingCompany) {
       throw new ConflictError("Company Already Exists");
     }
+    // Check if user exists cos two people should not have the same email
 
     const existingUser = await prismaClient.user.findUnique({
       where: {
@@ -67,6 +71,8 @@ export class AuthService {
           address: companyAddress || "",
         },
       });
+      // This is where we create a user record
+
       const user = await tx.user.create({
         data: {
           name: adminName,
@@ -81,6 +87,9 @@ export class AuthService {
         user,
       };
     });
+    // This token will be required to be sent as an auth token
+    // The three fields are what we require for basic authentication 
+
     const token = generateAccessToken({
       userId: result.user.id,
       role: result.user.role,
@@ -101,6 +110,8 @@ export class AuthService {
     } catch (error) {
       console.error("Onboarding email failed:", error);
     }
+    // The frontend receives this and uses it the way it needs to 
+    
     return {
       token,
       user: {

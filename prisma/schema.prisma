@@ -23,13 +23,6 @@ model Company {
   @@map("companies")
 }
 
-enum EmploymentType {
-  FULL_TIME
-  PART_TIME
-  CONTRACT
-  INTERN
-}
-
 model Employee {
   id                String           @id @default(uuid()) @db.Uuid
   companyId         String           @db.Uuid
@@ -101,8 +94,11 @@ model Department {
   parentDepartment   Department?      @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id])
   subDepartments     Department[]     @relation("DepartmentHierarchy")
   employees          Employee[]       @relation("DepartmentEmployees")
+  deletedAt          DateTime?
 
+  @@unique([companyId, name])
   @@index([companyId])
+  @@index([headEmployeeId])
   @@index([parentDepartmentId])
   @@map("departments")
 }
@@ -121,6 +117,7 @@ enum EmploymentStatus {
 
 enum Role {
   HR_ADMIN
+  ADMIN
   MANAGER
   EMPLOYEE
 }
@@ -128,4 +125,11 @@ enum Role {
 enum DepartmentStatus {
   ACTIVE
   INACTIVE
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
 }

@@ -9,7 +9,6 @@ import { prismaClient } from "../../config/db.js";
 
 import type {
   CreateEmployeeInput,
-  filterQuery,
   FilterQueryInput,
   UpdateEmployeeInput,
 } from "./employee.validation.js";
@@ -60,6 +59,20 @@ export class EmployeeService {
 
       if (manager.user.role !== "MANAGER") {
         throw new ConflictError("Selected employee is not a manager");
+      }
+    }
+
+    // Check if department exists
+    if (payload.departmentId) {
+      const department = await prismaClient.department.findFirst({
+        where: {
+          id: payload.departmentId,
+          companyId: hrUser.companyId,
+        },
+      });
+
+      if (!department) {
+        throw new NotFoundError("Department not found");
       }
     }
     // to generate employeecode , we get the last employee from the database

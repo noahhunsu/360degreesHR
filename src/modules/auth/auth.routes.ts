@@ -8,8 +8,8 @@ const router = Router()
 
 router.post("/register" , validate(registerSchema), AuthController.registerController)
 router.post("/login" , validate(loginSchema), AuthController.loginController)
+router.get("/me" , AuthController.authMeController)
 router.post("/forgot-password" ,  validate(forgotPasswordSchema), AuthController.forgotPasswordController)
 router.post("/reset-password" ,  validate(resetPasswordInputSchema) ,AuthController.resetPasswordController)
-router.get("/me" , AuthController.authMeController)
 
 export default router

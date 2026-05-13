@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
 import { EmployeeService } from "./employee.service.js";
-import { success } from "zod";
 
 export class EmployeeController {
   static async createEmployeeController(
