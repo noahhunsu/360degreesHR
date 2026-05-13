@@ -23,6 +23,13 @@ model Company {
   @@map("companies")
 }
 
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+}
+
 model Employee {
   id                String           @id @default(uuid()) @db.Uuid
   companyId         String           @db.Uuid
@@ -32,17 +39,28 @@ model Employee {
   gender            Gender
   dateOfBirth       DateTime?
   address           String?
-  hireDate          DateTime         @default(now())
+  jobTitle          String?
+  employmentType    EmploymentType?
+  managerId         String?          @db.Uuid
+  manager           Employee?        @relation("ManagerEmployees", fields: [managerId], references: [id])
+  subordinates      Employee[]       @relation("ManagerEmployees")
   employmentStatus  EmploymentStatus @default(ACTIVE)
   departmentId      String?          @db.Uuid
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
   headedDepartments Department[]     @relation("DepartmentHead")
   company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
   department        Department?      @relation("DepartmentEmployees", fields: [departmentId], references: [id])
-  user              User?
+  userId            String           @unique @db.Uuid
+  user              User             @relation(fields: [userId], references: [id])
 
+  hireDate  DateTime?
+  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  @@unique([companyId, employeeCode])
   @@index([companyId])
+  @@index([managerId])
+  @@index([employmentStatus])
   @@index([departmentId])
   @@map("employees")
 }
@@ -56,14 +74,13 @@ model User {
   role                Role
   isActive            Boolean   @default(true)
   lastLogin           DateTime?
-  employeeId          String?   @unique @db.Uuid
   resetToken          String?
   resetTokenExpiresAt DateTime?
   companyId           String    @db.Uuid
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   company             Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  employee            Employee? @relation(fields: [employeeId], references: [id])
+  employee            Employee?
 
   @@index([companyId])
   @@map("users")

@@ -15,3 +15,18 @@ export class UnauthorizedError extends AppError {
     super(message, 401);
   }
 }
+export class ConflictError extends AppError {
+  constructor(message = "User Already Exists") {
+    super(message, 409);
+  }
+}
+export class MatchError extends AppError {
+  constructor(message = "Password Mismatch") {
+    super(message, 401);
+  }
+}
+export class NotFoundError extends AppError {
+  constructor(message = "Information Not Found") {
+    super(message, 404);
+  }
+}

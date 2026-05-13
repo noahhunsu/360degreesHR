@@ -4,7 +4,6 @@
 // forgot password
 // reset password
 
-import { error } from "node:console";
 import { Role } from "../../../generated/prisma/enums.js";
 import { prismaClient } from "../../config/db.js";
 import { comparePassword, hashpassword } from "../../shared/utils/hash.js";
@@ -15,7 +14,11 @@ import type {
   RegisterInput,
   ResetPasswordInput,
 } from "./auth.validation.js";
-import { UnauthorizedError } from "../../shared/exceptions/app.error.js";
+import {
+  ConflictError,
+  MatchError,
+  UnauthorizedError,
+} from "../../shared/exceptions/app.error.js";
 import crypto from "crypto";
 import { sendEmail } from "../../shared/utils/sendEmail.js";
 export class AuthService {
@@ -31,23 +34,25 @@ export class AuthService {
       companyPhone,
     } = payload;
 
+    const normalizedCompanyEmail = companyEmail.toLocaleLowerCase().trim();
+    const normalizedAdminEmail = adminEmail.toLocaleLowerCase().trim();
     // check if company already exists in database
     const existingCompany = await prismaClient.company.findUnique({
-      where: { email: companyEmail },
+      where: { email: normalizedCompanyEmail },
     });
 
     if (existingCompany) {
-      throw new Error("Company Already Exists");
+      throw new ConflictError("Company Already Exists");
     }
 
     const existingUser = await prismaClient.user.findUnique({
       where: {
-        email: adminEmail,
+        email: normalizedAdminEmail,
       },
     });
 
     if (existingUser) {
-      throw new Error("User Already Exists");
+      throw new ConflictError("User Already Exists");
     }
     // Next , we hash the password
     const hashedPassword = await hashpassword(password);
@@ -56,7 +61,7 @@ export class AuthService {
       // We create the company record . We require the email , name , phone(optional ) , address ( optional)
       const company = await tx.company.create({
         data: {
-          email: companyEmail,
+          email: normalizedCompanyEmail,
           name: companyName,
           phone: companyPhone || "",
           address: companyAddress || "",
@@ -65,7 +70,7 @@ export class AuthService {
       const user = await tx.user.create({
         data: {
           name: adminName,
-          email: adminEmail,
+          email: normalizedAdminEmail,
           password: hashedPassword,
           role: Role.HR_ADMIN,
           companyId: company.id,
@@ -83,6 +88,19 @@ export class AuthService {
     });
 
     // At this point , an email will be sent to them
+
+    try {
+      await sendEmail({
+        to: companyEmail,
+        subject: "Company Onboarding",
+        html: `
+      <h2>Welcome to 360Degrees HR</h2>
+      <p>Your company onboarding was successful.</p>
+    `,
+      });
+    } catch (error) {
+      console.error("Onboarding email failed:", error);
+    }
     return {
       token,
       user: {
@@ -109,21 +127,30 @@ export class AuthService {
     });
 
     if (!existingUser) {
-      throw new Error("You are unauthorized to perform this action ");
+      throw new ConflictError("You are unauthorized to perform this action ");
     }
+
+    /**
+     * Check active account
+     */
+    if (!existingUser.isActive) {
+      throw new UnauthorizedError("Account is inactive");
+    }
+    
     const isPasswordMatch = await comparePassword(
       password,
       existingUser.password,
     );
 
     if (!isPasswordMatch) {
-      throw new Error("Password Mismatch");
+      throw new MatchError("Password Mismatch");
     }
     const token = generateAccessToken({
       userId: existingUser.id,
       companyId: existingUser.companyId,
       role: existingUser.role,
     });
+
     return {
       token,
       user: {
@@ -156,7 +183,6 @@ export class AuthService {
   }
 
   static async forgotPasswordService(payload: ForgotPasswordInput) {
-
     // check if user exists
     const user = await prismaClient.user.findUnique({
       where: {
@@ -173,12 +199,11 @@ export class AuthService {
 
     // generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
-    console.log(resetToken);
+
     const hashedToken = crypto
       .createHash("sha256")
       .update(resetToken)
       .digest("hex");
-    console.log(hashedToken);
 
     // update user table . Set the expiry and expiry date
     await prismaClient.user.update({
@@ -227,7 +252,7 @@ export class AuthService {
       .digest("hex");
 
     // first we get the email from the payload and then check if it exists
-    console.log("the payload schema is "  , payload.token)
+    console.log("the payload schema is ", payload.token);
     const user = await prismaClient.user.findFirst({
       where: {
         resetToken: hashedToken,
@@ -262,7 +287,7 @@ export class AuthService {
     <h2>Password Reset</h2>
 
     <p>You password has been reset successfully.</p> 
-  `
+  `,
     });
     return {
       success: true,

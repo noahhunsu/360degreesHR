@@ -14,6 +14,7 @@ export class AuthController {
         message: "Company Registration Successful",
         data: result,
       });
+      
     } catch (error) {
       next(error);
     }

@@ -7,6 +7,7 @@ import swaggerUi from "swagger-ui-express";
 import cors from  "cors";
 import "dotenv/config"
 import authRouter from "./src/modules/auth/auth.routes.js";
+import employeeRouter from "./src/modules/employee/employee.routes.js";
 import { swaggerSpec } from "./src/config/swagger.js";
 import { errorMiddleware } from "./src/shared/middleware/error.middleware.js";
 
@@ -29,6 +30,7 @@ app.use("/api/v1/docs" ,
 
 
 app.use("/api/v1/auth" ,authRouter )
+app.use("/api/v1/employees" ,employeeRouter )
 
 
 export default app;
