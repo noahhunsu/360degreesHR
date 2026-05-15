@@ -1,15 +1,17 @@
 import { Router } from "express";
 import { parseAuthHeaderMiddleware } from "./department.middleware.js";
 import { DepartmentController } from "./department.controller.js";
+import { validate } from "../../shared/middleware/validate.middleware.js";
+import { createDepartmentSchema, updateDepartmentSchema } from "./department.validation.js";
 
 
 
 
 const router = Router()
-router.post("/" , parseAuthHeaderMiddleware(), DepartmentController.createDepartmentController)
+router.post("/" , parseAuthHeaderMiddleware(),validate(createDepartmentSchema), DepartmentController.createDepartmentController)
 router.get("/" , parseAuthHeaderMiddleware(), DepartmentController.getDepartmentsController)
 router.get("/:departmentId" , parseAuthHeaderMiddleware(), DepartmentController.getSingleDepartmentController)
-router.put("/:departmentId" , parseAuthHeaderMiddleware(), DepartmentController.updateDepartmentController)
+router.put("/:departmentId" , parseAuthHeaderMiddleware(),validate(updateDepartmentSchema), DepartmentController.updateDepartmentController)
 router.delete("/:departmentId" , parseAuthHeaderMiddleware(), DepartmentController.deleteDepartmentController)
 router.get("/tree" , parseAuthHeaderMiddleware(), DepartmentController.getDepartmentTreeController)
 

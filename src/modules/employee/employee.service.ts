@@ -30,9 +30,9 @@ export class EmployeeService {
       throw new UnauthorizedError("You Are Not Authorized To Do This");
     }
 
-    const existingUser = await prismaClient.user.findUnique({
+    const existingUser = await prismaClient.user.findFirst({
       where: {
-        email: payload.email,
+        email: payload.email,companyId : hrUser.companyId
       },
     });
 
@@ -371,6 +371,7 @@ export class EmployeeService {
     return employee;
   }
 
+
   static async updateEmployeeService(
     user: User,
     employeeId: string,
@@ -408,7 +409,7 @@ export class EmployeeService {
     if (payload.email && payload.email !== existingEmployee.user.email) {
       const existingUser = await prismaClient.user.findUnique({
         where: {
-          email: payload.email,
+          email: payload.email
         },
       });
 

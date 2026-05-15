@@ -263,7 +263,6 @@ export class AuthService {
       .digest("hex");
 
     // first we get the email from the payload and then check if it exists
-    console.log("the payload schema is ", payload.token);
     const user = await prismaClient.user.findFirst({
       where: {
         resetToken: hashedToken,

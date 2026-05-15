@@ -11,6 +11,8 @@ interface SendEmailOptions {
 export const sendEmail = async ({
     to , subject , html
 } : SendEmailOptions) => {
+
+    console.log("sending email");
     return resend.emails.send({
         from : process.env.EMAIL_FROM!, 
         to , subject , html

@@ -8,42 +8,46 @@ datasource db {
 }
 
 model Company {
-  id          String       @id @default(uuid()) @db.Uuid
-  name        String
-  email       String       @unique
-  address     String?
-  phone       String?
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  departments Department[]
-  employees   Employee[]
-  users       User[]
+  id                  String               @id @default(uuid()) @db.Uuid
+  name                String
+  email               String               @unique
+  address             String?
+  phone               String?
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  departments         Department[]
+  employees           Employee[]
+  users               User[]
+  employmentHistories EmploymentHistory[]
+  disciplinaryRecords DisciplinaryRecord[]
 
   @@map("companies")
 }
 
 model Employee {
-  id                String           @id @default(uuid()) @db.Uuid
-  companyId         String           @db.Uuid
-  employeeCode      String
-  firstName         String
-  lastName          String
-  gender            Gender
-  dateOfBirth       DateTime?
-  address           String?
-  jobTitle          String?
-  employmentType    EmploymentType?
-  managerId         String?          @db.Uuid
-  manager           Employee?        @relation("ManagerEmployees", fields: [managerId], references: [id])
-  subordinates      Employee[]       @relation("ManagerEmployees")
-  employmentStatus  EmploymentStatus @default(ACTIVE)
-  departmentId      String?          @db.Uuid
-  headedDepartments Department[]     @relation("DepartmentHead")
-  company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  department        Department?      @relation("DepartmentEmployees", fields: [departmentId], references: [id])
-  userId            String           @unique @db.Uuid
-  user              User             @relation(fields: [userId], references: [id])
+  id                  String               @id @default(uuid()) @db.Uuid
+  companyId           String               @db.Uuid
+  employeeCode        String
+  firstName           String
+  lastName            String
+  gender              Gender
+  dateOfBirth         DateTime?
+  address             String?
+  jobTitle            String?
+  employmentType      EmploymentType?
+  managerId           String?              @db.Uuid
+  manager             Employee?            @relation("ManagerEmployees", fields: [managerId], references: [id])
+  subordinates        Employee[]           @relation("ManagerEmployees")
+  employmentStatus    EmploymentStatus     @default(ACTIVE)
+  departmentId        String?              @db.Uuid
+  headedDepartments   Department[]         @relation("DepartmentHead")
+  company             Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  department          Department?          @relation("DepartmentEmployees", fields: [departmentId], references: [id])
+  userId              String               @unique @db.Uuid
+  user                User                 @relation(fields: [userId], references: [id])
+  employmentHistory   EmploymentHistory[]
+  disciplinaryRecords DisciplinaryRecord[]
 
   hireDate  DateTime?
   updatedAt DateTime  @updatedAt
@@ -59,48 +63,127 @@ model Employee {
 }
 
 model User {
-  id                  String    @id @default(uuid()) @db.Uuid
-  name                String
-  email               String    @unique
-  password            String
-  phone               String?
-  role                Role
-  isActive            Boolean   @default(true)
-  lastLogin           DateTime?
-  resetToken          String?
-  resetTokenExpiresAt DateTime?
-  companyId           String    @db.Uuid
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  company             Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  employee            Employee?
+  id                   String               @id @default(uuid()) @db.Uuid
+  name                 String
+  email                String               @unique
+  password             String
+  phone                String?
+  role                 Role
+  isActive             Boolean              @default(true)
+  lastLogin            DateTime?
+  resetToken           String?
+  resetTokenExpiresAt  DateTime?
+  companyId            String               @db.Uuid
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  company              Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee             Employee?
+  disciplinaryCreated  DisciplinaryRecord[] @relation("DisciplinaryCreatedBy")
+  disciplinaryResolved DisciplinaryRecord[] @relation("DisciplinaryResolvedBy")
 
   @@index([companyId])
   @@map("users")
 }
 
 model Department {
-  id                 String           @id @default(uuid()) @db.Uuid
-  companyId          String           @db.Uuid
+  id                 String              @id @default(uuid()) @db.Uuid
+  companyId          String              @db.Uuid
   name               String
   description        String?
-  status             DepartmentStatus @default(ACTIVE)
-  parentDepartmentId String?          @db.Uuid
-  headEmployeeId     String?          @db.Uuid
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
-  company            Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  headEmployee       Employee?        @relation("DepartmentHead", fields: [headEmployeeId], references: [id])
-  parentDepartment   Department?      @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id])
-  subDepartments     Department[]     @relation("DepartmentHierarchy")
-  employees          Employee[]       @relation("DepartmentEmployees")
+  status             DepartmentStatus    @default(ACTIVE)
+  parentDepartmentId String?             @db.Uuid
+  headEmployeeId     String?             @db.Uuid
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  headEmployee       Employee?           @relation("DepartmentHead", fields: [headEmployeeId], references: [id])
+  parentDepartment   Department?         @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id])
+  subDepartments     Department[]        @relation("DepartmentHierarchy")
+  employees          Employee[]          @relation("DepartmentEmployees")
   deletedAt          DateTime?
+  employmentHistory  EmploymentHistory[]
 
   @@unique([companyId, name])
   @@index([companyId])
   @@index([headEmployeeId])
   @@index([parentDepartmentId])
   @@map("departments")
+}
+
+model EmploymentHistory {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String   @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  departmentId String?     @db.Uuid
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  jobTitle String
+
+  startDate DateTime
+  endDate   DateTime?
+
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id])
+  isCurrent Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([employeeId, isCurrent])
+  @@index([isCurrent])
+}
+
+model DisciplinaryRecord {
+  id String @id @default(uuid()) @db.Uuid
+
+  // =========================
+  // TENANCY
+  // =========================
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.Uuid
+
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String   @db.Uuid
+
+  // =========================
+  // DETAILS
+  // =========================
+  type        DisciplinaryType
+  severity    DisciplinarySeverity
+  title       String
+  description String
+
+  status DisciplinaryStatus @default(OPEN)
+
+  // =========================
+  // ACTION TRACKING
+  // =========================
+  createdById String @db.Uuid
+  createdBy   User   @relation("DisciplinaryCreatedBy", fields: [createdById], references: [id])
+
+  resolvedById String? @db.Uuid
+  resolvedBy   User?   @relation("DisciplinaryResolvedBy", fields: [resolvedById], references: [id])
+
+  resolutionNotes String?
+
+  resolvedAt DateTime?
+
+  // =========================
+  // TIMESTAMPS
+  // =========================
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // =========================
+  // INDEXES
+  // =========================
+  @@index([companyId])
+  @@index([employeeId])
+  @@index([status])
+  @@map("disciplinary_records")
 }
 
 enum Gender {
@@ -132,4 +215,25 @@ enum EmploymentType {
   PART_TIME
   CONTRACT
   INTERN
+}
+
+enum DisciplinaryStatus {
+  OPEN
+  RESOLVED
+}
+
+enum DisciplinarySeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum DisciplinaryType {
+  WARNING
+  MISCONDUCT
+  LATENESS
+  PERFORMANCE
+  SUSPENSION
+  OTHER
 }

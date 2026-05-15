@@ -4,7 +4,6 @@
 // update specific employee
 // Delete specific employee
 
-import { Role } from "../../../generated/prisma/enums.js";
 import { prismaClient } from "../../config/db.js";
 import {
   ConflictError,

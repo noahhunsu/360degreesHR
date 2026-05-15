@@ -59,7 +59,7 @@ export const updateEmployeeSchema = z.object({
     .optional(),
 
   dateOfBirth: z
-    .string()
+    .iso
     .datetime()
     .optional(),
 
@@ -91,12 +91,10 @@ export const updateEmployeeSchema = z.object({
     .optional(),
 
   departmentId: z
-    .string()
     .uuid()
     .optional(),
 
   managerId: z
-    .string()
     .uuid()
     .optional(),
 
