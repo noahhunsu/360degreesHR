@@ -18,9 +18,9 @@ import {
   UnauthorizedError,
 } from "../../shared/exceptions/app.error.js";
 import { sendEmail } from "../../shared/utils/sendEmail.js";
-import type { User } from "../../../generated/prisma/client.js";
 import { generateEmployeeCode } from "./employee.utils.js";
 import { hashpassword } from "../../shared/utils/hash.js";
+import type { User } from "../../shared/types/global.types.js";
 export class EmployeeService {
   static async createEmployeeService(
     payload: CreateEmployeeInput,
@@ -168,7 +168,7 @@ export class EmployeeService {
     } else if (user.role === "MANAGER") {
       const managerEmployee = await prismaClient.employee.findFirst({
         where: {
-          userId: user.id,
+          userId: user.userId,
           companyId: user.companyId,
         },
       });
@@ -181,7 +181,7 @@ export class EmployeeService {
     } else if (user.role === "EMPLOYEE") {
       const employee = await prismaClient.employee.findFirst({
         where: {
-          userId: user.id,
+          userId: user.userId,
           companyId: user.companyId,
         },
       });
@@ -297,7 +297,7 @@ export class EmployeeService {
        */
       const managerEmployee = await prismaClient.employee.findFirst({
         where: {
-          userId: user.id,
+          userId: user.userId,
           companyId: user.companyId,
         },
       });
@@ -314,7 +314,7 @@ export class EmployeeService {
        */
       const employee = await prismaClient.employee.findFirst({
         where: {
-          userId: user.id,
+          userId: user.userId,
           companyId: user.companyId,
         },
       });
@@ -565,7 +565,7 @@ export class EmployeeService {
     /**
      * Prevent deleting self
      */
-    if (existingEmployee.user.id === user.id) {
+    if (existingEmployee.user.id === user.userId) {
       throw new ConflictError("You cannot delete yourself");
     }
 

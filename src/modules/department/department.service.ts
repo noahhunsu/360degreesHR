@@ -10,7 +10,7 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../../shared/exceptions/app.error.js";
-import type { User } from "../../../generated/prisma/client.js";
+import type { User } from "../../shared/types/global.types.js";
 
 import type { CreateDepartmentInput, UpdateDepartmentInput } from "./department.validation.js";
 export class DepartmentService {
@@ -118,7 +118,7 @@ export class DepartmentService {
   if (hrUser.role === "MANAGER") {
     const managerEmployee = await prismaClient.employee.findFirst({
       where: {
-        userId: hrUser.id,
+        userId: hrUser.userId,
         companyId: hrUser.companyId,
       },
     });
@@ -214,7 +214,7 @@ static async getSingleDepartmentService(
   if (hrUser.role === "MANAGER") {
     const managerEmployee = await prismaClient.employee.findFirst({
       where: {
-        userId: hrUser.id,
+        userId: hrUser.userId,
         companyId: hrUser.companyId,
       },
     });

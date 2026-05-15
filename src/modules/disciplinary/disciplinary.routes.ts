@@ -8,9 +8,9 @@ import { createDisciplinarySchema, resolveDisciplinarySchema } from "./disciplin
 
 
 const router = Router()
-router.post("/employees/employeeId" , parseAuthHeaderMiddleware(),validate(createDisciplinarySchema), DisciplinaryController.createDisciplinaryRecordController)
-router.get("/employees/employeeId" , parseAuthHeaderMiddleware(), DisciplinaryController.getDisciplinaryRecordController)
-router.patch("/employees/disciplinaryId" , parseAuthHeaderMiddleware(),validate(resolveDisciplinarySchema), DisciplinaryController.resolveDisciplinaryRecordController)
+router.post("/employees/:employeeId" , parseAuthHeaderMiddleware(),validate(createDisciplinarySchema), DisciplinaryController.createDisciplinaryRecordController)
+router.get("/employees/:employeeId" , parseAuthHeaderMiddleware(), DisciplinaryController.getDisciplinaryRecordController)
+router.patch("/employees/:disciplinaryId" , parseAuthHeaderMiddleware(),validate(resolveDisciplinarySchema), DisciplinaryController.resolveDisciplinaryRecordController)
 
 
 

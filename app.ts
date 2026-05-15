@@ -9,8 +9,8 @@ import "dotenv/config"
 import authRouter from "./src/modules/auth/auth.routes.js";
 import employeeRouter from "./src/modules/employee/employee.routes.js";
 import departmentRouter from "./src/modules/department/department.routes.js";
-import employmentmentHistoryRouter from "./src/modules/employmentHistory/employmentHistory.routes.js";
-import disciplinaryRouter from "./src/modules/employmentHistory/employmentHistory.routes.js";
+import employmentHistoryRouter from "./src/modules/employmentHistory/employmentHistory.routes.js";
+import disciplinaryRouter from "./src/modules/disciplinary/disciplinary.routes.js";
 import { swaggerSpec } from "./src/config/swagger.js";
 import { errorMiddleware } from "./src/shared/middleware/error.middleware.js";
 
@@ -35,8 +35,8 @@ app.use("/api/v1/docs" ,
 app.use("/api/v1/auth" ,authRouter )
 app.use("/api/v1/employees" ,employeeRouter )
 app.use("/api/v1/departments" ,departmentRouter )
-app.use("/api/v1/history" ,departmentRouter )
-app.use("/api/v1/disciplinary" ,disciplinaryRouter )
+app.use("/api/v1/employment-history" ,employmentHistoryRouter )
+app.use("/api/v1/disciplinary" , disciplinaryRouter )
 
 
 export default app;

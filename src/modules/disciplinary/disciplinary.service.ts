@@ -10,7 +10,7 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../../shared/exceptions/app.error.js";
-import type { User } from "../../../generated/prisma/client.js";
+import type { User } from "../../shared/types/global.types.js";
 import type { CreateDisciplinaryInput, ResolveDisciplinaryInput } from "./disciplinary.validation.js";
 
 export class DisciplinaryService {
@@ -54,6 +54,7 @@ export class DisciplinaryService {
     throw new MatchError("CompanyId Mismatch");
   }
 
+
   const disciplinaryRecord =
     await prismaClient.disciplinaryRecord.create({
       data: {
@@ -69,7 +70,7 @@ export class DisciplinaryService {
 
         description: payload.description,
 
-        createdById: user.id,
+        createdById: user.userId,
       },
     });
 
@@ -228,7 +229,7 @@ static async resolveDisciplinaryRecordService(
 
         resolvedAt: new Date(),
 
-        resolvedById: user.id,
+        resolvedById: user.userId,
       },
     });
 

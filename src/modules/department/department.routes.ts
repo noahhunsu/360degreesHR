@@ -13,7 +13,7 @@ router.get("/" , parseAuthHeaderMiddleware(), DepartmentController.getDepartment
 router.get("/:departmentId" , parseAuthHeaderMiddleware(), DepartmentController.getSingleDepartmentController)
 router.put("/:departmentId" , parseAuthHeaderMiddleware(),validate(updateDepartmentSchema), DepartmentController.updateDepartmentController)
 router.delete("/:departmentId" , parseAuthHeaderMiddleware(), DepartmentController.deleteDepartmentController)
-router.get("/tree" , parseAuthHeaderMiddleware(), DepartmentController.getDepartmentTreeController)
+router.get("/company/tree" , parseAuthHeaderMiddleware(), DepartmentController.getDepartmentTreeController)
 
 
 

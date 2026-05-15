@@ -1,6 +1,6 @@
-import type { User } from "../../../generated/prisma/client.js";
 import { prismaClient } from "../../config/db.js";
 import { UnauthorizedError } from "../../shared/exceptions/app.error.js";
+import type { User } from "../../shared/types/global.types.js";
 import type { CreateEmploymentHistoryInput } from "./employmentHistory.validation.js";
 
 export class EmploymentHistoryService {
