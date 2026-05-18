@@ -4,7 +4,7 @@
 // update specific employee
 // Delete specific employee
 
-import { Role } from "../../../generated/prisma/enums.js";
+// import { Role } from "../../../generated/prisma/enums.js";
 import { prismaClient } from "../../config/db.js";
 
 import type {
@@ -21,6 +21,7 @@ import { sendEmail } from "../../shared/utils/sendEmail.js";
 import { generateEmployeeCode } from "./employee.utils.js";
 import { hashpassword } from "../../shared/utils/hash.js";
 import type { User } from "../../shared/types/global.types.js";
+import { Role } from "@prisma/client";
 export class EmployeeService {
   static async createEmployeeService(
     payload: CreateEmployeeInput,

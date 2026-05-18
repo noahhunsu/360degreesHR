@@ -1,5 +1,6 @@
+import { EmploymentType, Gender } from "@prisma/client";
 import * as z from "zod";
-import { EmploymentType, Gender } from "../../../generated/prisma/enums.js";
+// import { EmploymentType, Gender } from "../../../generated/prisma/enums.js";
 
 export const createEmployeeSchema = z.object({
 

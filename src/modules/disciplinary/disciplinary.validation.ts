@@ -1,5 +1,6 @@
+import { DisciplinarySeverity, DisciplinaryType } from "@prisma/client";
 import { z } from "zod";
-import { DisciplinarySeverity, DisciplinaryType } from "../../../generated/prisma/enums.js";
+// import { DisciplinarySeverity, DisciplinaryType } from "../../../generated/prisma/enums.js";
 
 
 export const createDisciplinarySchema = z.object({

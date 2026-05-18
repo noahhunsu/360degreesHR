@@ -1,10 +1,13 @@
+import { PrismaClient } from "@prisma/client"
 
 
-import { PrismaClient } from "../../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
+
+
+
+// import { PrismaPg } from "@prisma/adapter-pg";
 const connectionString = `${process.env.DATABASE_URL}`
 
-const adapter = new PrismaPg({ connectionString });
+// const adapter = new PrismaPg({ connectionString });
 
 
-export const prismaClient = new PrismaClient({adapter})
+export const prismaClient = new PrismaClient()

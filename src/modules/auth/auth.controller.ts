@@ -1,3 +1,4 @@
+// import type { NextFunction, Request, Response } from "express";
 import type { NextFunction, Request, Response } from "express";
 import { AuthService } from "./auth.service.js";
 
@@ -16,6 +17,7 @@ export class AuthController {
       });
       
     } catch (error) {
+      console.log("the errror is " ,error)
       next(error);
     }
   }

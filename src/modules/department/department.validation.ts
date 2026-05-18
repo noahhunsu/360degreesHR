@@ -1,5 +1,6 @@
+import { DepartmentStatus } from "@prisma/client";
 import * as z from "zod";
-import { DepartmentStatus, EmploymentType, Gender } from "../../../generated/prisma/enums.js";
+// import { DepartmentStatus, EmploymentType, Gender } from "../../../generated/prisma/enums.js";
 
 export const createDepartmentSchema = z.object({
   name: z.string().min(3),
