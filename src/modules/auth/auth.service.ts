@@ -8,12 +8,7 @@ import { Role } from "../../../generated/prisma/enums.js";
 import { prismaClient } from "../../config/db.js";
 import { comparePassword, hashpassword } from "../../shared/utils/hash.js";
 import { generateAccessToken, verifyToken } from "../../shared/utils/jwt.js";
-import type {
-  ForgotPasswordInput,
-  LoginInput,
-  RegisterInput,
-  ResetPasswordInput,
-} from "./auth.validation.js";
+
 import {
   ConflictError,
   MatchError,
@@ -21,6 +16,7 @@ import {
 } from "../../shared/exceptions/app.error.js";
 import crypto from "crypto";
 import { sendEmail } from "../../shared/utils/sendEmail.js";
+import type { ForgotPasswordInput, LoginInput, RegisterInput, ResetPasswordInput } from "./auth.validation.js";
 export class AuthService {
   static async registerService(payload: RegisterInput) {
     // destructuring the payload
