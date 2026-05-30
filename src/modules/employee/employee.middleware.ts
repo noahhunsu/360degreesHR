@@ -8,8 +8,8 @@ export const parseAuthHeaderMiddleware = () => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const authHeader = req.headers.authorization;
-      console.log("token unavailable")
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.log("token unavailable")
         return res.status(401).json({
           success: false,
           message: "Authorization header required",
