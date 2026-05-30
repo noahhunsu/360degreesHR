@@ -228,7 +228,7 @@ export class AuthService {
     // next we send the email .
     await sendEmail({
       // to: user.email,
-      to : "omnidev.build@gmail.com",
+      to : payload.email,
       subject: "Reset Your Password",
       html: `
     <h2>Password Reset</h2>
