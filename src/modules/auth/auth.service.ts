@@ -224,7 +224,7 @@ export class AuthService {
       },
     });
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-token?token=${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
     // next we send the email .
     await sendEmail({
       // to: user.email,
