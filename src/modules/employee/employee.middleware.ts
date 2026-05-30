@@ -8,6 +8,7 @@ export const parseAuthHeaderMiddleware = () => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const authHeader = req.headers.authorization;
+      console.log("token unavailable")
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({
           success: false,
@@ -15,6 +16,7 @@ export const parseAuthHeaderMiddleware = () => {
         });
       }
       const token = authHeader.split(" ")[1] || "";
+      console.log("token available", token)
       const decoded = verifyToken(token);
       (req as any).user = decoded;
       next();
