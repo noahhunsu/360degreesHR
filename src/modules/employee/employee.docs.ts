@@ -628,3 +628,122 @@
  *                     selfDelete:
  *                       value: You cannot delete yourself
  */
+
+/**
+ * @swagger
+ * /employees/bulk-uploads:
+ *   post:
+ *     summary: Bulk create employees from spreadsheet
+ *     description: |
+ *       Upload an Excel spreadsheet (.xlsx or .xls) containing employee records.
+ *
+ *       Required columns:
+ *       - firstName
+ *       - lastName
+ *       - email
+ *       - gender
+ *
+ *       Optional columns:
+ *       - phone
+ *       - dateOfBirth
+ *       - address
+ *       - jobTitle
+ *       - employmentType
+ *       - departmentId
+ *       - managerId
+ *       - hireDate
+ *
+ *       Any unknown columns are ignored.
+ *
+ *       Rows that fail validation are skipped and returned in the failedRows array.
+ *
+ *     tags:
+ *       - Employees
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Excel spreadsheet (.xlsx or .xls)
+ *
+ *     responses:
+ *       201:
+ *         description: Bulk upload processed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *
+ *                 message:
+ *                   type: string
+ *                   example: Employees processed successfully
+ *
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalRows:
+ *                       type: integer
+ *                       example: 10
+ *
+ *                     successful:
+ *                       type: integer
+ *                       example: 8
+ *
+ *                     failed:
+ *                       type: integer
+ *                       example: 2
+ *
+ *                     successfulRows:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           row:
+ *                             type: integer
+ *                             example: 2
+ *
+ *                           employeeId:
+ *                             type: string
+ *                             example: 5f7f4a71-f278-4c82-9f4d-8c7fcdd1dcb3
+ *
+ *                           email:
+ *                             type: string
+ *                             example: john.doe@example.com
+ *
+ *                     failedRows:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           row:
+ *                             type: integer
+ *                             example: 4
+ *
+ *                           reason:
+ *                             type: string
+ *                             example: Email already exists
+ *
+ *       400:
+ *         description: Invalid spreadsheet or validation error
+ *
+ *       401:
+ *         description: Unauthorized
+ *
+ *       403:
+ *         description: Forbidden
+ */
