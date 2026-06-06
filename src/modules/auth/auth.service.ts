@@ -227,11 +227,10 @@ export class AuthService {
       },
     });
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-token?token=${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
     // next we send the email .
     await sendEmail({
-      // to: user.email,
-      to : "omnidev.build@gmail.com",
+      to: payload.email,
       subject: "Reset Your Password",
       html: `
     <h2>Password Reset</h2>

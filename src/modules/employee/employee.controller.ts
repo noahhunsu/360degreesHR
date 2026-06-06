@@ -20,28 +20,6 @@ export class EmployeeController {
       next(error);
     }
   }
-
-  static async createBulkEmployeeViaSheetController(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) {
-    try {
-      const user = (req as any).user;
-
-      if(!req.file){
-        throw new BadRequestError("Spreadsheet file is required")
-      }
-      const result = await EmployeeService.createBulkEmployeeViaSheetService(req.file, user);
-      return res.status(201).json({
-        success: true,
-        message: "Employee Created successfully",
-        data : result
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
   
   static async getAllEmployeesController(
     req: Request,
