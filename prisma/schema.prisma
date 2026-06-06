@@ -8,19 +8,24 @@ datasource db {
 }
 
 model Company {
-  id                  String               @id @default(uuid()) @db.Uuid
-  name                String
-  email               String               @unique
-  address             String?
-  phone               String?
-  isActive            Boolean              @default(true)
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  employmentHistories EmploymentHistory[]
-  departments         Department[]
-  disciplinaryRecords DisciplinaryRecord[]
-  employees           Employee[]
-  users               User[]
+  id                    String                 @id @default(uuid()) @db.Uuid
+  name                  String
+  email                 String                 @unique
+  address               String?
+  phone                 String?
+  isActive              Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  employmentHistories   EmploymentHistory[]
+  departments           Department[]
+  disciplinaryRecords   DisciplinaryRecord[]
+  employees             Employee[]
+  users                 User[]
+  onboardingInvitations OnboardingInvitation[]
+
+  onboardingSubmissions OnboardingSubmission[]
+
+  onboardingTemplates OnboardingTemplate[]
 
   @@map("companies")
 }
@@ -52,6 +57,7 @@ model Employee {
   manager             Employee?            @relation("ManagerEmployees", fields: [managerId], references: [id])
   subordinates        Employee[]           @relation("ManagerEmployees")
   user                User                 @relation(fields: [userId], references: [id])
+  employeeDocument EmployeeDocument[]
 
   @@unique([companyId, employeeCode])
   @@index([companyId])
@@ -61,46 +67,58 @@ model Employee {
   @@map("employees")
 }
 
+
+
 model User {
-  id                   String               @id @default(uuid()) @db.Uuid
+  id                   String                 @id @default(uuid()) @db.Uuid
   name                 String
-  email                String               @unique
+  email                String                 @unique
   password             String
   phone                String?
   role                 Role
-  isActive             Boolean              @default(true)
+  isActive             Boolean                @default(true)
   lastLogin            DateTime?
   resetToken           String?
   resetTokenExpiresAt  DateTime?
-  companyId            String               @db.Uuid
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-  disciplinaryCreated  DisciplinaryRecord[] @relation("DisciplinaryCreatedBy")
-  disciplinaryResolved DisciplinaryRecord[] @relation("DisciplinaryResolvedBy")
+  companyId            String                 @db.Uuid
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  disciplinaryCreated  DisciplinaryRecord[]   @relation("DisciplinaryCreatedBy")
+  disciplinaryResolved DisciplinaryRecord[]   @relation("DisciplinaryResolvedBy")
+  eobManager           OnboardingInvitation[] @relation("EOBManager")
   employee             Employee?
-  company              Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company              Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdOnboardingTemplates OnboardingTemplate[] @relation("CreatedOnboardingTemplates")
+
+  createdInvitations  OnboardingInvitation[] @relation("InvitationCreatedBy")
+  reviewedSubmissions OnboardingSubmission[] @relation("SubmissionReviewedBy")
+
+  reviewedDocuments OnboardingDocument[] @relation("DocumentReviewedBy")
 
   @@index([companyId])
   @@map("users")
 }
 
 model Department {
-  id                 String              @id @default(uuid()) @db.Uuid
-  companyId          String              @db.Uuid
-  name               String
-  description        String?
-  status             DepartmentStatus    @default(ACTIVE)
-  parentDepartmentId String?             @db.Uuid
-  headEmployeeId     String?             @db.Uuid
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  deletedAt          DateTime?
-  employmentHistory  EmploymentHistory[]
-  company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  headEmployee       Employee?           @relation("DepartmentHead", fields: [headEmployeeId], references: [id])
-  parentDepartment   Department?         @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id])
-  subDepartments     Department[]        @relation("DepartmentHierarchy")
-  employees          Employee[]          @relation("DepartmentEmployees")
+  id                    String                 @id @default(uuid()) @db.Uuid
+  companyId             String                 @db.Uuid
+  name                  String
+  description           String?
+  status                DepartmentStatus       @default(ACTIVE)
+  parentDepartmentId    String?                @db.Uuid
+  headEmployeeId        String?                @db.Uuid
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  deletedAt             DateTime?
+  employmentHistory     EmploymentHistory[]
+  company               Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  headEmployee          Employee?              @relation("DepartmentHead", fields: [headEmployeeId], references: [id])
+  parentDepartment      Department?            @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id])
+  subDepartments        Department[]           @relation("DepartmentHierarchy")
+  employees             Employee[]             @relation("DepartmentEmployees")
+  onboardingSubmissions OnboardingSubmission[]
+  onboardingInvitations OnboardingInvitation[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -127,6 +145,7 @@ model EmploymentHistory {
   @@index([employeeId])
   @@index([employeeId, isCurrent])
   @@index([isCurrent])
+  @@map("employment_history")
 }
 
 model DisciplinaryRecord {
@@ -155,6 +174,198 @@ model DisciplinaryRecord {
   @@map("disciplinary_records")
 }
 
+model OnboardingInvitation {
+  id String @id @default(uuid()) @db.Uuid
+
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id])
+
+  templateId String?             @db.Uuid
+  template   OnboardingTemplate? @relation(fields: [templateId], references: [id])
+
+  invitedById String @db.Uuid
+  invitedBy   User   @relation("InvitationCreatedBy", fields: [invitedById], references: [id])
+
+  email String
+
+  token String @unique
+
+  expiresAt    DateTime
+  jobTitle     String?
+  departmentId String?     @db.Uuid
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  invitationStatus  InvitationStatus @default(PENDING)
+  requiredDocuments Json
+  onboardingStatus  OnboardingStatus @default(INVITED)
+
+  compensation   String
+  managerId      String?        @db.Uuid
+  manager        User?          @relation("EOBManager", fields: [managerId], references: [id])
+  employmentType EmploymentType
+
+  acceptedAt DateTime?
+  declinedAt DateTime?
+
+  submission OnboardingSubmission?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([token])
+  @@map("onboarding_invitations")
+}
+
+model OnboardingSubmission {
+  id String @id @default(uuid()) @db.Uuid
+
+  invitationId String               @unique @db.Uuid
+  invitation   OnboardingInvitation @relation(fields: [invitationId], references: [id])
+
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id])
+
+  firstName String
+  lastName  String
+
+  phoneNumber String?
+
+  address String?
+
+  dateOfBirth DateTime?
+
+  emergencyContactName  String?
+  emergencyContactPhone String?
+
+  jobTitle String?
+
+  departmentId String?     @db.Uuid
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  status OnboardingStatus @default(IN_PROGRESS)
+
+  submittedAt DateTime?
+
+  reviewedById String? @db.Uuid
+  reviewedBy   User?   @relation("SubmissionReviewedBy", fields: [reviewedById], references: [id])
+
+  reviewedAt DateTime?
+
+  rejectionReason String?
+
+  documents OnboardingDocument[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@map("onboarding_submissions")
+}
+
+model OnboardingDocument {
+  id String @id @default(uuid()) @db.Uuid
+
+  submissionId String               @db.Uuid
+  submission   OnboardingSubmission @relation(fields: [submissionId], references: [id])
+
+  documentType String
+
+  originalFileName String
+
+  storageKey String
+
+  mimeType String
+
+  fileSize Int
+
+  reviewStatus DocumentReviewStatus @default(PENDING)
+
+  reviewedById String?   @db.Uuid
+  reviewedBy   User?     @relation("DocumentReviewedBy", fields: [reviewedById], references: [id])
+  reviewedAt   DateTime?
+
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+
+  @@index([reviewStatus])
+  @@map("onboarding_documents")
+}
+
+model OnboardingTemplate {
+  id String @id @default(uuid()) @db.Uuid
+
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id])
+
+  name String
+
+  description String?
+
+  isDefault Boolean @default(false)
+
+  isActive Boolean @default(true)
+
+  documentRequirements TemplateDocumentRequirement[]
+
+  createdById String @db.Uuid
+  createdBy   User   @relation("CreatedOnboardingTemplates", fields: [createdById], references: [id])
+
+  invitations OnboardingInvitation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([companyId, name])
+  @@map("onboarding_templates")
+}
+
+model TemplateDocumentRequirement {
+  id String @id @default(uuid()) @db.Uuid
+
+  templateId String             @db.Uuid
+  template   OnboardingTemplate @relation(fields: [templateId], references: [id])
+
+  documentType String
+
+  isRequired Boolean @default(true)
+
+  description String?
+
+  createdAt DateTime @default(now())
+
+  @@map("template_document_requirements")
+}
+
+model EmployeeDocument {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String @db.Uuid
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  companyId String @db.Uuid
+  company Company @relation(fields: [companyId], references: [id])
+
+  documentType String
+
+  originalFileName String
+
+  storageKey String
+
+  mimeType String
+
+  fileSize Int
+
+  uploadedById String? @db.Uuid
+  uploadedBy User? @relation(fields: [uploadedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([employeeId])
+  @@index([companyId])
+  @@map("employee_documents")
+}
 enum Gender {
   MALE
   FEMALE
@@ -205,4 +416,34 @@ enum DisciplinaryType {
   PERFORMANCE
   SUSPENSION
   OTHER
+}
+
+enum OnboardingStatus {
+  INVITED
+  IN_PROGRESS
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum DocumentReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EmployementType {
+  FULL_TIME
+  CONTRACT
+  REMOTE
+  HYBRID
 }

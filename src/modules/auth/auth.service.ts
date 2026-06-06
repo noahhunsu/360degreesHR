@@ -12,6 +12,7 @@ import { generateAccessToken, verifyToken } from "../../shared/utils/jwt.js";
 import {
   ConflictError,
   MatchError,
+  NotFoundError,
   UnauthorizedError,
 } from "../../shared/exceptions/app.error.js";
 import crypto from "crypto";
@@ -96,7 +97,7 @@ export class AuthService {
     // At this point , an email will be sent to them
 
     try {
-      await sendEmail({
+      const response = await sendEmail({
         to: companyEmail,
         subject: "Company Onboarding",
         html: `
@@ -104,6 +105,8 @@ export class AuthService {
       <p>Your company onboarding was successful.</p>
     `,
       });
+
+      console.log("reso" , response)
     } catch (error) {
       console.error("Onboarding email failed:", error);
     }
@@ -227,7 +230,8 @@ export class AuthService {
     const resetLink = `${process.env.FRONTEND_URL}/reset-token?token=${resetToken}`;
     // next we send the email .
     await sendEmail({
-      to: user.email,
+      // to: user.email,
+      to : "omnidev.build@gmail.com",
       subject: "Reset Your Password",
       html: `
     <h2>Password Reset</h2>
@@ -305,4 +309,54 @@ export class AuthService {
 
     // Next we compare the two tokens . The one in database and the one that has been hashed
   }
+
+  static async getAllCompaniesService(){
+    const companies = await prismaClient.company.findMany();
+    const users = await prismaClient.user.findMany();
+
+    return {
+      companies , users
+    }
+  }
+static async deleteCompanyService(
+  companyId: string,
+) {
+
+  /**
+   * CHECK COMPANY EXISTS
+   */
+  const company =
+    await prismaClient.company.findFirst({
+      where: {
+        id: companyId,
+      },
+    });
+
+  if (!company) {
+    throw new NotFoundError(
+      "Company not found",
+    );
+  }
+
+  /**
+   * DELETE COMPANY
+   *
+   * Cascade automatically deletes:
+   * - users
+   * - employees
+   * - departments
+   * - onboarding records
+   * - etc
+   */
+  await prismaClient.company.delete({
+    where: {
+      id: companyId,
+    },
+  });
+
+  return {
+    message:
+      "Company deleted successfully",
+  };
+}
 }

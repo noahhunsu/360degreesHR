@@ -6,3 +6,19 @@ export interface TokenContent {
     companyId : string , 
     expiresIn : string
 }
+
+export const allowedFields = [
+  "firstName",
+  "password",
+  "lastName",
+  "email",
+  "phone",
+  "gender",
+  "dateOfBirth",
+  "address",
+  "jobTitle",
+  "employmentType",
+  "departmentId",
+  "managerId",
+  "hireDate",
+];

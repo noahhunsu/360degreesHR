@@ -1,4 +1,4 @@
-
+import crypto from "crypto"
 
 function extractNumber(code: string | null) {
   if (!code) return 0;
@@ -12,3 +12,7 @@ export function generateEmployeeCode(lastCode: string | null) {
 
   return `EMP-${nextNumber.toString().padStart(4, "0")}`;
 }
+
+export const generateTemporaryPassword = () => {
+  return crypto.randomBytes(8).toString("base64").slice(0, 12);
+};

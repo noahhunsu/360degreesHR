@@ -103,4 +103,39 @@ export class AuthController {
         next(error)
     }
   }
+  static async getAllCompaniesController(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ){
+    try {
+       
+        const result = await AuthService.getAllCompaniesService()
+        return res.status(200).json({
+            success: true , 
+            message : "Password Reset Successfully",
+            result 
+        })
+    } catch (error) {
+        next(error)
+    }
+  }
+
+  static async deleteCompaniesController(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ){
+    try {
+        const companyId  = req.params.companyId as string;
+       console.log("company id is " , companyId)
+        await AuthService.deleteCompanyService(companyId)
+        return res.status(200).json({
+            success: true , 
+            message : "Password Reset Successfully"
+        })
+    } catch (error) {
+        next(error)
+    }
+  }
 }

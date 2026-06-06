@@ -7,21 +7,25 @@
 // import { Role } from "../../../generated/prisma/enums.js";
 import { prismaClient } from "../../config/db.js";
 
-import type {
-  CreateEmployeeInput,
-  FilterQueryInput,
-  UpdateEmployeeInput,
+import {
+  createEmployeeSchema,
+  type CreateEmployeeInput,
+  type FilterQueryInput,
+  type UpdateEmployeeInput,
 } from "./employee.validation.js";
 import {
+  BadRequestError,
   ConflictError,
   NotFoundError,
   UnauthorizedError,
 } from "../../shared/exceptions/app.error.js";
 import { sendEmail } from "../../shared/utils/sendEmail.js";
-import { generateEmployeeCode } from "./employee.utils.js";
+import { generateEmployeeCode, generateTemporaryPassword } from "./employee.utils.js";
 import { hashpassword } from "../../shared/utils/hash.js";
 import type { User } from "../../shared/types/global.types.js";
 import { Role } from "@prisma/client";
+import XLSX from "xlsx";
+
 export class EmployeeService {
   static async createEmployeeService(
     payload: CreateEmployeeInput,
@@ -92,12 +96,14 @@ export class EmployeeService {
       lastEmployee?.employeeCode || null,
     );
     // we run a transaction . Creating both user and employee
+    const generatedPassword = generateTemporaryPassword();
+    const hashedPassword = await hashpassword(generatedPassword)
     const result = await prismaClient.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
           name: `${payload.firstName} ${payload.lastName}`,
           email: payload.email,
-          password: payload.password,
+          password: hashedPassword,
           role: Role.EMPLOYEE,
           companyId: hrUser.companyId,
         },
@@ -142,6 +148,85 @@ export class EmployeeService {
     }
     return result;
   }
+
+  static async createBulkEmployeeViaSheetService(
+  file: Express.Multer.File,
+  hrUser: User,
+) {
+  if (!hrUser || hrUser.role !== "HR_ADMIN") {
+    throw new UnauthorizedError(
+      "You Are Not Authorized To Do This",
+    );
+  }
+
+
+
+  const workbook = XLSX.read(file.buffer, {
+    type: "buffer",
+  });
+
+  const firstSheetName = workbook.SheetNames[0]
+  if (!firstSheetName){
+    throw new BadRequestError("Spreadsheet contains no worksheets")
+  }
+  const worksheet =
+    workbook.Sheets[
+      firstSheetName
+    ];
+
+  const rows =
+    XLSX.utils.sheet_to_json<
+      Record<string, unknown>
+    >(worksheet!);
+
+  const successfulRows : any[]= [];
+  const failedRows = [];
+
+ for (const [index, row] of rows.entries()) {
+  try {
+
+    const parsed =
+      createEmployeeSchema.safeParse(row);
+
+    if (!parsed.success) {
+      failedRows.push({
+        row: index + 2,
+        reason: parsed.error.flatten(),
+      });
+
+      continue;
+    }
+
+    const employee =
+      await EmployeeService.createEmployeeService(
+        parsed.data,
+        hrUser,
+      );
+
+    successfulRows.push({
+      row: index + 2,
+      employeeId: employee.employee.id,
+      email: employee.user.email,
+    });
+
+  } catch (error: any) {
+    failedRows.push({
+      row: index + 2,
+      reason: error.message ?? "Unknown error",
+    });
+  }
+}
+
+  return {
+    totalRows: rows.length,
+    successful: successfulRows.length,
+    failed: failedRows.length,
+    successfulRows,
+    failedRows,
+  };
+}
+
+ 
 
   static async getAllEmployeeService(
     user: User,

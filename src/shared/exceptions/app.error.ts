@@ -30,3 +30,8 @@ export class NotFoundError extends AppError {
     super(message, 404);
   }
 }
+export class BadRequestError extends AppError {
+  constructor(message = "Parameter Not Provided") {
+    super(message, 404);
+  }
+}
