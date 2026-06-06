@@ -22,6 +22,7 @@ model Company {
   employees             Employee[]
   users                 User[]
   onboardingInvitations OnboardingInvitation[]
+  employeeDocuments     EmployeeDocument[]
 
   onboardingSubmissions OnboardingSubmission[]
 
@@ -57,7 +58,7 @@ model Employee {
   manager             Employee?            @relation("ManagerEmployees", fields: [managerId], references: [id])
   subordinates        Employee[]           @relation("ManagerEmployees")
   user                User                 @relation(fields: [userId], references: [id])
-  employeeDocument EmployeeDocument[]
+  employeeDocument    EmployeeDocument[]
 
   @@unique([companyId, employeeCode])
   @@index([companyId])
@@ -66,8 +67,6 @@ model Employee {
   @@index([departmentId])
   @@map("employees")
 }
-
-
 
 model User {
   id                   String                 @id @default(uuid()) @db.Uuid
@@ -88,6 +87,7 @@ model User {
   eobManager           OnboardingInvitation[] @relation("EOBManager")
   employee             Employee?
   company              Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  uploadedDocuments    EmployeeDocument[]
 
   createdOnboardingTemplates OnboardingTemplate[] @relation("CreatedOnboardingTemplates")
 
@@ -341,11 +341,11 @@ model TemplateDocumentRequirement {
 model EmployeeDocument {
   id String @id @default(uuid()) @db.Uuid
 
-  employeeId String @db.Uuid
-  employee Employee @relation(fields: [employeeId], references: [id])
+  employeeId String   @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-  companyId String @db.Uuid
-  company Company @relation(fields: [companyId], references: [id])
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id])
 
   documentType String
 
@@ -358,7 +358,7 @@ model EmployeeDocument {
   fileSize Int
 
   uploadedById String? @db.Uuid
-  uploadedBy User? @relation(fields: [uploadedById], references: [id])
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id])
 
   createdAt DateTime @default(now())
 
@@ -366,6 +366,7 @@ model EmployeeDocument {
   @@index([companyId])
   @@map("employee_documents")
 }
+
 enum Gender {
   MALE
   FEMALE
