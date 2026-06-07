@@ -42,6 +42,36 @@ export class EmployeeController {
       next(error);
     }
   }
+
+  static async downloadBulkUploadTemplateController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+
+     const user = (req as any).user;
+    const fileBuffer =
+      await EmployeeService.downloadBulkUploadTemplateService(user);
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=employee-upload-template.xlsx",
+    );
+
+    res.setHeader("Cache-Control", "no-cache");
+
+    return res.send(fileBuffer);
+
+  } catch (error) {
+    next(error);
+  }
+}
   static async getAllEmployeesController(
     req: Request,
     res: Response,

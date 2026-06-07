@@ -25,6 +25,7 @@ import { hashpassword } from "../../shared/utils/hash.js";
 import type { User } from "../../shared/types/global.types.js";
 import { Role } from "@prisma/client";
 import XLSX from "xlsx";
+import { templateSampleData } from "./employee.types.js";
 
 export class EmployeeService {
   static async createEmployeeService(
@@ -226,7 +227,19 @@ export class EmployeeService {
   };
 }
 
- 
+ static async downloadBulkUploadTemplateService(hrUser : User){
+    const worksheet = XLSX.utils.json_to_sheet(templateSampleData)
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet , "Employee_Record")
+
+      const buffer =
+    XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
+
+  return buffer;
+ }
 
   static async getAllEmployeeService(
     user: User,
@@ -243,7 +256,7 @@ export class EmployeeService {
      */
     const whereClause: any = {
       companyId: user.companyId,
-      deletedAt: null,
+      // deletedAt: null,
     };
 
     /**

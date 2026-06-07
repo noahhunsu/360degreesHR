@@ -13,6 +13,8 @@ const upload = multer({
 })
 
 router.post("/" , parseAuthHeaderMiddleware(), validate(createEmployeeSchema ), EmployeeController.createEmployeeController)
+router.get("/bulk-upload/template", parseAuthHeaderMiddleware(), EmployeeController.downloadBulkUploadTemplateController,
+);
 router.post("/bulk-uploads" , parseAuthHeaderMiddleware(), upload.single("file"), EmployeeController.createBulkEmployeeViaSheetController)
 router.get("/" , parseAuthHeaderMiddleware(), EmployeeController.getAllEmployeesController)
 router.get("/:employeeId" , parseAuthHeaderMiddleware(), EmployeeController.getSingleEmployeeController)
