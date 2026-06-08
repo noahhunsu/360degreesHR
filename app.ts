@@ -11,6 +11,7 @@ import employeeRouter from "./src/modules/employee/employee.routes.js";
 import departmentRouter from "./src/modules/department/department.routes.js";
 import employmentHistoryRouter from "./src/modules/employmentHistory/employmentHistory.routes.js";
 import disciplinaryRouter from "./src/modules/disciplinary/disciplinary.routes.js";
+import offerLetterRouter from "./src/modules/offerLetter/offer_letter.routes.js";
 // import onboardingTemplateRouter from "./src/modules/onboardingTemplate/onboardingTemplate.routes.js";
 // import onboardingRouter from "./src/modules/invitation/preOnboarding.routes.js";
 // import documentUploadRouter from "./src/modules/s3FilesUploads/s3.files.routes.js";
@@ -40,6 +41,7 @@ app.use("/api/v1/employees" ,employeeRouter )
 app.use("/api/v1/departments" ,departmentRouter )
 app.use("/api/v1/employment-history" ,employmentHistoryRouter )
 app.use("/api/v1/disciplinary" , disciplinaryRouter )
+app.use("/api/v1/offer-letter" , offerLetterRouter )
 // app.use("/api/v1/onboarding-template" , onboardingTemplateRouter )
 // app.use("/api/v1/onboarding", onboardingRouter)
 // app.use("/api/v1/document-upload" , documentUploadRouter)

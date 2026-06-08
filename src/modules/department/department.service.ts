@@ -438,6 +438,14 @@ static async getDepartmentTreeService(hrUser: User) {
           jobTitle: true,
         },
       },
+      headEmployee: {
+        select : {
+          id : true , 
+          firstName : true , 
+          lastName : true , 
+          jobTitle : true
+        }
+      }
     },
   });
 

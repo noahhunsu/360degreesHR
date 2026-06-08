@@ -27,6 +27,8 @@ model Company {
   onboardingSubmissions OnboardingSubmission[]
 
   onboardingTemplates OnboardingTemplate[]
+  offerLetterTemplates OfferLetterTemplate[]
+  employeeOfferLetters OfferLetterDocument[]
 
   @@map("companies")
 }
@@ -95,6 +97,10 @@ model User {
   reviewedSubmissions OnboardingSubmission[] @relation("SubmissionReviewedBy")
 
   reviewedDocuments OnboardingDocument[] @relation("DocumentReviewedBy")
+
+
+  uploadedOfferLetterTemplates OfferLetterTemplate[]
+
 
   @@index([companyId])
   @@map("users")
@@ -206,7 +212,7 @@ model OnboardingInvitation {
 
   acceptedAt DateTime?
   declinedAt DateTime?
-
+  offerLetterDocument   OfferLetterDocument?
   submission OnboardingSubmission?
 
   createdAt DateTime @default(now())
@@ -365,6 +371,54 @@ model EmployeeDocument {
   @@index([employeeId])
   @@index([companyId])
   @@map("employee_documents")
+}
+
+model OfferLetterTemplate {
+  id              String   @id @default(uuid())
+
+
+  fileName        String
+  storageKey      String
+
+  isActive        Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  companyId       String   @db.Uuid
+  company         Company  @relation(fields: [companyId],references: [id],onDelete: Cascade)
+
+  uploadedById    String  @db.Uuid
+  uploadedBy      User     @relation(fields: [uploadedById],references: [id])
+
+  @@index([companyId])
+    @@map("offer_letter_templates")
+
+}
+
+model OfferLetterDocument {
+  id            String   @id @default(uuid())
+
+
+
+  fileName      String
+
+  storageKey    String
+
+  mimeType      String
+
+  fileSize      Int
+
+  uploadedById  String
+
+  createdAt     DateTime @default(now())
+
+  companyId     String @db.Uuid
+  company        Company                @relation(fields: [companyId], references: [id])
+  invitationId  String @db.Uuid 
+  invitation     OnboardingInvitation   @relation(fields: [invitationId], references: [id])
+  @@unique(invitationId)
+  @@index([companyId])
 }
 
 enum Gender {

@@ -8,3 +8,4 @@ node_modules
 /modules/invitation
 /modules/onboardingTemplate
 /modules/s3FilesUploads
+/modules/offerLetter
