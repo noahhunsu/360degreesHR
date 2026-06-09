@@ -419,6 +419,8 @@ model OfferLetterDocument {
   invitation     OnboardingInvitation   @relation(fields: [invitationId], references: [id])
   @@unique(invitationId)
   @@index([companyId])
+      @@map("offer_letter_documents")
+
 }
 
 enum Gender {

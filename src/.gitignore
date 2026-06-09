@@ -9,3 +9,4 @@ node_modules
 /modules/onboardingTemplate
 /modules/s3FilesUploads
 /modules/offerLetter
+/modules/postOnboarding

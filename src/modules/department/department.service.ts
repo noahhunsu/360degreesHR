@@ -462,6 +462,7 @@ static async getDepartmentTreeService(hrUser: User) {
       status: dept.status,
       parentDepartmentId: dept.parentDepartmentId,
       employees: dept.employees,
+      headOfDepartment : dept.headEmployee,
       children: [],
     });
   });

@@ -15,11 +15,11 @@ interface SendEmailOptions {
 }
 
 export const sendEmail = async ({
-    to , subject , html
+    to , subject , html , attachments
 } : SendEmailOptions) => {
 
     return resend.emails.send({
         from : process.env.EMAIL_FROM!, 
-        to , subject , html
+        to , subject , html , ...(attachments && {attachments})
     })
 }
