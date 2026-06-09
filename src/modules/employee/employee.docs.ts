@@ -747,3 +747,119 @@
  *       403:
  *         description: Forbidden
  */
+
+/**
+ * @swagger
+ * /employees/bulk-upload/template:
+ *   get:
+ *     summary: Download employee bulk upload template
+ *     description: Downloads an Excel template that HR administrators can use to prepare employee bulk upload data.
+ *     tags:
+ *       - Employees
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: Excel template downloaded successfully
+ *         content:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *
+ *       401:
+ *         description: Unauthorized
+ *
+ *       403:
+ *         description: Forbidden
+ *
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /employees/bulk-uploads:
+ *   post:
+ *     summary: Bulk create employees from spreadsheet
+ *     description: Upload an Excel spreadsheet containing employee records for bulk employee creation.
+ *     tags:
+ *       - Employees
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Excel (.xlsx) spreadsheet containing employee records
+ *
+ *     responses:
+ *       201:
+ *         description: Employees created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *
+ *                 message:
+ *                   type: string
+ *                   example: Employee Created successfully
+ *
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalRows:
+ *                       type: integer
+ *                       example: 25
+ *
+ *                     successful:
+ *                       type: integer
+ *                       example: 23
+ *
+ *                     failed:
+ *                       type: integer
+ *                       example: 2
+ *
+ *                     errors:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           row:
+ *                             type: integer
+ *                             example: 4
+ *
+ *                           message:
+ *                             type: string
+ *                             example: Email already exists
+ *
+ *       400:
+ *         description: Spreadsheet file is required
+ *
+ *       401:
+ *         description: Unauthorized
+ *
+ *       403:
+ *         description: Forbidden
+ *
+ *       422:
+ *         description: Invalid spreadsheet format
+ *
+ *       500:
+ *         description: Internal server error
+ */
