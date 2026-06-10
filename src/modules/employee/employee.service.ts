@@ -118,8 +118,8 @@ export class EmployeeService {
         ...(payload.dateOfBirth && {
           dateOfBirth: new Date(payload.dateOfBirth),
         }),
+        jobTitle: payload.jobTitle ,
         ...(payload.address && { address: payload.address }),
-        ...(payload.jobTitle && { jobTitle: payload.jobTitle }),
         ...(payload.employmentType && {
           employmentType: payload.employmentType,
         }),
@@ -131,7 +131,21 @@ export class EmployeeService {
         data: employeeData,
       });
 
-      return { user, employee };
+      const employmentHistoryData = {
+        companyId: hrUser.companyId,
+        employeeId  : employee.id,
+        startDate : new Date(),
+        isCurrent : true,
+        jobTitle: payload.jobTitle ,
+        ...(payload.departmentId && { departmentId: payload.departmentId }),
+      };
+
+      const employeeHistory = await tx.employmentHistory.create({
+        data : employmentHistoryData
+        
+      })
+
+      return { user, employee , employeeHistory};
     });
 
     try {

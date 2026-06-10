@@ -61,6 +61,7 @@ model Employee {
   subordinates        Employee[]           @relation("ManagerEmployees")
   user                User                 @relation(fields: [userId], references: [id])
   employeeDocument    EmployeeDocument[]
+  onboardingSubmission OnboardingSubmission?
 
   @@unique([companyId, employeeCode])
   @@index([companyId])
@@ -242,6 +243,7 @@ model OnboardingSubmission {
 
   emergencyContactName  String?
   emergencyContactPhone String?
+  gender Gender
 
   jobTitle String?
 
@@ -260,6 +262,8 @@ model OnboardingSubmission {
   rejectionReason String?
 
   documents OnboardingDocument[]
+  employeeId String? @unique @db.Uuid
+  employee   Employee? @relation(fields: [employeeId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

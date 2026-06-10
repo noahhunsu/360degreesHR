@@ -5,7 +5,7 @@ node_modules
 /generated/prisma
 
 
-/modules/invitation
+/modules/preOnboarding
 /modules/onboardingTemplate
 /modules/s3FilesUploads
 /modules/offerLetter

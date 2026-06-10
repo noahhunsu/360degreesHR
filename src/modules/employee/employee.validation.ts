@@ -24,7 +24,7 @@ export const createEmployeeSchema = z.object({
 
   address: z.string().max(255).optional(),
 
-  jobTitle: z.string().max(100).optional(),
+  jobTitle: z.string().max(100),
 
   employmentType: z.enum(EmploymentType).optional(),
 
