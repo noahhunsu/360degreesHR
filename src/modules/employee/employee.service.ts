@@ -98,7 +98,10 @@ export class EmployeeService {
     );
     // we run a transaction . Creating both user and employee
     const generatedPassword = generateTemporaryPassword();
+
+    console.log("Password generated" , generatedPassword);
     const hashedPassword = await hashpassword(generatedPassword)
+    console.log("Password generated" , hashedPassword);
     const result = await prismaClient.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
@@ -145,7 +148,7 @@ export class EmployeeService {
         
       })
 
-      return { user, employee , employeeHistory};
+      return { user, employee , employeeHistory };
     });
 
     try {

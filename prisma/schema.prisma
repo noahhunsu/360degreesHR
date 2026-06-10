@@ -26,42 +26,46 @@ model Company {
 
   onboardingSubmissions OnboardingSubmission[]
 
-  onboardingTemplates OnboardingTemplate[]
+  onboardingTemplates  OnboardingTemplate[]
   offerLetterTemplates OfferLetterTemplate[]
   employeeOfferLetters OfferLetterDocument[]
+
+  employeeOnboardingTask EmployeeOnboardingTask[]
+  companyOnboardingTaskTemplate OnboardingTaskTemplate[]
 
   @@map("companies")
 }
 
 model Employee {
-  id                  String               @id @default(uuid()) @db.Uuid
-  companyId           String               @db.Uuid
-  employeeCode        String
-  firstName           String
-  lastName            String
-  gender              Gender
-  dateOfBirth         DateTime?
-  address             String?
-  jobTitle            String?
-  employmentType      EmploymentType?
-  managerId           String?              @db.Uuid
-  employmentStatus    EmploymentStatus     @default(ACTIVE)
-  departmentId        String?              @db.Uuid
-  userId              String               @unique @db.Uuid
-  hireDate            DateTime?
-  updatedAt           DateTime             @updatedAt
-  createdAt           DateTime             @default(now())
-  deletedAt           DateTime?
-  employmentHistory   EmploymentHistory[]
-  headedDepartments   Department[]         @relation("DepartmentHead")
-  disciplinaryRecords DisciplinaryRecord[]
-  company             Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  department          Department?          @relation("DepartmentEmployees", fields: [departmentId], references: [id])
-  manager             Employee?            @relation("ManagerEmployees", fields: [managerId], references: [id])
-  subordinates        Employee[]           @relation("ManagerEmployees")
-  user                User                 @relation(fields: [userId], references: [id])
-  employeeDocument    EmployeeDocument[]
+  id                   String                   @id @default(uuid()) @db.Uuid
+  companyId            String                   @db.Uuid
+  employeeCode         String
+  firstName            String
+  lastName             String
+  gender               Gender
+  dateOfBirth          DateTime?
+  address              String?
+  jobTitle             String?
+  employmentType       EmploymentType?
+  managerId            String?                  @db.Uuid
+  employmentStatus     EmploymentStatus         @default(ACTIVE)
+  departmentId         String?                  @db.Uuid
+  userId               String                   @unique @db.Uuid
+  hireDate             DateTime?
+  updatedAt            DateTime                 @updatedAt
+  createdAt            DateTime                 @default(now())
+  deletedAt            DateTime?
+  employmentHistory    EmploymentHistory[]
+  headedDepartments    Department[]             @relation("DepartmentHead")
+  disciplinaryRecords  DisciplinaryRecord[]
+  company              Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  department           Department?              @relation("DepartmentEmployees", fields: [departmentId], references: [id])
+  manager              Employee?                @relation("ManagerEmployees", fields: [managerId], references: [id])
+  subordinates         Employee[]               @relation("ManagerEmployees")
+  user                 User                     @relation(fields: [userId], references: [id])
+  employeeDocument     EmployeeDocument[]
   onboardingSubmission OnboardingSubmission?
+  onboardingTasks      EmployeeOnboardingTask[]
 
   @@unique([companyId, employeeCode])
   @@index([companyId])
@@ -99,9 +103,11 @@ model User {
 
   reviewedDocuments OnboardingDocument[] @relation("DocumentReviewedBy")
 
-
   uploadedOfferLetterTemplates OfferLetterTemplate[]
-
+  onboardingTasksAssignedTo EmployeeOnboardingTask[]   @relation("AssignedOnboardingTask")
+  onboardingTasksCompleted EmployeeOnboardingTask[]   @relation("CompletedOnboardingTask")
+  templatesCreated OnboardingTaskTemplate[]   @relation("TaskTemplateCreatedBy")
+  assignedUserOnTemplate OnboardingTaskTemplate[]   @relation("TemplateAssignedUser")
 
   @@index([companyId])
   @@map("users")
@@ -198,7 +204,7 @@ model OnboardingInvitation {
   token String @unique
 
   expiresAt    DateTime
-  jobTitle     String?
+  jobTitle     String
   departmentId String?     @db.Uuid
   department   Department? @relation(fields: [departmentId], references: [id])
 
@@ -211,10 +217,10 @@ model OnboardingInvitation {
   manager        User?          @relation("EOBManager", fields: [managerId], references: [id])
   employmentType EmploymentType
 
-  acceptedAt DateTime?
-  declinedAt DateTime?
-  offerLetterDocument   OfferLetterDocument?
-  submission OnboardingSubmission?
+  acceptedAt          DateTime?
+  declinedAt          DateTime?
+  offerLetterDocument OfferLetterDocument?
+  submission          OnboardingSubmission?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -243,7 +249,7 @@ model OnboardingSubmission {
 
   emergencyContactName  String?
   emergencyContactPhone String?
-  gender Gender
+  gender                Gender
 
   jobTitle String?
 
@@ -261,9 +267,9 @@ model OnboardingSubmission {
 
   rejectionReason String?
 
-  documents OnboardingDocument[]
-  employeeId String? @unique @db.Uuid
-  employee   Employee? @relation(fields: [employeeId], references: [id])
+  documents  OnboardingDocument[]
+  employeeId String?              @unique @db.Uuid
+  employee   Employee?            @relation(fields: [employeeId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -378,53 +384,135 @@ model EmployeeDocument {
 }
 
 model OfferLetterTemplate {
-  id              String   @id @default(uuid())
+  id String @id @default(uuid())
 
+  fileName   String
+  storageKey String
 
-  fileName        String
-  storageKey      String
+  isActive Boolean @default(true)
 
-  isActive        Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  companyId       String   @db.Uuid
-  company         Company  @relation(fields: [companyId],references: [id],onDelete: Cascade)
-
-  uploadedById    String  @db.Uuid
-  uploadedBy      User     @relation(fields: [uploadedById],references: [id])
+  uploadedById String @db.Uuid
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
 
   @@index([companyId])
-    @@map("offer_letter_templates")
-
+  @@map("offer_letter_templates")
 }
 
 model OfferLetterDocument {
-  id            String   @id @default(uuid())
+  id String @id @default(uuid())
 
+  fileName String
 
+  storageKey String
 
-  fileName      String
+  mimeType String
 
-  storageKey    String
+  fileSize Int
 
-  mimeType      String
+  uploadedById String
 
-  fileSize      Int
+  createdAt DateTime @default(now())
 
-  uploadedById  String
+  companyId    String               @db.Uuid
+  company      Company              @relation(fields: [companyId], references: [id])
+  invitationId String               @db.Uuid
+  invitation   OnboardingInvitation @relation(fields: [invitationId], references: [id])
 
-  createdAt     DateTime @default(now())
-
-  companyId     String @db.Uuid
-  company        Company                @relation(fields: [companyId], references: [id])
-  invitationId  String @db.Uuid 
-  invitation     OnboardingInvitation   @relation(fields: [invitationId], references: [id])
   @@unique(invitationId)
   @@index([companyId])
-      @@map("offer_letter_documents")
+  @@map("offer_letter_documents")
+}
 
+
+model OnboardingTaskTemplate {
+  id String @id @default(uuid()) @db.Uuid
+
+  companyId String @db.Uuid
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  title String
+
+  description String?
+
+  responsibility TaskResponsibility
+
+  /**
+   * Used only when responsibility = SPECIFIC_USER
+   */
+  assignedUserId String? @db.Uuid
+  assignedUser User? @relation("TemplateAssignedUser",fields: [assignedUserId],references: [id])
+
+  isActive Boolean @default(true)
+
+  createdById String @db.Uuid
+  createdBy User @relation("TaskTemplateCreatedBy",fields: [createdById],references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  generatedTasks EmployeeOnboardingTask[]
+
+  @@index([companyId])
+  @@index([isActive])
+  @@map("onboarding_task_templates")
+}
+model EmployeeOnboardingTask {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String @db.Uuid
+  employee Employee @relation( fields: [employeeId], references: [id], onDelete: Cascade  )
+
+  templateId String? @db.Uuid
+  template OnboardingTaskTemplate? @relation(fields: [templateId],references: [id] )
+
+  companyId String @db.Uuid
+  company Company @relation(fields: [companyId], references: [id])
+
+  title String
+
+  description String?
+
+  assignedToUserId String @db.Uuid
+  assignedToUser User @relation("AssignedOnboardingTask",fields: [assignedToUserId], references: [id]  )
+
+  status OnboardingTaskStatus @default(PENDING)
+
+  completedById String? @db.Uuid
+  completedBy User? @relation("CompletedOnboardingTask",fields: [completedById],references: [id])
+
+  completedAt DateTime?
+
+  remarks String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([assignedToUserId])
+  @@index([status])
+  @@index([companyId])
+
+  @@map("employee_onboarding_tasks")
+}
+
+model Notification {
+  id String @id @default(uuid())
+
+  userId String @db.Uuid
+
+  title String
+
+  message String
+
+  isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
 }
 
 enum Gender {
@@ -507,4 +595,17 @@ enum EmployementType {
   CONTRACT
   REMOTE
   HYBRID
+}
+
+enum TaskResponsibility {
+  HR
+  DEPARTMENT_MANAGER
+  SPECIFIC_USER
+}
+
+enum OnboardingTaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }

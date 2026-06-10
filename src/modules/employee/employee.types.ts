@@ -31,7 +31,7 @@ export const allowedFields = [
 
       email: "john@example.com",
 
-      gender: "MALE",
+      gender: "MALE || FEMALE",
 
       phone: "+2348012345678",
 
@@ -39,7 +39,7 @@ export const allowedFields = [
 
       jobTitle: "Software Engineer",
 
-      employmentType: "FULL_TIME",
+      employmentType: "FULL_TIME || INTERN || CONTRACT || PART_TIME",
       hireDate: "2026-05-01",
     },
   ];

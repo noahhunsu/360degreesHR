@@ -6,9 +6,6 @@ export const createEmployeeSchema = z.object({
 
 
   firstName: z.string().min(2, "First name must be at least 2 characters"),
-
-  password: z.string().min(8),
-
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
 
   email: z.email("Invalid email address"),
@@ -20,7 +17,7 @@ export const createEmployeeSchema = z.object({
 
   gender: z.enum(Gender),
 
-  dateOfBirth: z.iso.datetime().optional(),
+  dateOfBirth: z.date().optional(),
 
   address: z.string().max(255).optional(),
 
@@ -32,7 +29,7 @@ export const createEmployeeSchema = z.object({
 
   managerId: z.uuid("Invalid manager ID").optional(),
 
-  hireDate: z.iso.datetime().optional(),
+  hiredDate: z.date().optional(),
 });
 
 export const filterQuery = z.object({
