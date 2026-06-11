@@ -143,12 +143,14 @@ export class EmployeeService {
         ...(payload.departmentId && { departmentId: payload.departmentId }),
       };
 
-      const employeeHistory = await tx.employmentHistory.create({
-        data : employmentHistoryData
+      // const employeeHistory = await tx.employmentHistory.create({
+      //   data : employmentHistoryData
         
-      })
+      // })
 
-      return { user, employee , employeeHistory };
+      return { user, employee 
+        // , employeeHistory 
+      };
     });
 
     try {
