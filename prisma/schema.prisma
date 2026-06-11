@@ -487,6 +487,7 @@ model EmployeeOnboardingTask {
   completedBy User? @relation("CompletedOnboardingTask",fields: [completedById],references: [id])
 
   completedAt DateTime?
+  startedAt DateTime?
 
   remarks String?
 
