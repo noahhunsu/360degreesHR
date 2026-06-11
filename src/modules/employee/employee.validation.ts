@@ -6,6 +6,9 @@ export const createEmployeeSchema = z.object({
 
 
   firstName: z.string().min(2, "First name must be at least 2 characters"),
+
+  password: z.string().min(8),
+
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
 
   email: z.email("Invalid email address"),
