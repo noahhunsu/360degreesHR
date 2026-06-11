@@ -17,6 +17,7 @@ export class EmployeeController {
         data : result
       });
     } catch (error) {
+      console.log("error is " , error)
       next(error);
     }
   }
