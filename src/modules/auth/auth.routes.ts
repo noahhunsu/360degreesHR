@@ -11,7 +11,6 @@ router.post("/login" , validate(loginSchema), AuthController.loginController)
 router.get("/me" , AuthController.authMeController)
 router.post("/forgot-password" ,  validate(forgotPasswordSchema), AuthController.forgotPasswordController)
 router.post("/reset-password" ,  validate(resetPasswordInputSchema) ,AuthController.resetPasswordController)
-router.get("/companies" ,AuthController.getAllCompaniesController)
-router.delete("/companies/:companyId" ,AuthController.deleteCompaniesController)
+
 
 export default router

@@ -67,9 +67,9 @@ export class DepartmentService {
       if (!employee) {
         throw new NotFoundError("Employee Not Found");
       }
-      if (employee.user.role !== "MANAGER") {
-        throw new ConflictError("Employee Must be a Manager");
-      }
+      // if (employee.user.role !== "MANAGER") {
+      //   throw new ConflictError("Employee Must be a Manager");
+      // }
     }
 
     const department = await prismaClient.department.create({
