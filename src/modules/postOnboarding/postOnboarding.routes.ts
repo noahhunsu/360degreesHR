@@ -13,7 +13,7 @@ router.post("/template" , parseAuthHeaderMiddleware() ,validate(createOnboarding
 
 router.get("/template" , parseAuthHeaderMiddleware(), PostOnboardingController.getOnboardingTaskTemplateController)
 
-router.patch("/template/deactivate", parseAuthHeaderMiddleware() , PostOnboardingController.deactivateOnboardingTaskTemplateController)
+router.patch("/template/:templateId/deactivate", parseAuthHeaderMiddleware() , PostOnboardingController.deactivateOnboardingTaskTemplateController)
 
 router.post("/task/:employeeId" , parseAuthHeaderMiddleware() ,validate(createOnboardingTaskSchema) , PostOnboardingController.createOnboardingTaskController )
 

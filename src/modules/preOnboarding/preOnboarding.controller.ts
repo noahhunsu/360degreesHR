@@ -76,7 +76,7 @@ export class PreOnboardingController {
   ) {
     try {
       const hrUser = (req as any).user;
-      const submissionId = req.query.submissionId as string;
+      const submissionId = req.params.submissionId as string;
       const result = await preOnboardingService.getSingleOnboardingSubmissionService(hrUser, submissionId )
       return res.status(200).json({
         success: true,
@@ -94,7 +94,7 @@ export class PreOnboardingController {
   ) {
     try {
       const hrUser = (req as any).user;
-      const submissionId = req.query.submissionId as string;
+      const submissionId = req.params.submissionId as string;
       const result = await preOnboardingService.onboardingSubmissionActionService(submissionId,hrUser, req.body )
       
       return res.status(200).json({
