@@ -5,8 +5,3 @@ node_modules
 /generated/prisma
 
 
-/modules/preOnboarding
-/modules/onboardingTemplate
-/modules/s3FilesUploads
-/modules/offerLetter
-/modules/postOnboarding
