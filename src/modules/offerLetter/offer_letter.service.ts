@@ -23,10 +23,10 @@ export class OfferLetterService {
     if (!hrUser || hrUser.role !== "HR_ADMIN") {
       throw new UnauthorizedError("You Are Not Authorized To Do This");
     }
+    console.log("payload is " , payload);
     
     // generate unique storage key
     const fileExtension = payload.fileName.split(".").pop();
-    console.log("file extension")
 
     if (fileExtension?.toLocaleLowerCase() !== "docx") {
       throw new BadRequestError("File format not accepted");

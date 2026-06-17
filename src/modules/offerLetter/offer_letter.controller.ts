@@ -12,6 +12,7 @@ export class OfferLetterController {
   ) {
     try {
       const user = (req as any).user;
+      console.log("the payload is " , req.body)
       const result = await OfferLetterService.generatePresignedUrlOfferLetterTemplateService(user , req.body)
       return res.status(200).json({
         success: true,
