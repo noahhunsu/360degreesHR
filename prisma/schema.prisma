@@ -30,8 +30,15 @@ model Company {
   offerLetterTemplates OfferLetterTemplate[]
   employeeOfferLetters OfferLetterDocument[]
 
-  employeeOnboardingTask EmployeeOnboardingTask[]
+  employeeOnboardingTask        EmployeeOnboardingTask[]
   companyOnboardingTaskTemplate OnboardingTaskTemplate[]
+  companyJobRequisitions JobRequisition[]
+  companyJobOpenings JobOpening[]
+  jobOpeningCandidates Candidate[]
+  companyRecruitmentStage RecruitmentStage[]
+  companyJobApplications JobApplication[]
+  companyJobOffers JobOffer[]
+  companyRecruitmentActivity RecruitmentActivity[]
 
   @@map("companies")
 }
@@ -104,10 +111,19 @@ model User {
   reviewedDocuments OnboardingDocument[] @relation("DocumentReviewedBy")
 
   uploadedOfferLetterTemplates OfferLetterTemplate[]
-  onboardingTasksAssignedTo EmployeeOnboardingTask[]   @relation("AssignedOnboardingTask")
-  onboardingTasksCompleted EmployeeOnboardingTask[]   @relation("CompletedOnboardingTask")
-  templatesCreated OnboardingTaskTemplate[]   @relation("TaskTemplateCreatedBy")
-  assignedUserOnTemplate OnboardingTaskTemplate[]   @relation("TemplateAssignedUser")
+  onboardingTasksAssignedTo    EmployeeOnboardingTask[] @relation("AssignedOnboardingTask")
+  onboardingTasksCompleted     EmployeeOnboardingTask[] @relation("CompletedOnboardingTask")
+  templatesCreated             OnboardingTaskTemplate[] @relation("TaskTemplateCreatedBy")
+  assignedUserOnTemplate       OnboardingTaskTemplate[] @relation("TemplateAssignedUser")
+
+  createdRequisitions  JobRequisition[] @relation("RequestedRequisitions")
+  approvedOrRejectedRequisitions  JobRequisition[] @relation("ApprovedOrRejectedRequisitions")
+
+  applicationStageMoves ApplicationStageHistory[]
+  candidateNotesCreated CandidateNote[]
+  recruitmentActivityActor RecruitmentActivity[]
+
+  hiringTeam JobOpeningHiringTeam[]
 
   @@index([companyId])
   @@map("users")
@@ -132,6 +148,10 @@ model Department {
   employees             Employee[]             @relation("DepartmentEmployees")
   onboardingSubmissions OnboardingSubmission[]
   onboardingInvitations OnboardingInvitation[]
+
+  departmentRequisitions  JobRequisition[] 
+  departmentOpenings JobOpening[] 
+
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -186,6 +206,8 @@ model DisciplinaryRecord {
   @@index([status])
   @@map("disciplinary_records")
 }
+
+// This is the part for pre onboarding and post onboarding
 
 model OnboardingInvitation {
   id String @id @default(uuid()) @db.Uuid
@@ -421,20 +443,22 @@ model OfferLetterDocument {
 
   companyId    String               @db.Uuid
   company      Company              @relation(fields: [companyId], references: [id])
-  invitationId String               @db.Uuid
-  invitation   OnboardingInvitation @relation(fields: [invitationId], references: [id])
+  invitationId String?               @db.Uuid
+  invitation   OnboardingInvitation? @relation(fields: [invitationId], references: [id])
+
+  jobOfferId String? @unique
+  jobOpening JobOffer? @relation(fields: [jobOfferId], references: [id])
 
   @@unique(invitationId)
   @@index([companyId])
   @@map("offer_letter_documents")
 }
 
-
 model OnboardingTaskTemplate {
   id String @id @default(uuid()) @db.Uuid
 
-  companyId String @db.Uuid
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   title String
 
@@ -446,12 +470,12 @@ model OnboardingTaskTemplate {
    * Used only when responsibility = SPECIFIC_USER
    */
   assignedUserId String? @db.Uuid
-  assignedUser User? @relation("TemplateAssignedUser",fields: [assignedUserId],references: [id])
+  assignedUser   User?   @relation("TemplateAssignedUser", fields: [assignedUserId], references: [id])
 
   isActive Boolean @default(true)
 
   createdById String @db.Uuid
-  createdBy User @relation("TaskTemplateCreatedBy",fields: [createdById],references: [id])
+  createdBy   User   @relation("TaskTemplateCreatedBy", fields: [createdById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -462,32 +486,33 @@ model OnboardingTaskTemplate {
   @@index([isActive])
   @@map("onboarding_task_templates")
 }
+
 model EmployeeOnboardingTask {
   id String @id @default(uuid()) @db.Uuid
 
-  employeeId String @db.Uuid
-  employee Employee @relation( fields: [employeeId], references: [id], onDelete: Cascade  )
+  employeeId String   @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  templateId String? @db.Uuid
-  template OnboardingTaskTemplate? @relation(fields: [templateId],references: [id] )
+  templateId String?                 @db.Uuid
+  template   OnboardingTaskTemplate? @relation(fields: [templateId], references: [id])
 
-  companyId String @db.Uuid
-  company Company @relation(fields: [companyId], references: [id])
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id])
 
   title String
 
   description String?
 
   assignedToUserId String @db.Uuid
-  assignedToUser User @relation("AssignedOnboardingTask",fields: [assignedToUserId], references: [id]  )
+  assignedToUser   User   @relation("AssignedOnboardingTask", fields: [assignedToUserId], references: [id])
 
   status OnboardingTaskStatus @default(PENDING)
 
   completedById String? @db.Uuid
-  completedBy User? @relation("CompletedOnboardingTask",fields: [completedById],references: [id])
+  completedBy   User?   @relation("CompletedOnboardingTask", fields: [completedById], references: [id])
 
   completedAt DateTime?
-  startedAt DateTime?
+  startedAt   DateTime?
 
   remarks String?
 
@@ -498,8 +523,330 @@ model EmployeeOnboardingTask {
   @@index([assignedToUserId])
   @@index([status])
   @@index([companyId])
-
   @@map("employee_onboarding_tasks")
+}
+
+// Where pre and post onboarding ends
+
+// WHere recruitment begins 
+model JobRequisition {
+  id String @id @default(uuid())
+
+  companyId String
+  company Company @relation(fields: [companyId], references: [id])
+
+  requestedById String
+  requestedBy User @relation("RequestedRequisitions", fields: [requestedById], references: [id])
+
+  approvedOrRejectedById String?
+  approvedOrRejectedBy User? @relation("ApprovedOrRejectedRequisitions", fields: [approvedOrRejectedById], references: [id])
+
+  departmentId String
+  department Department @relation(fields: [departmentId], references: [id])
+
+  jobTitle String
+
+  numberOfPositions Int
+
+  salaryRangeMin Decimal? @db.Decimal(18,2)
+  salaryRangeMax Decimal? @db.Decimal(18,2)
+
+  reason String
+
+  priority String?
+
+  status RequisitionStatus @default(PENDING)
+
+  rejectionReason String?
+
+  reviewedAt DateTime?
+
+  jobOpening JobOpening?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JobOpening {
+  id String @id @default(uuid())
+
+  companyId String
+  company Company @relation(fields: [companyId], references: [id])
+
+  requisitionId String @unique
+  requisition JobRequisition @relation(fields: [requisitionId], references: [id])
+
+  departmentId String
+  department Department @relation(fields: [departmentId], references: [id])
+
+  title String
+
+  description String? @db.Text
+
+  location String?
+
+  employmentType EmploymentType?
+
+  numberOfOpenings Int
+
+  salaryMin Decimal? @db.Decimal(18,2)
+  salaryMax Decimal? @db.Decimal(18,2)
+
+  status JobOpeningStatus @default(DRAFT)
+
+  publishedAt DateTime?
+  closedAt DateTime?
+
+  applications JobApplication[]
+  offers JobOffer[]
+
+  jobOpeningSettings JobOpeningSettings[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JobOpeningSettings {
+  id String @id @default(uuid())
+
+  jobOpeningId String @unique
+  jobOpening JobOpening @relation(fields:[jobOpeningId], references:[id])
+
+  numberOfOpenings Int
+
+  openingDate DateTime?
+
+  expiryDate DateTime?
+
+  evaluationScale Int @default(5)
+
+  stages JobOpeningHiringStage[]
+
+  hiringTeam JobOpeningHiringTeam[]
+
+  createdAt DateTime @default(now())
+}
+
+model JobOpeningHiringTeam {
+  id String @id @default(uuid())
+
+  jobOpeningSettingsId String
+  jobOpeningSettings JobOpeningSettings @relation(fields: [jobOpeningSettingsId], references: [id])
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  role HiringTeamRole
+
+  createdAt DateTime @default(now())
+
+  @@index([jobOpeningSettingsId])
+  @@index([userId])
+}
+model JobOpeningHiringStage {
+  id String @id @default(uuid())
+
+  settingsId String
+  settings JobOpeningSettings @relation(fields:[settingsId], references:[id])
+
+  name String
+
+  position Int
+
+  isRequired Boolean @default(true)
+
+  createdAt DateTime @default(now())
+}
+model Candidate {
+  id String @id @default(uuid())
+
+  companyId String
+  company Company @relation(fields: [companyId], references: [id])
+
+  firstName String
+  lastName String
+
+  email String
+  phone String?
+
+  linkedinUrl String?
+  portfolioUrl String?
+
+  currentLocation String?
+
+  yearsOfExperience Int?
+
+  source CandidateSource @default(MANUAL_ENTRY)
+
+  applications JobApplication[]
+  documents CandidateDocument[]
+  notes CandidateNote[]
+  offers JobOffer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, email])
+}
+
+model CandidateDocument {
+  id String @id @default(uuid())
+
+  candidateId String
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+
+  documentType CandidateDocumentType
+
+  fileName String
+
+  storageKey String
+
+  mimeType String
+
+  uploadedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+}
+
+model RecruitmentStage {
+  id String @id @default(uuid())
+
+  companyId String
+  company Company @relation(fields: [companyId], references: [id])
+
+  name String
+
+  position Int
+
+  isDefault Boolean @default(false)
+
+  applications JobApplication[]
+
+  fromHistory ApplicationStageHistory[] @relation("FromStage")
+  toHistory ApplicationStageHistory[] @relation("ToStage")
+
+  createdAt DateTime @default(now())
+}
+
+model JobApplication {
+  id String @id @default(uuid())
+
+  companyId String
+  company Company @relation(fields: [companyId], references: [id])
+
+  candidateId String
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+
+  jobOpeningId String
+  jobOpening JobOpening @relation(fields: [jobOpeningId], references: [id])
+
+  currentStageId String?
+  currentStage RecruitmentStage? @relation(fields: [currentStageId], references: [id])
+
+  status ApplicationStatus @default(ACTIVE)
+
+  stageHistory ApplicationStageHistory[]
+
+  notes CandidateNote[]
+
+  activities RecruitmentActivity[]
+
+  offers JobOffer[]
+
+  appliedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([candidateId, jobOpeningId])
+}
+
+model ApplicationStageHistory {
+  id String @id @default(uuid())
+
+  applicationId String
+  application JobApplication @relation(fields: [applicationId], references: [id])
+
+  fromStageId String?
+  fromStage RecruitmentStage? @relation("FromStage", fields: [fromStageId], references: [id])
+
+  toStageId String
+  toStage RecruitmentStage @relation("ToStage", fields: [toStageId], references: [id])
+
+  movedById String
+  movedBy User @relation(fields: [movedById], references: [id])
+
+  notes String?
+
+  createdAt DateTime @default(now())
+}
+
+model JobOffer {
+  id String @id @default(uuid())
+
+  companyId String
+  company Company @relation(fields: [companyId], references: [id])
+
+  applicationId String
+  application JobApplication @relation(fields: [applicationId], references: [id])
+
+  candidateId String
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+
+  jobOpeningId String
+  jobOpening JobOpening @relation(fields: [jobOpeningId], references: [id])
+
+  salary Decimal @db.Decimal(18,2)
+
+  currency String @default("NGN")
+
+  startDate DateTime?
+
+  status OfferStatus @default(DRAFT)
+
+  offerLetter OfferLetterDocument?
+
+  sentAt DateTime?
+  acceptedAt DateTime?
+  declinedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RecruitmentActivity {
+  id String @id @default(uuid())
+
+  companyId String
+  company Company @relation(fields: [companyId], references: [id])
+
+  applicationId String
+  application JobApplication @relation(fields: [applicationId], references: [id])
+
+  actorId String
+  actor User @relation(fields: [actorId], references: [id])
+
+  activityType String
+
+  description String
+
+  createdAt DateTime @default(now())
+}
+
+model CandidateNote {
+  id String @id @default(uuid())
+
+  candidateId String
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+
+  applicationId String?
+  application JobApplication? @relation(fields: [applicationId], references: [id])
+
+  createdById String
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  note String @db.Text
+
+  createdAt DateTime @default(now())
 }
 
 model Notification {
@@ -609,4 +956,57 @@ enum OnboardingTaskStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+enum RequisitionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum JobOpeningStatus {
+  DRAFT
+  PUBLISHED
+  PAUSED
+  CLOSED
+  FILLED
+}
+
+enum HiringTeamRole {
+  RECRUITER
+  HIRING_MANAGER
+  INTERVIEWER
+}
+
+enum CandidateSource {
+  REFERRAL
+  LINKEDIN
+  CAREER_SITE
+  JOB_BOARD
+  MANUAL_ENTRY
+  OTHER
+}
+
+enum ApplicationStatus {
+  ACTIVE
+  WITHDRAWN
+  REJECTED
+  HIRED
+}
+
+enum OfferStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum CandidateDocumentType {
+  RESUME
+  COVER_LETTER
+  PORTFOLIO
+  CERTIFICATE
+  OTHER
 }

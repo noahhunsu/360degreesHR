@@ -19,6 +19,7 @@ export class OfferLetterController {
         data : result
       });
     } catch (error) {
+      console.log("the error is " , error)
       next(error);
     }
   }
