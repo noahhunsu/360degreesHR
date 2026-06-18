@@ -446,8 +446,8 @@ model OfferLetterDocument {
   invitationId String?               @db.Uuid
   invitation   OnboardingInvitation? @relation(fields: [invitationId], references: [id])
 
-  jobOfferId String? @unique
-  jobOpening JobOffer? @relation(fields: [jobOfferId], references: [id])
+  // jobOfferId String? @unique
+  // jobOpening JobOffer? @relation(fields: [jobOfferId], references: [id])
 
   @@unique(invitationId)
   @@index([companyId])
@@ -587,8 +587,6 @@ model JobOpening {
 
   employmentType EmploymentType?
 
-  numberOfOpenings Int
-
   salaryMin Decimal? @db.Decimal(18,2)
   salaryMax Decimal? @db.Decimal(18,2)
 
@@ -600,7 +598,7 @@ model JobOpening {
   applications JobApplication[]
   offers JobOffer[]
 
-  jobOpeningSettings JobOpeningSettings[]
+  jobOpeningSettings JobOpeningSettings?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -624,6 +622,7 @@ model JobOpeningSettings {
   hiringTeam JobOpeningHiringTeam[]
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model JobOpeningHiringTeam {
@@ -655,6 +654,7 @@ model JobOpeningHiringStage {
   isRequired Boolean @default(true)
 
   createdAt DateTime @default(now())
+  @@unique([settingsId, position])
 }
 model Candidate {
   id String @id @default(uuid())
@@ -803,7 +803,7 @@ model JobOffer {
 
   status OfferStatus @default(DRAFT)
 
-  offerLetter OfferLetterDocument?
+  // offerLetter OfferLetterDocument?
 
   sentAt DateTime?
   acceptedAt DateTime?

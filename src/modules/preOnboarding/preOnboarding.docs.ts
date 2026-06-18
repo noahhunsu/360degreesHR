@@ -1,6 +1,6 @@
 /**
  * @swagger
- * /pre-onboarding:
+ * /onboarding:
  *   post:
  *     summary: Create onboarding invitation
  *     tags:
@@ -65,7 +65,7 @@
 
 /**
  * @swagger
- * /pre-onboarding/token:
+ * /onboarding/token:
  *   get:
  *     summary: Get onboarding invitation details using token
  *     tags:
@@ -90,7 +90,7 @@
 
 /**
  * @swagger
- * /pre-onboarding/submit:
+ * /onboarding/submit:
  *   post:
  *     summary: Submit onboarding information
  *     tags:
@@ -177,7 +177,7 @@
 
 /**
  * @swagger
- * /pre-onboarding/submissions:
+ * /onboarding/submissions:
  *   get:
  *     summary: Get all onboarding submissions
  *     tags:
@@ -208,7 +208,7 @@
 
 /**
  * @swagger
- * /pre-onboarding/submissions/{submissionId}:
+ * /onboarding/submissions/{submissionId}:
  *   get:
  *     summary: Get a single onboarding submission
  *     tags:
@@ -234,7 +234,7 @@
 
 /**
  * @swagger
- * /pre-onboarding/submissions/{submissionId}:
+ * /onboarding/submissions/{submissionId}:
  *   post:
  *     summary: Approve or reject onboarding submission
  *     tags:

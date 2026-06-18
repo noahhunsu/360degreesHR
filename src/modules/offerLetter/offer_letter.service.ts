@@ -48,6 +48,7 @@ export class OfferLetterService {
     // create upload command
     const command = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
+      
 
       Key: storageKey,
 
@@ -56,7 +57,7 @@ export class OfferLetterService {
 
     // generate signed url
     const uploadUrl = await getSignedUrl(aws3Client, command, {
-      expiresIn: 60 * 5,
+      expiresIn: 60 * 5
     });
 
     // This returned upload url is then used by frontend to do a put request
