@@ -928,13 +928,13 @@ export class preOnboardingService {
   }
 
 
-   static async generatePresignedUrlOfferLetterTemplateService(
+   static async generatePresignedUrlPreOnboardingService(
       payload: GetPresignedUrlInputForPreOnboardingInput,
     ) {
   
       // generate unique storage key
       // const fileExtension = payload.fileName.split(".").pop();
-     
+     console.log("payload is " , payload)
   
       const safeFileName = payload.fileName
         .replace(/\s+/g, "-")

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { parseAuthHeaderMiddleware } from "./preOnboarding.middleware.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
-import { createOnboardingInvitationSchema,  onboardingActionSubmissionSchema, saveOnboardingSubmissionSchema } from "./preOnboarding.validation.js";
+import { createOnboardingInvitationSchema,  getPresignedUrlInputForPreOnboardingSchema,  onboardingActionSubmissionSchema, saveOnboardingSubmissionSchema } from "./preOnboarding.validation.js";
 import { PreOnboardingController } from "./preOnboarding.controller.js";
 import multer from "multer";
 
@@ -20,6 +20,6 @@ router.get("/submissions" , parseAuthHeaderMiddleware() ,PreOnboardingController
 router.get("/submissions/:submissionId" , parseAuthHeaderMiddleware() , PreOnboardingController.getSingleSubmissionsController)
 router.post("/submissions/:submissionId" , parseAuthHeaderMiddleware() ,validate(onboardingActionSubmissionSchema), PreOnboardingController.onboardingSubmissionActionController)
 router.post("/submissions/:submissionId/document/:documentId" , parseAuthHeaderMiddleware() , PreOnboardingController.onboardingSubmissionDocumentViewController)
-router.post("/submissions/upload-url" ,  parseAuthHeaderMiddleware(), PreOnboardingController.generatePresignedUrlForPreOnboardingController)
+router.post("/submissions/upload-url" ,  parseAuthHeaderMiddleware(), validate(getPresignedUrlInputForPreOnboardingSchema),  PreOnboardingController.generatePresignedUrlForPreOnboardingController)
 
 export default router

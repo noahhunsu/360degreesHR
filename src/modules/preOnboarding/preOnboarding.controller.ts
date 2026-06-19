@@ -136,7 +136,8 @@ export class PreOnboardingController {
   ){
 try{
     
-          const result = await preOnboardingService.generatePresignedUrlOfferLetterTemplateService(req.body)
+          const result = await preOnboardingService.generatePresignedUrlPreOnboardingService(req.body)
+          console.log("request body is " , req.body)
           return res.status(200).json({
             success: true,
             message: "Upload url generated successfully",
