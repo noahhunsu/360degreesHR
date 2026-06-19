@@ -20,6 +20,8 @@ router.get("/submissions" , parseAuthHeaderMiddleware() ,PreOnboardingController
 router.get("/submissions/:submissionId" , parseAuthHeaderMiddleware() , PreOnboardingController.getSingleSubmissionsController)
 router.post("/submissions/:submissionId" , parseAuthHeaderMiddleware() ,validate(onboardingActionSubmissionSchema), PreOnboardingController.onboardingSubmissionActionController)
 router.post("/submissions/:submissionId/document/:documentId" , parseAuthHeaderMiddleware() , PreOnboardingController.onboardingSubmissionDocumentViewController)
-router.post("/submissions/upload-url" , validate(getPresignedUrlInputForPreOnboardingSchema),  PreOnboardingController.generatePresignedUrlForPreOnboardingController)
+router.post("/submissions/upload-url" ,
+    //  validate(getPresignedUrlInputForPreOnboardingSchema),  
+     PreOnboardingController.generatePresignedUrlForPreOnboardingController)
 
 export default router
