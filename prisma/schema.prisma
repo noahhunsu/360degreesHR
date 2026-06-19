@@ -734,7 +734,7 @@ model RecruitmentStage {
 
   isDefault Boolean @default(false)
 
-  applications JobApplication[]
+  // applications JobApplication[]
 
   fromHistory ApplicationStageHistory[] @relation("FromStage")
   toHistory ApplicationStageHistory[] @relation("ToStage")
