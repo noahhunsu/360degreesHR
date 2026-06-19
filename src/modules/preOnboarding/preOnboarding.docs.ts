@@ -235,7 +235,7 @@
 /**
  * @swagger
  * /onboarding/submissions/{submissionId}:
- *   post:
+ *   patch:
  *     summary: Approve or reject onboarding submission
  *     tags:
  *       - Pre Onboarding

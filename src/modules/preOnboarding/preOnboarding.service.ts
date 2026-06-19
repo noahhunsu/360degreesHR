@@ -35,6 +35,18 @@ import { hashpassword } from "../../shared/utils/hash.js";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export class preOnboardingService {
+
+  static async getAllInvitationsService(hrUser : User){
+    if (!hrUser || hrUser.role !== "HR_ADMIN"){
+      throw new UnauthorizedError("You are not authorized to perform this action")
+    }
+    const invitations = await prismaClient.onboardingInvitation.findMany({
+      where : {
+        companyId : hrUser.companyId
+      }
+    })
+    return invitations
+  }
   static async createOnboardingInvitationService(
     payload: CreateOnboardingInvitationInput,
     file: Express.Multer.File | undefined,

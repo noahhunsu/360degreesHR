@@ -693,7 +693,6 @@ model Candidate {
   source CandidateSource @default(MANUAL_ENTRY)
 
   applications JobApplication[]
-  documents CandidateDocument[]
   notes CandidateNote[]
   offers JobOffer[]
 
@@ -703,11 +702,13 @@ model Candidate {
   @@unique([companyId, email])
 }
 
-model CandidateDocument {
+model JobApplicationDocument {
   id String @id @default(uuid())
 
-  candidateId String
-  candidate Candidate @relation(fields: [candidateId], references: [id])
+  // candidateId String
+  // candidate Candidate @relation(fields: [candidateId], references: [id])
+  jobApplicationId String
+  jobApplication JobApplication @relation(fields: [jobApplicationId], references: [id])
 
   documentType CandidateDocumentType
 
@@ -759,6 +760,8 @@ model JobApplication {
 
   currentStageId String?
   currentStage JobOpeningHiringStage? @relation(fields: [currentStageId], references: [id])
+
+    documents JobApplicationDocument[]
 
   status ApplicationStatus @default(ACTIVE)
 

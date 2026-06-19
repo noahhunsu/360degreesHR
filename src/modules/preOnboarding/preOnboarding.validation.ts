@@ -85,6 +85,7 @@ export const onboardingActionSubmissionSchema =
 
     dateOfBirth: z
       .coerce
+      
       .date()
       .optional(),
 

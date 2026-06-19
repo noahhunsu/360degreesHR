@@ -11,6 +11,7 @@ export const validate =(schema : ZodObject) => {
             schema.parse(req.body)
             next()
         } catch (error) {
+            console.log("Error is " , error)
             next(error)
         }
     }

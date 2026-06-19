@@ -3,6 +3,23 @@ import { preOnboardingService } from "./preOnboarding.service.js";
 import type { User } from "@prisma/client";
 
 export class PreOnboardingController {
+  static async getAllInvitationsService(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+      const result = await preOnboardingService.getAllInvitationsService(user)
+      return res.status(201).json({
+        success: true,
+        message: "Onboarding Invitations fetched successfully",
+        data : result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   static async createOnboardingInvitationController(
     req: Request,
     res: Response,

@@ -15,13 +15,14 @@ const upload = multer({
 
 router.post("/" ,parseAuthHeaderMiddleware(),upload.single("offerLetter"), validate(createOnboardingInvitationSchema) , PreOnboardingController.createOnboardingInvitationController)
 router.post("/submissions/upload-url" ,
-     validate(getPresignedUrlInputForPreOnboardingSchema),  
-     PreOnboardingController.generatePresignedUrlForPreOnboardingController)
+    validate(getPresignedUrlInputForPreOnboardingSchema),  
+    PreOnboardingController.generatePresignedUrlForPreOnboardingController)
+router.get("/invitation/get-all" ,parseAuthHeaderMiddleware(), PreOnboardingController.getAllInvitationsService)
 router.get("/token" ,  PreOnboardingController.getOnboardingInvitationController)
 router.post("/submit" , validate(saveOnboardingSubmissionSchema) , PreOnboardingController.submitOnboardingDetailsController)
 router.get("/submissions" , parseAuthHeaderMiddleware() ,PreOnboardingController.getAllSubmissionsController)
 router.get("/submissions/:submissionId" , parseAuthHeaderMiddleware() , PreOnboardingController.getSingleSubmissionsController)
-router.post("/submissions/:submissionId" , parseAuthHeaderMiddleware() ,validate(onboardingActionSubmissionSchema), PreOnboardingController.onboardingSubmissionActionController)
+router.patch("/submissions/:submissionId" , parseAuthHeaderMiddleware() ,validate(onboardingActionSubmissionSchema), PreOnboardingController.onboardingSubmissionActionController)
 router.post("/submissions/:submissionId/document/:documentId" , parseAuthHeaderMiddleware() , PreOnboardingController.onboardingSubmissionDocumentViewController)
 
 export default router
