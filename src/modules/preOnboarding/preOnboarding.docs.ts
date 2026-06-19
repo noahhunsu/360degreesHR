@@ -276,3 +276,89 @@
  *       401:
  *         description: Unauthorized
  */
+/**
+ * @swagger
+ * /onboarding/submissions/{submissionId}/document/{documentId}:
+ *   post:
+ *     summary: Generate document view URL for onboarding submission document
+ *     tags:
+ *       - Pre-Onboarding
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: submissionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Onboarding submission ID
+ *
+ *       - in: path
+ *         name: documentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Onboarding document ID
+ *
+ *     responses:
+ *       200:
+ *         description: Submission document fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Submission Document fetched successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     documentViewUrl:
+ *                       type: string
+ *                       format: uri
+ *                       example: https://bucket.s3.amazonaws.com/file.pdf?X-Amz-Signature=abc123
+ *                     fileName:
+ *                       type: string
+ *                       example: international-passport.pdf
+ *                     mimeType:
+ *                       type: string
+ *                       example: application/pdf
+ *
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: You need to be authorized
+ *
+ *       404:
+ *         description: Onboarding document not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Onboarding document not found
+ *
+ *       500:
+ *         description: Internal server error
+ */

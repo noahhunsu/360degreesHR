@@ -110,7 +110,12 @@ export const onboardingActionSubmissionSchema =
     submissionId : z.string()
   })
 
-  export const documentViewSchema = z.object({})
+  export const getPresignedUrlInputForPreOnboardingSchema = z.object({
+    fileName: z.string(),
+      mimeType: z.string(),
+      documentType: z.string()
+  })
+
 export type SaveOnboardingSubmissionInput =
   z.infer<
     typeof saveOnboardingSubmissionSchema
@@ -135,7 +140,7 @@ export type OnboardingActionInput =
   z.infer<
     typeof onboardingActionSubmissionSchema
   >;
-export type OnboardingDocumentViewInput =
+export type GetPresignedUrlInputForPreOnboardingInput =
   z.infer<
-    typeof documentViewSchema
+    typeof getPresignedUrlInputForPreOnboardingSchema
   >;

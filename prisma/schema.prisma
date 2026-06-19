@@ -603,6 +603,7 @@ model JobOpening {
   updatedAt DateTime @updatedAt
 }
 
+
 model JobOpeningSettings {
   id String @id @default(uuid())
 
@@ -619,12 +620,25 @@ model JobOpeningSettings {
 
   stages JobOpeningHiringStage[]
 
+  jobOpeningDocuments JobOpeningDocumentRequirement[]
+
   hiringTeam JobOpeningHiringTeam[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+model JobOpeningDocumentRequirement{
+  id String @id @default(uuid())
+  jobOpeningSettingsId String
+  jobOpeningSettings JobOpeningSettings @relation(fields: [jobOpeningSettingsId], references: [id])
 
+  name                 JobOpeningDocumentType
+  isRequired           Boolean @default(true)
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+}
 model JobOpeningHiringTeam {
   id String @id @default(uuid())
 
@@ -653,6 +667,7 @@ model JobOpeningHiringStage {
 
   isRequired Boolean @default(true)
 
+  jobApplication JobApplication[]
   createdAt DateTime @default(now())
   @@unique([settingsId, position])
 }
@@ -739,8 +754,11 @@ model JobApplication {
   jobOpeningId String
   jobOpening JobOpening @relation(fields: [jobOpeningId], references: [id])
 
+  // currentStageId String?
+  // currentStage RecruitmentStage? @relation(fields: [currentStageId], references: [id])
+
   currentStageId String?
-  currentStage RecruitmentStage? @relation(fields: [currentStageId], references: [id])
+  currentStage JobOpeningHiringStage? @relation(fields: [currentStageId], references: [id])
 
   status ApplicationStatus @default(ACTIVE)
 
@@ -1004,6 +1022,13 @@ enum OfferStatus {
 }
 
 enum CandidateDocumentType {
+  RESUME
+  COVER_LETTER
+  PORTFOLIO
+  CERTIFICATE
+  OTHER
+}
+enum JobOpeningDocumentType {
   RESUME
   COVER_LETTER
   PORTFOLIO

@@ -129,6 +129,24 @@ export class PreOnboardingController {
       next(error);
     }
   }
+  static async generatePresignedUrlForPreOnboardingController(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ){
+try{
+    
+          const result = await preOnboardingService.generatePresignedUrlOfferLetterTemplateService(req.body)
+          return res.status(200).json({
+            success: true,
+            message: "Upload url generated successfully",
+            data : result
+          });
+        } catch (error) {
+          console.log("the error is " , error)
+          next(error);
+        }
+  }
 
 
   
