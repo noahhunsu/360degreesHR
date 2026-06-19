@@ -110,6 +110,7 @@ export const onboardingActionSubmissionSchema =
     submissionId : z.string()
   })
 
+  export const documentViewSchema = z.object({})
 export type SaveOnboardingSubmissionInput =
   z.infer<
     typeof saveOnboardingSubmissionSchema
@@ -133,4 +134,8 @@ export type GetOnboardingSubmissionInput =
 export type OnboardingActionInput =
   z.infer<
     typeof onboardingActionSubmissionSchema
+  >;
+export type OnboardingDocumentViewInput =
+  z.infer<
+    typeof documentViewSchema
   >;

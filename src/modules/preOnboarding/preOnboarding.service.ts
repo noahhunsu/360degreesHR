@@ -18,11 +18,12 @@ import type {
   GetOnboardingInvitationInput,
   GetOnboardingSubmissionInput,
   OnboardingActionInput,
+  OnboardingDocumentViewInput,
   SaveOnboardingSubmissionInput,
 } from "./preOnboarding.validation.js";
 import crypto from "crypto";
 import { sendEmail } from "../../shared/utils/sendEmail.js";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { aws3Client } from "../../config/aws_s3.js";
 import { EmployeeService } from "../employee/employee.service.js";
 import {
@@ -31,6 +32,7 @@ import {
 } from "../employee/employee.utils.js";
 import type { CreateEmployeeInput } from "../employee/employee.validation.js";
 import { hashpassword } from "../../shared/utils/hash.js";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export class preOnboardingService {
   static async createOnboardingInvitationService(
@@ -884,5 +886,44 @@ export class preOnboardingService {
         submission: updatedSubmission,
       };
     }
+  }
+
+  static async onboardingSubmissionDocumentViewService(
+    submissionId : string , documentId : string , hrUser : User 
+  ){
+    if (!hrUser || hrUser.role !== "HR_ADMIN"){
+      throw new UnauthorizedError("You need to be authorized")
+    }
+
+    const onboardingDocument = await prismaClient.onboardingDocument.findFirst({
+      where : {
+        id : documentId , 
+        submissionId 
+      }
+    })
+
+    if (!onboardingDocument){
+      throw new NotFoundError("Onboarding document not found")
+    }
+
+    const documentViewUrl = await this.getPresignedDownloadUrl(onboardingDocument.storageKey , 60 * 15)
+
+    return {
+      documentViewUrl, 
+      fileName : onboardingDocument.originalFileName , 
+      mimeType : onboardingDocument.mimeType
+
+    }
+  }
+
+  static async getPresignedDownloadUrl(storageKey: string , expiresIn = 900) {
+    const command = new GetObjectCommand({
+      Bucket : process.env.AWS_BUCKET_NAME,
+      Key : storageKey
+    });
+
+    return getSignedUrl(aws3Client , command ,{
+      expiresIn
+    })
   }
 }

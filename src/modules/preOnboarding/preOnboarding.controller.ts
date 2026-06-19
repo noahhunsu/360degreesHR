@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { preOnboardingService } from "./preOnboarding.service.js";
+import type { User } from "@prisma/client";
 
 export class PreOnboardingController {
   static async createOnboardingInvitationController(
@@ -100,6 +101,28 @@ export class PreOnboardingController {
       return res.status(200).json({
         success: true,
         message: "Submissions updated successfully",
+        data : result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async onboardingSubmissionDocumentViewController(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ){
+
+    try {
+      const hrUser = (req as any).user;
+      const submissionId = req.params.submissionId as string;
+      const documentId = req.params.documentId as string;
+      const result = await preOnboardingService.onboardingSubmissionDocumentViewService(submissionId, documentId ,hrUser)
+      
+      return res.status(200).json({
+        success: true,
+        message: "Submission Document fetched successfully",
         data : result
       });
     } catch (error) {
