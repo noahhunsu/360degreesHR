@@ -279,6 +279,8 @@ export class AuthService {
 
     const hashedPassword = await hashpassword(payload.password);
 
+    console.log("the hashed password " , hashedPassword)
+
     await prismaClient.user.update({
       where: {
         id: user.id,

@@ -667,6 +667,8 @@ model JobOpeningHiringStage {
 
   isRequired Boolean @default(true)
 
+    fromHistory ApplicationStageHistory[] @relation("FromStage")
+  toHistory ApplicationStageHistory[] @relation("ToStage")
   jobApplication JobApplication[]
   createdAt DateTime @default(now())
   @@unique([settingsId, position])
@@ -737,8 +739,8 @@ model RecruitmentStage {
 
   // applications JobApplication[]
 
-  fromHistory ApplicationStageHistory[] @relation("FromStage")
-  toHistory ApplicationStageHistory[] @relation("ToStage")
+  // fromHistory ApplicationStageHistory[] @relation("FromStage")
+  // toHistory ApplicationStageHistory[] @relation("ToStage")
 
   createdAt DateTime @default(now())
 }
@@ -788,10 +790,10 @@ model ApplicationStageHistory {
   application JobApplication @relation(fields: [applicationId], references: [id])
 
   fromStageId String?
-  fromStage RecruitmentStage? @relation("FromStage", fields: [fromStageId], references: [id])
+  fromStage JobOpeningHiringStage? @relation("FromStage", fields: [fromStageId], references: [id])
 
   toStageId String
-  toStage RecruitmentStage @relation("ToStage", fields: [toStageId], references: [id])
+  toStage JobOpeningHiringStage @relation("ToStage", fields: [toStageId], references: [id])
 
   movedById String
   movedBy User @relation(fields: [movedById], references: [id])
