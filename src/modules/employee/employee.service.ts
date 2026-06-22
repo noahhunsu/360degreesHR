@@ -19,7 +19,7 @@ import {
   UnauthorizedError,
 } from "../../shared/exceptions/app.error.js";
 import { sendEmail } from "../../shared/utils/sendEmail.js";
-import { generateEmployeeCode, generateTemporaryPassword } from "./employee.utils.js";
+import { generateEmployeeCode, generateTemporaryPassword, normalizeEmployeeRow } from "./employee.utils.js";
 import { hashpassword } from "../../shared/utils/hash.js";
 import type { User } from "../../shared/types/global.types.js";
 import { Role } from "@prisma/client";
@@ -205,8 +205,9 @@ export class EmployeeService {
   try {
 
     console.log("The row is ", row)
+    const normalizedRow = normalizeEmployeeRow(row)
     const parsed =
-      createEmployeeSchema.safeParse(row);
+      createEmployeeSchema.safeParse(normalizedRow);
 
     if (!parsed.success) {
       failedRows.push({

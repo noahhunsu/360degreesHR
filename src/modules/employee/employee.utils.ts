@@ -17,7 +17,7 @@ export const generateTemporaryPassword = () => {
   return crypto.randomBytes(8).toString("base64").slice(0, 12);
 };
 
-function normalizeEmployeeRow(
+export function normalizeEmployeeRow(
   row: Record<string, unknown>
 ) {
 
@@ -38,5 +38,7 @@ function normalizeEmployeeRow(
       typeof row.email === "string"
         ? row.email.trim().toLowerCase()
         : row.email,
+    phone : 
+      typeof row.phone === "number" ? row.phone.toString().trim() : row.phone
   };
 }
