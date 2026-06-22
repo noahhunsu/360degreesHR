@@ -4,30 +4,51 @@ import * as z from "zod";
 
 export const createEmployeeSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
-
+  
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
-
-  email: z.email("Invalid email address"),
-
-  phone: z.coerce
-    .string()
+  
+  email: z.string().email("Invalid email address"),
+  
+  phone: z.string()
     .regex(/^\+?[0-9]+$/, "Invalid phone number")
     .optional(),
-
-  gender: z.enum(Gender),
-
+  
+  gender: z.preprocess(
+    (val) => {
+      if (typeof val === "string") {
+        const upper = val.trim().toUpperCase();
+        if (upper.startsWith("M")) return "MALE";
+        if (upper.startsWith("F")) return "FEMALE";
+      }
+      return val;
+    },
+    z.enum(Gender)
+  ),
+  
   dateOfBirth: z.date().optional(),
-
+  
   address: z.string().max(255).optional(),
-
+  
   jobTitle: z.string().max(100),
-
-  employmentType: z.enum(EmploymentType).optional(),
-
-  departmentId: z.uuid("Invalid department ID").optional(),
-
-  managerId: z.uuid("Invalid manager ID").optional(),
-
+  
+  employmentType: z.preprocess(
+    (val) => {
+      if (typeof val === "string") {
+        const upper = val.trim().toUpperCase();
+        if (upper.startsWith("F")) return "FULL_TIME";
+        if (upper.startsWith("C")) return "CONTRACT";
+        if (upper.startsWith("P")) return "PART_TIME";
+        if (upper.startsWith("I")) return "INTERN";
+      }
+      return val;
+    },
+    z.enum(EmploymentType).optional()
+  ),
+  
+  departmentId: z.string().uuid("Invalid department ID").optional(),
+  
+  managerId: z.string().uuid("Invalid manager ID").optional(),
+  
   hiredDate: z.date().optional(),
 });
 
