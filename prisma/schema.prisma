@@ -32,13 +32,13 @@ model Company {
 
   employeeOnboardingTask        EmployeeOnboardingTask[]
   companyOnboardingTaskTemplate OnboardingTaskTemplate[]
-  companyJobRequisitions JobRequisition[]
-  companyJobOpenings JobOpening[]
-  jobOpeningCandidates Candidate[]
-  companyRecruitmentStage RecruitmentStage[]
-  companyJobApplications JobApplication[]
-  companyJobOffers JobOffer[]
-  companyRecruitmentActivity RecruitmentActivity[]
+  companyJobRequisitions        JobRequisition[]
+  companyJobOpenings            JobOpening[]
+  jobOpeningCandidates          Candidate[]
+  companyRecruitmentStage       RecruitmentStage[]
+  companyJobApplications        JobApplication[]
+  companyJobOffers              JobOffer[]
+  companyRecruitmentActivity    RecruitmentActivity[]
 
   @@map("companies")
 }
@@ -116,11 +116,12 @@ model User {
   templatesCreated             OnboardingTaskTemplate[] @relation("TaskTemplateCreatedBy")
   assignedUserOnTemplate       OnboardingTaskTemplate[] @relation("TemplateAssignedUser")
 
-  createdRequisitions  JobRequisition[] @relation("RequestedRequisitions")
-  approvedOrRejectedRequisitions  JobRequisition[] @relation("ApprovedOrRejectedRequisitions")
+  createdRequisitions            JobRequisition[] @relation("RequestedRequisitions")
+  approvedOrRejectedRequisitions JobRequisition[] @relation("ApprovedOrRejectedRequisitions")
 
-  applicationStageMoves ApplicationStageHistory[]
-  candidateNotesCreated CandidateNote[]
+  applicationStageMoves    ApplicationStageHistory[]
+  rejectedApplicatins      JobApplication[]
+  candidateNotesCreated    CandidateNote[]
   recruitmentActivityActor RecruitmentActivity[]
 
   hiringTeam JobOpeningHiringTeam[]
@@ -149,9 +150,8 @@ model Department {
   onboardingSubmissions OnboardingSubmission[]
   onboardingInvitations OnboardingInvitation[]
 
-  departmentRequisitions  JobRequisition[] 
-  departmentOpenings JobOpening[] 
-
+  departmentRequisitions JobRequisition[]
+  departmentOpenings     JobOpening[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -243,6 +243,11 @@ model OnboardingInvitation {
   declinedAt          DateTime?
   offerLetterDocument OfferLetterDocument?
   submission          OnboardingSubmission?
+
+  // Note this is important
+
+  // jobApplicationId String?     @db.Uuid
+  // jobApplication   JobApplication? @relation(fields: [jobApplicationId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -441,8 +446,8 @@ model OfferLetterDocument {
 
   createdAt DateTime @default(now())
 
-  companyId    String               @db.Uuid
-  company      Company              @relation(fields: [companyId], references: [id])
+  companyId    String                @db.Uuid
+  company      Company               @relation(fields: [companyId], references: [id])
   invitationId String?               @db.Uuid
   invitation   OnboardingInvitation? @relation(fields: [invitationId], references: [id])
 
@@ -533,23 +538,23 @@ model JobRequisition {
   id String @id @default(uuid())
 
   companyId String
-  company Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id])
 
   requestedById String
-  requestedBy User @relation("RequestedRequisitions", fields: [requestedById], references: [id])
+  requestedBy   User   @relation("RequestedRequisitions", fields: [requestedById], references: [id])
 
   approvedOrRejectedById String?
-  approvedOrRejectedBy User? @relation("ApprovedOrRejectedRequisitions", fields: [approvedOrRejectedById], references: [id])
+  approvedOrRejectedBy   User?   @relation("ApprovedOrRejectedRequisitions", fields: [approvedOrRejectedById], references: [id])
 
   departmentId String
-  department Department @relation(fields: [departmentId], references: [id])
+  department   Department @relation(fields: [departmentId], references: [id])
 
   jobTitle String
 
   numberOfPositions Int
 
-  salaryRangeMin Decimal? @db.Decimal(18,2)
-  salaryRangeMax Decimal? @db.Decimal(18,2)
+  salaryRangeMin Decimal? @db.Decimal(18, 2)
+  salaryRangeMax Decimal? @db.Decimal(18, 2)
 
   reason String
 
@@ -571,13 +576,13 @@ model JobOpening {
   id String @id @default(uuid())
 
   companyId String
-  company Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id])
 
-  requisitionId String @unique
-  requisition JobRequisition @relation(fields: [requisitionId], references: [id])
+  requisitionId String         @unique
+  requisition   JobRequisition @relation(fields: [requisitionId], references: [id])
 
   departmentId String
-  department Department @relation(fields: [departmentId], references: [id])
+  department   Department @relation(fields: [departmentId], references: [id])
 
   title String
 
@@ -587,28 +592,27 @@ model JobOpening {
 
   employmentType EmploymentType?
 
-  salaryMin Decimal? @db.Decimal(18,2)
-  salaryMax Decimal? @db.Decimal(18,2)
+  salaryMin Decimal? @db.Decimal(18, 2)
+  salaryMax Decimal? @db.Decimal(18, 2)
 
   status JobOpeningStatus @default(DRAFT)
 
   publishedAt DateTime?
-  closedAt DateTime?
+  closedAt    DateTime?
 
   applications JobApplication[]
-  offers JobOffer[]
+  offers       JobOffer[]
 
   jobOpeningSettings JobOpeningSettings?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 }
-
 
 model JobOpeningSettings {
   id String @id @default(uuid())
 
-  jobOpeningId String @unique
-  jobOpening JobOpening @relation(fields:[jobOpeningId], references:[id])
+  jobOpeningId String     @unique
+  jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id])
 
   numberOfOpenings Int
 
@@ -627,26 +631,27 @@ model JobOpeningSettings {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-model JobOpeningDocumentRequirement{
-  id String @id @default(uuid())
+
+model JobOpeningDocumentRequirement {
+  id                   String             @id @default(uuid())
   jobOpeningSettingsId String
-  jobOpeningSettings JobOpeningSettings @relation(fields: [jobOpeningSettingsId], references: [id])
+  jobOpeningSettings   JobOpeningSettings @relation(fields: [jobOpeningSettingsId], references: [id])
 
-  name                 JobOpeningDocumentType
-  isRequired           Boolean @default(true)
+  name       JobOpeningDocumentType
+  isRequired Boolean                @default(true)
 
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
 model JobOpeningHiringTeam {
   id String @id @default(uuid())
 
   jobOpeningSettingsId String
-  jobOpeningSettings JobOpeningSettings @relation(fields: [jobOpeningSettingsId], references: [id])
+  jobOpeningSettings   JobOpeningSettings @relation(fields: [jobOpeningSettingsId], references: [id])
 
   userId String
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   role HiringTeamRole
 
@@ -655,11 +660,12 @@ model JobOpeningHiringTeam {
   @@index([jobOpeningSettingsId])
   @@index([userId])
 }
+
 model JobOpeningHiringStage {
   id String @id @default(uuid())
 
   settingsId String
-  settings JobOpeningSettings @relation(fields:[settingsId], references:[id])
+  settings   JobOpeningSettings @relation(fields: [settingsId], references: [id])
 
   name String
 
@@ -667,25 +673,27 @@ model JobOpeningHiringStage {
 
   isRequired Boolean @default(true)
 
-    fromHistory ApplicationStageHistory[] @relation("FromStage")
-  toHistory ApplicationStageHistory[] @relation("ToStage")
+  fromHistory    ApplicationStageHistory[] @relation("FromStage")
+  toHistory      ApplicationStageHistory[] @relation("ToStage")
   jobApplication JobApplication[]
-  createdAt DateTime @default(now())
+  createdAt      DateTime                  @default(now())
+
   @@unique([settingsId, position])
 }
+
 model Candidate {
   id String @id @default(uuid())
 
   companyId String
-  company Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id])
 
   firstName String
-  lastName String
+  lastName  String
 
   email String
   phone String?
 
-  linkedinUrl String?
+  linkedinUrl  String?
   portfolioUrl String?
 
   currentLocation String?
@@ -695,8 +703,8 @@ model Candidate {
   source CandidateSource @default(MANUAL_ENTRY)
 
   applications JobApplication[]
-  notes CandidateNote[]
-  offers JobOffer[]
+  notes        CandidateNote[]
+  offers       JobOffer[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -710,7 +718,7 @@ model JobApplicationDocument {
   // candidateId String
   // candidate Candidate @relation(fields: [candidateId], references: [id])
   jobApplicationId String
-  jobApplication JobApplication @relation(fields: [jobApplicationId], references: [id])
+  jobApplication   JobApplication @relation(fields: [jobApplicationId], references: [id])
 
   documentType CandidateDocumentType
 
@@ -729,7 +737,7 @@ model RecruitmentStage {
   id String @id @default(uuid())
 
   companyId String
-  company Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id])
 
   name String
 
@@ -749,22 +757,24 @@ model JobApplication {
   id String @id @default(uuid())
 
   companyId String
-  company Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id])
 
   candidateId String
-  candidate Candidate @relation(fields: [candidateId], references: [id])
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
 
   jobOpeningId String
-  jobOpening JobOpening @relation(fields: [jobOpeningId], references: [id])
+  jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id])
 
   // currentStageId String?
   // currentStage RecruitmentStage? @relation(fields: [currentStageId], references: [id])
 
   currentStageId String?
-  currentStage JobOpeningHiringStage? @relation(fields: [currentStageId], references: [id])
+  currentStage   JobOpeningHiringStage? @relation(fields: [currentStageId], references: [id])
 
-    documents JobApplicationDocument[]
+  documents JobApplicationDocument[]
+  // this is important
 
+  // invitation OnboardingInvitation?
   status ApplicationStatus @default(ACTIVE)
 
   stageHistory ApplicationStageHistory[]
@@ -773,12 +783,16 @@ model JobApplication {
 
   activities RecruitmentActivity[]
 
+  rejectionReason String?
+  rejectedById    String?
+  rejectedBy      User?   @relation(fields: [rejectedById], references: [id])
+
   offers JobOffer[]
 
-  appliedAt DateTime @default(now())
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  appliedAt  DateTime  @default(now())
+  rejectedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@unique([candidateId, jobOpeningId])
 }
@@ -787,16 +801,16 @@ model ApplicationStageHistory {
   id String @id @default(uuid())
 
   applicationId String
-  application JobApplication @relation(fields: [applicationId], references: [id])
+  application   JobApplication @relation(fields: [applicationId], references: [id])
 
   fromStageId String?
-  fromStage JobOpeningHiringStage? @relation("FromStage", fields: [fromStageId], references: [id])
+  fromStage   JobOpeningHiringStage? @relation("FromStage", fields: [fromStageId], references: [id])
 
   toStageId String
-  toStage JobOpeningHiringStage @relation("ToStage", fields: [toStageId], references: [id])
+  toStage   JobOpeningHiringStage @relation("ToStage", fields: [toStageId], references: [id])
 
   movedById String
-  movedBy User @relation(fields: [movedById], references: [id])
+  movedBy   User   @relation(fields: [movedById], references: [id])
 
   notes String?
 
@@ -807,18 +821,18 @@ model JobOffer {
   id String @id @default(uuid())
 
   companyId String
-  company Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id])
 
   applicationId String
-  application JobApplication @relation(fields: [applicationId], references: [id])
+  application   JobApplication @relation(fields: [applicationId], references: [id])
 
   candidateId String
-  candidate Candidate @relation(fields: [candidateId], references: [id])
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
 
   jobOpeningId String
-  jobOpening JobOpening @relation(fields: [jobOpeningId], references: [id])
+  jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id])
 
-  salary Decimal @db.Decimal(18,2)
+  salary Decimal @db.Decimal(18, 2)
 
   currency String @default("NGN")
 
@@ -828,7 +842,7 @@ model JobOffer {
 
   // offerLetter OfferLetterDocument?
 
-  sentAt DateTime?
+  sentAt     DateTime?
   acceptedAt DateTime?
   declinedAt DateTime?
 
@@ -840,13 +854,13 @@ model RecruitmentActivity {
   id String @id @default(uuid())
 
   companyId String
-  company Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id])
 
   applicationId String
-  application JobApplication @relation(fields: [applicationId], references: [id])
+  application   JobApplication @relation(fields: [applicationId], references: [id])
 
   actorId String
-  actor User @relation(fields: [actorId], references: [id])
+  actor   User   @relation(fields: [actorId], references: [id])
 
   activityType String
 
@@ -859,13 +873,13 @@ model CandidateNote {
   id String @id @default(uuid())
 
   candidateId String
-  candidate Candidate @relation(fields: [candidateId], references: [id])
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
 
   applicationId String?
-  application JobApplication? @relation(fields: [applicationId], references: [id])
+  application   JobApplication? @relation(fields: [applicationId], references: [id])
 
   createdById String
-  createdBy User @relation(fields: [createdById], references: [id])
+  createdBy   User   @relation(fields: [createdById], references: [id])
 
   note String @db.Text
 
@@ -1016,6 +1030,8 @@ enum ApplicationStatus {
   WITHDRAWN
   REJECTED
   HIRED
+  // ONBOARDING
+  // ONBOARDED
 }
 
 enum OfferStatus {
@@ -1033,6 +1049,7 @@ enum CandidateDocumentType {
   CERTIFICATE
   OTHER
 }
+
 enum JobOpeningDocumentType {
   RESUME
   COVER_LETTER

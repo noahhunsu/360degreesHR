@@ -3,16 +3,13 @@ import * as z from "zod";
 // import { EmploymentType, Gender } from "../../../generated/prisma/enums.js";
 
 export const createEmployeeSchema = z.object({
-
-
   firstName: z.string().min(2, "First name must be at least 2 characters"),
-
 
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
 
   email: z.email("Invalid email address"),
 
-  phone: z
+  phone: z.coerce
     .string()
     .regex(/^\+?[0-9]+$/, "Invalid phone number")
     .optional(),
@@ -43,87 +40,44 @@ export const filterQuery = z.object({
 });
 
 export const updateEmployeeSchema = z.object({
+  firstName: z.string().min(2).optional(),
 
-  firstName: z
-    .string()
-    .min(2)
-    .optional(),
+  lastName: z.string().min(2).optional(),
 
-  lastName: z
-    .string()
-    .min(2)
-    .optional(),
+  gender: z.enum(["MALE", "FEMALE"]).optional(),
 
-  gender: z
-    .enum(["MALE", "FEMALE"])
-    .optional(),
+  dateOfBirth: z.iso.datetime().optional(),
 
-  dateOfBirth: z
-    .iso
-    .datetime()
-    .optional(),
+  address: z.string().optional(),
 
-  address: z
-    .string()
-    .optional(),
-
-  jobTitle: z
-    .string()
-    .optional(),
+  jobTitle: z.string().optional(),
 
   employmentType: z
-    .enum([
-      "FULL_TIME",
-      "PART_TIME",
-      "CONTRACT",
-      "INTERN",
-      "REMOTE",
-    ])
+    .enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERN", "REMOTE"])
     .optional(),
 
   employmentStatus: z
-    .enum([
-      "ACTIVE",
-      "INACTIVE",
-      "SUSPENDED",
-      "TERMINATED",
-    ])
+    .enum(["ACTIVE", "INACTIVE", "SUSPENDED", "TERMINATED"])
     .optional(),
 
-  departmentId: z
-    .uuid()
-    .optional(),
+  departmentId: z.uuid().optional(),
 
-  managerId: z
-    .uuid()
-    .optional(),
+  managerId: z.uuid().optional(),
 
   /**
    * User fields
    */
 
-  email: z
-    .email()
-    .optional(),
+  email: z.email().optional(),
 
   phone: z
     .string()
     .regex(/^\+?[0-9]+$/)
     .optional(),
 
-  role: z
-    .enum([
-      "HR_ADMIN",
-      "MANAGER",
-      "EMPLOYEE",
-    ])
-    .optional(),
+  role: z.enum(["HR_ADMIN", "MANAGER", "EMPLOYEE"]).optional(),
 
-  password: z
-    .string()
-    .min(8)
-    .optional(),
-
+  password: z.string().min(8).optional(),
 });
 
 export type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;

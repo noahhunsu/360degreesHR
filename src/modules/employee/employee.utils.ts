@@ -16,3 +16,26 @@ export function generateEmployeeCode(lastCode: string | null) {
 export const generateTemporaryPassword = () => {
   return crypto.randomBytes(8).toString("base64").slice(0, 12);
 };
+
+function normalizeEmployeeRow(
+  row: Record<string, unknown>
+) {
+  return {
+    ...row,
+
+    firstName:
+      typeof row.firstName === "string"
+        ? row.firstName.trim()
+        : row.firstName,
+
+    lastName:
+      typeof row.lastName === "string"
+        ? row.lastName.trim()
+        : row.lastName,
+
+    email:
+      typeof row.email === "string"
+        ? row.email.trim().toLowerCase()
+        : row.email,
+  };
+}

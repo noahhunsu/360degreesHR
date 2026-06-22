@@ -4,7 +4,6 @@
 // update specific employee
 // Delete specific employee
 
-// import { Role } from "../../../generated/prisma/enums.js";
 import { prismaClient } from "../../config/db.js";
 
 import {
@@ -205,6 +204,7 @@ export class EmployeeService {
  for (const [index, row] of rows.entries()) {
   try {
 
+    console.log("The row is ", row)
     const parsed =
       createEmployeeSchema.safeParse(row);
 

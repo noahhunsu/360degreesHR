@@ -26,12 +26,7 @@ import { sendEmail } from "../../shared/utils/sendEmail.js";
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { aws3Client } from "../../config/aws_s3.js";
 import { EmployeeService } from "../employee/employee.service.js";
-import {
-  generateEmployeeCode,
-  generateTemporaryPassword,
-} from "../employee/employee.utils.js";
-import type { CreateEmployeeInput } from "../employee/employee.validation.js";
-import { hashpassword } from "../../shared/utils/hash.js";
+
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export class preOnboardingService {
@@ -47,6 +42,7 @@ export class preOnboardingService {
     })
     return invitations
   }
+  // For the service below , we are going to tie each invitation to an application
   static async createOnboardingInvitationService(
     payload: CreateOnboardingInvitationInput,
     file: Express.Multer.File | undefined,
@@ -57,6 +53,10 @@ export class preOnboardingService {
       throw new UnauthorizedError("You Are Not Authorized To Do This");
     }
 
+    // we take the jobApplication id , check if it exists, 
+    // if it doesnt , we throw . Invitations can only be sent from an application
+    // We set the state of the appliation to ONBOARDING
+    // when hr confirms candidate , we set state to ONBOARDED.
     // offer letter required
     if (!file) {
       throw new BadRequestError("Offer letter attachment is required");

@@ -11,6 +11,7 @@ import z from "zod";
 
 export const createOnboardingInvitationSchema =
   z.object({
+    // jobApplicationId : z.string(),
     email: z.email(),
 
     templateId: z.uuid(),
