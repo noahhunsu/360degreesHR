@@ -98,10 +98,15 @@ export class EmployeeService {
     // we run a transaction . Creating both user and employee
     const generatedPassword = generateTemporaryPassword();
 
-    console.log("Password generated" , generatedPassword);
     const hashedPassword = await hashpassword(generatedPassword)
-    console.log("Password generated" , hashedPassword);
     const result = await prismaClient.$transaction(async (tx) => {
+      if(!payload.isProbation && payload.probationPeriod === undefined){
+        throw new BadRequestError("Probation period must be set")
+      }
+
+      // let probationPeriod = new Date()
+
+      // probationPeriod.setMonth(probationPeriod.getMonth() + payload.probationPeriod!)
       const user = await tx.user.create({
         data: {
           name: `${payload.firstName} ${payload.lastName}`,
@@ -111,6 +116,7 @@ export class EmployeeService {
           companyId: hrUser.companyId,
         },
       });
+
       const employeeData = {
         companyId: hrUser.companyId,
         employeeCode,
@@ -127,6 +133,9 @@ export class EmployeeService {
         }),
         ...(payload.managerId && { managerId: payload.managerId }),
         ...(payload.departmentId && { departmentId: payload.departmentId }),
+        // ...(payload.isProbation && { isProbation: payload.isProbation }),
+        // probationPeriod,
+
         userId: user.id,
       };
       const employee = await tx.employee.create({

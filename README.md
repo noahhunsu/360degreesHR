@@ -37,7 +37,7 @@ npm -v
 ```
 
 ---
-
+ 
 ## 2. PostgreSQL
 
 Install PostgreSQL locally.
@@ -311,6 +311,15 @@ http://localhost:5000
 * Notifications
 
 ---
+
+# Changes made ( change 1 )
+* Added probation to schema
+* create employee validation schema has 2 new fields , isProbation , probationPeriod
+* 
+* 
+* 
+* 
+* 
 
 # Maintainers
 

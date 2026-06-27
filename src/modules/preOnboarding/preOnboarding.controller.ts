@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
 import { preOnboardingService } from "./preOnboarding.service.js";
-import type { User } from "@prisma/client";
 
 export class PreOnboardingController {
   static async getAllInvitationsService(

@@ -50,6 +50,8 @@ export const createEmployeeSchema = z.object({
   managerId: z.string().uuid("Invalid manager ID").optional(),
   
   hiredDate: z.date().optional(),
+   isProbation : z.boolean().optional(),
+  probationPeriod : z.coerce.number().optional()
 });
 
 export const filterQuery = z.object({
@@ -99,6 +101,8 @@ export const updateEmployeeSchema = z.object({
   role: z.enum(["HR_ADMIN", "MANAGER", "EMPLOYEE"]).optional(),
 
   password: z.string().min(8).optional(),
+  isProbation : z.boolean().optional(),
+  probationPeriod : z.coerce.number().optional()
 });
 
 export type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;

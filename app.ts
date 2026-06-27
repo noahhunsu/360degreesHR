@@ -15,9 +15,10 @@ import offerLetterRouter from "./src/modules/offerLetter/offer_letter.routes.js"
 import onboardingTemplateRouter from "./src/modules/onboardingTemplate/onboardingTemplate.routes.js";
 import onboardingRouter from "./src/modules/preOnboarding/preOnboarding.routes.js";
 import postOnboardingRouter from "./src/modules/postOnboarding/postOnboarding.routes.js";
-// import jobRequisitionsRouter from "./src/modules/jobRequisitions/jobRequisitions.routes.js";
-// import jobCreationRouter from "./src/modules/jobCreation/jobCreation.routes.js";
-// import jobApplicationRouter from "./src/modules/jobApplication/jobApplication.routes.js";
+import jobRequisitionsRouter from "./src/modules/jobRequisitions/jobRequisitions.routes.js";
+import jobCreationRouter from "./src/modules/jobCreation/jobCreation.routes.js";
+import jobApplicationRouter from "./src/modules/jobApplication/jobApplication.routes.js";
+// import leaveApplicationRouter from "./src/modules/leaveApplication/leaveApplication.routes.js";
 import documentUploadRouter from "./src/modules/s3FilesUploads/s3.files.routes.js";
 import { swaggerSpec } from "./src/config/swagger.js";
 import { errorMiddleware } from "./src/shared/middleware/error.middleware.js";
@@ -50,9 +51,10 @@ app.use("/api/v1/onboarding-template" , onboardingTemplateRouter )
 app.use("/api/v1/onboarding", onboardingRouter)
 app.use("/api/v1/document-upload" , documentUploadRouter)
 app.use("/api/v1/onboarding-task" , postOnboardingRouter)
-// app.use("/api/v1/requisitions" , jobRequisitionsRouter)
-// app.use("/api/v1/recruitment" , jobCreationRouter)
-// app.use("/api/v1/job-applications" , jobApplicationRouter)
+app.use("/api/v1/requisitions" , jobRequisitionsRouter)
+app.use("/api/v1/recruitment" , jobCreationRouter)
+app.use("/api/v1/job-applications" , jobApplicationRouter)
+// app.use("/api/v1/leave-applications" , leaveApplicationRouter)
 
 
 export default app;

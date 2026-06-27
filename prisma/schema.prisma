@@ -40,6 +40,10 @@ model Company {
   companyJobOffers              JobOffer[]
   companyRecruitmentActivity    RecruitmentActivity[]
 
+  companyLeaveTypes LeaveType[]
+  publicHolidays    PublicHoliday[]
+  leavePolicy     LeavePolicy?
+
   @@map("companies")
 }
 
@@ -54,14 +58,18 @@ model Employee {
   address              String?
   jobTitle             String?
   employmentType       EmploymentType?
+  compensation         Int?
   managerId            String?                  @db.Uuid
   employmentStatus     EmploymentStatus         @default(ACTIVE)
   departmentId         String?                  @db.Uuid
   userId               String                   @unique @db.Uuid
-  hireDate             DateTime?
+  hireDate             DateTime                 @default(now())
   updatedAt            DateTime                 @updatedAt
   createdAt            DateTime                 @default(now())
   deletedAt            DateTime?
+  // some companies would put new employees on probation
+  isProbation          Boolean?                 @default(false)
+  probationPeriod      DateTime?
   employmentHistory    EmploymentHistory[]
   headedDepartments    Department[]             @relation("DepartmentHead")
   disciplinaryRecords  DisciplinaryRecord[]
@@ -73,6 +81,11 @@ model Employee {
   employeeDocument     EmployeeDocument[]
   onboardingSubmission OnboardingSubmission?
   onboardingTasks      EmployeeOnboardingTask[]
+
+  leaveBalances          EmployeeLeaveBalance[]
+  uploadedLeaveDocuments LeaveRequestDocument[]
+  leaveRequests          LeaveRequest[]         @relation("currentLeaveRequests")
+  relievedRequests       LeaveRequest?          @relation("assignedReliever")
 
   @@unique([companyId, employeeCode])
   @@index([companyId])
@@ -124,7 +137,10 @@ model User {
   candidateNotesCreated    CandidateNote[]
   recruitmentActivityActor RecruitmentActivity[]
 
-  hiringTeam JobOpeningHiringTeam[]
+  hiringTeam           JobOpeningHiringTeam[]
+  approvedLeaveRequest LeaveRequest[]         @relation("acceptance")
+  rejectedLeaveRequest LeaveRequest[]         @relation("rejection")
+  leaveApprovalHistory LeaveApprovalHistory[]
 
   @@index([companyId])
   @@map("users")
@@ -900,6 +916,220 @@ model Notification {
   createdAt DateTime @default(now())
 }
 
+// LEAVE MODULE 
+
+model LeaveType {
+  id String @id @default(uuid())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  name String
+
+  description String?
+
+  daysPerYear Int
+
+  isPaid Boolean @default(true)
+
+  requiresApproval Boolean @default(true)
+
+  approvalFrom ApprovalFrom?
+
+  requiresDocument Boolean @default(false)
+
+  documentType String?
+
+  // Eligibility
+
+  minimumMonthsOfService Int @default(0)
+
+  // Notice
+
+  noticePeriodDays Int @default(0)
+
+  // Carry Forward
+
+  allowCarryForward Boolean @default(false)
+
+  maxCarryForwardDays Int?
+
+  // Half Day
+
+  allowHalfDay Boolean @default(false)
+
+  // Probation
+
+  availableDuringProbation Boolean @default(false)
+
+  // Activation
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  balances      EmployeeLeaveBalance[]
+  leaveRequests LeaveRequest[]
+}
+
+model EmployeeLeaveBalance {
+  id String @id @default(uuid())
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  leaveTypeId String
+  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  allocatedDays Int
+
+  usedDays Int @default(0)
+
+  remainingDays Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([employeeId, leaveTypeId])
+}
+
+model LeaveRequest {
+  id String @id @default(uuid())
+
+  employeeId String
+  employee   Employee @relation("currentLeaveRequests", fields: [employeeId], references: [id])
+
+  leaveTypeId String
+  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  startDate DateTime
+
+  endDate DateTime
+
+  totalDays Int
+
+  reason String?
+
+  status LeaveRequestStatus @default(PENDING)
+
+  approvedById String?
+  approvedBy   User?   @relation("acceptance", fields: [approvedById], references: [id])
+
+  rejectedById String?
+  rejectedBy   User?   @relation("rejection", fields: [rejectedById], references: [id])
+
+  relievedById String?   @unique
+  relievedBy   Employee? @relation("assignedReliever", fields: [relievedById], references: [id])
+
+  approvedAt DateTime?
+
+  rejectedAt DateTime?
+
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  history            LeaveApprovalHistory[]
+  documentsInRequest LeaveRequestDocument[]
+}
+
+model LeaveApprovalHistory {
+  id String @id @default(uuid())
+
+  leaveRequestId String
+  leaveRequest   LeaveRequest @relation(fields: [leaveRequestId], references: [id])
+
+  actedById String?
+  actedBy   User?   @relation(fields: [actedById], references: [id])
+
+  action LeaveActionType
+
+  comment String?
+
+  createdAt DateTime @default(now())
+}
+
+model PublicHoliday {
+  id String @id @default(uuid())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  name String
+
+  date DateTime
+
+  createdAt DateTime @default(now())
+}
+
+model LeavePolicy {
+  id String @id @default(uuid())
+
+  companyId String  @unique
+  company   Company @relation(fields: [companyId], references: [id])
+
+  // Calendar rules
+  excludeWeekends       Boolean @default(true)
+  excludePublicHolidays Boolean @default(true)
+
+  workingDays WeekDay
+
+  // Eligibility
+  minimumMonthsBeforeLeave Int @default(0)
+
+  // Notice requirements
+  minimumNoticeDays Int @default(0)
+
+  // Carry forward
+  allowCarryForward   Boolean @default(false)
+  maxCarryForwardDays Int?
+
+  // Negative balances
+  allowNegativeBalance Boolean @default(false)
+
+  // Leave encashment
+  allowLeaveEncashment Boolean @default(false)
+
+  // Cancellation
+  allowEmployeeCancellation Boolean @default(true)
+  cancellationNoticeDays    Int?
+
+  // Half-day leave
+  allowHalfDayLeave Boolean @default(false)
+
+  // Probation rules
+  allowLeaveDuringProbation Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeaveRequestDocument {
+  id String @id @default(uuid())
+
+  fileName String
+
+  storageKey String
+
+  mimeType String
+
+  uploadedById String   @db.Uuid
+  uploadedBy   Employee @relation(fields: [uploadedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  leaveId String       @db.Uuid
+  leave   LeaveRequest @relation(fields: [leaveId], references: [id])
+
+  // jobOfferId String? @unique
+  // jobOpening JobOffer? @relation(fields: [jobOfferId], references: [id])
+
+  @@index([leaveId])
+  @@map("leave_request_documents")
+}
+
 enum Gender {
   MALE
   FEMALE
@@ -1056,4 +1286,33 @@ enum JobOpeningDocumentType {
   PORTFOLIO
   CERTIFICATE
   OTHER
+}
+
+enum LeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  COMPLETED
+}
+
+enum LeaveActionType {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ApprovalFrom {
+  HR
+  HOD
+}
+enum WeekDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
 }
