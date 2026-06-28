@@ -282,7 +282,7 @@
  *   post:
  *     summary: Generate document view URL for onboarding submission document
  *     tags:
- *       - Pre-Onboarding
+ *       - Pre Onboarding
  *     security:
  *       - bearerAuth: []
  *

@@ -4,9 +4,6 @@ import { JobRequisitionController} from "./jobRequisitions.controller.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { acceptOrRejectRequisitionInputSchema, createJobRequisitionInputSchema, updateJobRequisitionInputSchema } from "./jobRequisitions.validation.js";
 
-
-
-
 const router = Router()
 
 router.post("/" , parseAuthHeaderMiddleware() ,validate(createJobRequisitionInputSchema), JobRequisitionController.createJobRequisitionController)
