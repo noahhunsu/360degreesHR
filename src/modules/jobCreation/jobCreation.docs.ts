@@ -1,10 +1,10 @@
 /**
  * @swagger
- * /onboarding-task/template:
+ * /recruitment/job-openings:
  *   post:
- *     summary: Create onboarding task template
+ *     summary: Create a new job opening
  *     tags:
- *       - Onboarding Task
+ *       - Job Openings
  *     security:
  *       - bearerAuth: []
  *
@@ -15,182 +15,255 @@
  *           schema:
  *             type: object
  *             required:
+ *               - requisitionId
  *               - title
- *               - responsibility
+ *               - description
+ *               - employmentType
+ *               - settings
+ *               - hiringTeam
+ *               - stages
+ *             properties:
+ *               requisitionId:
+ *                 type: string
+ *                 format: uuid
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               employmentType:
+ *                 type: string
+ *               salaryMin:
+ *                 type: number
+ *               salaryMax:
+ *                 type: number
+ *               settings:
+ *                 type: object
+ *                 properties:
+ *                   numberOfOpenings:
+ *                     type: integer
+ *                   openingDate:
+ *                     type: string
+ *                     format: date-time
+ *                   expiryDate:
+ *                     type: string
+ *                     format: date-time
+ *                   evaluationScale:
+ *                     type: integer
+ *               hiringTeam:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       format: uuid
+ *                     role:
+ *                       type: string
+ *                       enum:
+ *                         - HIRING_MANAGER
+ *                         - RECRUITER
+ *                         - INTERVIEWER
+ *               jobOpeningDocuments:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     isRequired:
+ *                       type: boolean
+ *               stages:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     position:
+ *                       type: integer
+ *                     isRequired:
+ *                       type: boolean
+ *
+ *     responses:
+ *       201:
+ *         description: Job opening created successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ */
+
+
+/**
+ * @swagger
+ * /recruitment/job-openings/stats:
+ *   get:
+ *     summary: Get job opening statistics
+ *     tags:
+ *       - Job Openings
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: Job opening statistics fetched successfully
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /recruitment/job-openings:
+ *   get:
+ *     summary: Get all job openings
+ *     tags:
+ *       - Job Openings
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: Job openings fetched successfully
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /recruitment/job-openings/{jobOpeningId}:
+ *   get:
+ *     summary: Get a single job opening
+ *     tags:
+ *       - Job Openings
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: jobOpeningId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
+ *     responses:
+ *       200:
+ *         description: Job opening fetched successfully
+ *       400:
+ *         description: Invalid job opening ID
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Job opening not found
+ */
+
+/**
+ * @swagger
+ * /reruitment/job-openings/{jobOpeningId}:
+ *   patch:
+ *     summary: Update a job opening
+ *     tags:
+ *       - Job Openings
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: jobOpeningId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
  *             properties:
  *               title:
  *                 type: string
- *                 example: Complete Employee Handbook Review
  *               description:
  *                 type: string
- *                 example: Employee must review and acknowledge handbook
- *               responsibility:
+ *               location:
  *                 type: string
- *                 enum:
- *                   - EMPLOYEE
- *                   - MANAGER
- *                   - HR_ADMIN
- *                   - SPECIFIC_USER
- *               assignedUserId:
+ *               employmentType:
  *                 type: string
- *                 format: uuid
- *                 example: d290f1ee-6c54-4b01-90e6-d701748f0851
+ *               salaryMin:
+ *                 type: number
+ *               salaryMax:
+ *                 type: number
+ *               settings:
+ *                 type: object
+ *               hiringTeam:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *               jobOpeningDocuments:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *               stages:
+ *                 type: array
+ *                 items:
+ *                   type: object
  *
  *     responses:
- *       201:
- *         description: Onboarding task template created successfully
+ *       200:
+ *         description: Job opening updated successfully
  *       400:
  *         description: Validation error
  *       401:
  *         description: Unauthorized
+ *       404:
+ *         description: Job opening not found
  */
 
 /**
  * @swagger
- * /onboarding-task/template:
- *   get:
- *     summary: Get onboarding task templates
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     responses:
- *       200:
- *         description: Onboarding task templates fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/template/{templateId}/deactivate:
+ * /recruitment/job-openings/{jobOpeningId}/publish:
  *   patch:
- *     summary: Deactivate onboarding task template
+ *     summary: Publish a job opening
  *     tags:
- *       - Onboarding Task
+ *       - Job Openings
  *     security:
  *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: templateId
- *         required: true
- *         schema:
- *           type: string
- *
- *     responses:
- *       200:
- *         description: Onboarding task template deactivated successfully
- *       400:
- *         description: Invalid template ID
- *       404:
- *         description: Template not found
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/{employeeId}:
- *   post:
- *     summary: Assign onboarding task to employee
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: employeeId
+ *         name: jobOpeningId
  *         required: true
  *         schema:
  *           type: string
  *           format: uuid
  *
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - onboardingTaskTemplateId
- *             properties:
- *               onboardingTaskTemplateId:
- *                 type: string
- *                 format: uuid
- *                 example: 550e8400-e29b-41d4-a716-446655440000
- *
- *     responses:
- *       201:
- *         description: Onboarding task created successfully
- *       400:
- *         description: Validation error
- *       404:
- *         description: Employee or template not found
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/me:
- *   get:
- *     summary: Get current user's onboarding tasks
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
  *     responses:
  *       200:
- *         description: Onboarding tasks fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
+ *         description: Job opening published successfully
+ *       400:
+ *         description: Invalid job opening ID
  *       401:
  *         description: Unauthorized
+ *       404:
+ *         description: Job opening not found
  */
 
 /**
  * @swagger
- * /onboarding-task/task/{taskId}/start:
+ * /recruitment/job-openings/{jobOpeningId}/close:
  *   patch:
- *     summary: Start onboarding task
+ *     summary: Close a job opening
  *     tags:
- *       - Onboarding Task
+ *       - Job Openings
  *     security:
  *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: taskId
+ *         name: jobOpeningId
  *         required: true
  *         schema:
  *           type: string
@@ -198,28 +271,28 @@
  *
  *     responses:
  *       200:
- *         description: Onboarding task started successfully
+ *         description: Job opening closed successfully
  *       400:
- *         description: Invalid task ID
- *       404:
- *         description: Task not found
+ *         description: Invalid job opening ID
  *       401:
  *         description: Unauthorized
+ *       404:
+ *         description: Job opening not found
  */
 
 /**
  * @swagger
- * /onboarding-task/task/{taskId}/complete:
+ * /recruitment/job-openings/{jobOpeningId}/reopen:
  *   patch:
- *     summary: Complete onboarding task
+ *     summary: Reopen a closed job opening
  *     tags:
- *       - Onboarding Task
+ *       - Job Openings
  *     security:
  *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: taskId
+ *         name: jobOpeningId
  *         required: true
  *         schema:
  *           type: string
@@ -227,57 +300,11 @@
  *
  *     responses:
  *       200:
- *         description: Onboarding task completed successfully
+ *         description: Job opening reopened successfully
  *       400:
- *         description: Invalid task ID
- *       404:
- *         description: Task not found
+ *         description: Invalid job opening ID
  *       401:
  *         description: Unauthorized
- */
-
-
-/**
- * @swagger
- * /onboarding-task/task/{employeeId}/incomplete:
- *   get:
- *     summary: Get incomplete onboarding tasks for an employee
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: employeeId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     responses:
- *       200:
- *         description: Incomplete onboarding tasks fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
- *       400:
- *         description: Invalid employee ID
  *       404:
- *         description: Employee not found
- *       401:
- *         description: Unauthorized
+ *         description: Job opening not found
  */
-
-

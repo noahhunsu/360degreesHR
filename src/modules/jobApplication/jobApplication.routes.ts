@@ -13,7 +13,7 @@ const router = Router()
 //   "/upload-url,
 //   validate(),
 //   JobApplicationController.createJobApplicationController);
-router.post("/" , JobApplicationController.createJobApplicationController)
+router.post("/job-openings/:jobOpeningId" , JobApplicationController.createJobApplicationController)
 router.get("/" , parseAuthHeaderMiddleware() ,  JobApplicationController.getAllJobApplicationController)
 router.get("/:applicationId" , parseAuthHeaderMiddleware() ,  JobApplicationController.getSingleJobApplicationController)
 router.get("/:applicationId/document/:documentId" , parseAuthHeaderMiddleware() , JobApplicationController.applicationSubmissionDocumentViewController)

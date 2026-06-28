@@ -1,122 +1,14 @@
 /**
  * @swagger
- * /onboarding-task/template:
+ * /job-applications/job-openings/{jobOpeningId}:
  *   post:
- *     summary: Create onboarding task template
+ *     summary: Submit a job application
  *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - title
- *               - responsibility
- *             properties:
- *               title:
- *                 type: string
- *                 example: Complete Employee Handbook Review
- *               description:
- *                 type: string
- *                 example: Employee must review and acknowledge handbook
- *               responsibility:
- *                 type: string
- *                 enum:
- *                   - EMPLOYEE
- *                   - MANAGER
- *                   - HR_ADMIN
- *                   - SPECIFIC_USER
- *               assignedUserId:
- *                 type: string
- *                 format: uuid
- *                 example: d290f1ee-6c54-4b01-90e6-d701748f0851
- *
- *     responses:
- *       201:
- *         description: Onboarding task template created successfully
- *       400:
- *         description: Validation error
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/template:
- *   get:
- *     summary: Get onboarding task templates
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     responses:
- *       200:
- *         description: Onboarding task templates fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/template/{templateId}/deactivate:
- *   patch:
- *     summary: Deactivate onboarding task template
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
+ *       - Job Applications
  *
  *     parameters:
  *       - in: path
- *         name: templateId
- *         required: true
- *         schema:
- *           type: string
- *
- *     responses:
- *       200:
- *         description: Onboarding task template deactivated successfully
- *       400:
- *         description: Invalid template ID
- *       404:
- *         description: Template not found
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/{employeeId}:
- *   post:
- *     summary: Assign onboarding task to employee
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: employeeId
+ *         name: jobOpeningId
  *         required: true
  *         schema:
  *           type: string
@@ -129,37 +21,236 @@
  *           schema:
  *             type: object
  *             required:
- *               - onboardingTaskTemplateId
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - documents
  *             properties:
- *               onboardingTaskTemplateId:
+ *               firstName:
  *                 type: string
- *                 format: uuid
- *                 example: 550e8400-e29b-41d4-a716-446655440000
+ *               lastName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               phoneNumber:
+ *                 type: string
+ *               documents:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - documentType
+ *                     - fileName
+ *                     - storageKey
+ *                     - mimeType
+ *                   properties:
+ *                     documentType:
+ *                       type: string
+ *                       description: Candidate document type
+ *                     fileName:
+ *                       type: string
+ *                     storageKey:
+ *                       type: string
+ *                     mimeType:
+ *                       type: string
  *
  *     responses:
  *       201:
- *         description: Onboarding task created successfully
+ *         description: Application created successfully
  *       400:
  *         description: Validation error
  *       404:
- *         description: Employee or template not found
+ *         description: Job opening not found
+ */
+
+/**
+ * @swagger
+ * /job-applications:
+ *   get:
+ *     summary: Get all job applications
+ *     tags:
+ *       - Job Applications
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: Job applications fetched successfully
  *       401:
  *         description: Unauthorized
  */
 
 /**
  * @swagger
- * /onboarding-task/task/me:
+ * /job-applications/{applicationId}:
  *   get:
- *     summary: Get current user's onboarding tasks
+ *     summary: Get a single job application
  *     tags:
- *       - Onboarding Task
+ *       - Job Applications
  *     security:
  *       - bearerAuth: []
  *
+ *     parameters:
+ *       - in: path
+ *         name: applicationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *
  *     responses:
  *       200:
- *         description: Onboarding tasks fetched successfully
+ *         description: Job application fetched successfully
+ *       400:
+ *         description: Invalid application ID
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Application not found
+ */
+
+/**
+ * @swagger
+ * /job-applications/upload/upload-url:
+ *   post:
+ *     summary: Generate a presigned upload URL for applicant documents
+ *     tags:
+ *       - Job Applications
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fileName
+ *               - mimeType
+ *               - documentType
+ *             properties:
+ *               fileName:
+ *                 type: string
+ *               mimeType:
+ *                 type: string
+ *               documentType:
+ *                 type: string
+ *
+ *     responses:
+ *       200:
+ *         description: Upload URL generated successfully
+ *       400:
+ *         description: Validation error
+ */
+
+/**
+ * @swagger
+ * /job-applications/{applicationId}/move:
+ *   patch:
+ *     summary: Move a job application to another recruitment stage
+ *     tags:
+ *       - Job Applications
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: applicationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - stageId
+ *             properties:
+ *               stageId:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *
+ *     responses:
+ *       200:
+ *         description: Job application updated successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Application not found
+ */
+
+/**
+ * @swagger
+ * /job-applications/{applicationId}/reject:
+ *   patch:
+ *     summary: Reject a job application
+ *     tags:
+ *       - Job Applications
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: applicationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - reason
+ *             properties:
+ *               reason:
+ *                 type: string
+ *
+ *     responses:
+ *       200:
+ *         description: Job application rejected successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Application not found
+ */
+
+/**
+ * @swagger
+ * /job-applications/{applicationId}/document/{documentId}:
+ *   get:
+ *     summary: View an uploaded application document
+ *     tags:
+ *       - Job Applications
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: applicationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *
+ *       - in: path
+ *         name: documentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *
+ *     responses:
+ *       200:
+ *         description: Document URL generated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -170,114 +261,20 @@
  *                 message:
  *                   type: string
  *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/{taskId}/start:
- *   patch:
- *     summary: Start onboarding task
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: taskId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     responses:
- *       200:
- *         description: Onboarding task started successfully
- *       400:
- *         description: Invalid task ID
- *       404:
- *         description: Task not found
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/{taskId}/complete:
- *   patch:
- *     summary: Complete onboarding task
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: taskId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     responses:
- *       200:
- *         description: Onboarding task completed successfully
- *       400:
- *         description: Invalid task ID
- *       404:
- *         description: Task not found
- *       401:
- *         description: Unauthorized
- */
-
-
-/**
- * @swagger
- * /onboarding-task/task/{employeeId}/incomplete:
- *   get:
- *     summary: Get incomplete onboarding tasks for an employee
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: employeeId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     responses:
- *       200:
- *         description: Incomplete onboarding tasks fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
+ *                   type: object
+ *                   properties:
+ *                     documentViewUrl:
+ *                       type: string
+ *                     fileName:
+ *                       type: string
+ *                     mimeType:
+ *                       type: string
  *
  *       400:
- *         description: Invalid employee ID
- *       404:
- *         description: Employee not found
+ *         description: Invalid application or document ID
  *       401:
  *         description: Unauthorized
+ *       404:
+ *         description: Document not found
  */
-
 

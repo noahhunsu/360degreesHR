@@ -1,10 +1,10 @@
 /**
  * @swagger
- * /onboarding-task/template:
+ * /requisitions/job-requisitions:
  *   post:
- *     summary: Create onboarding task template
+ *     summary: Create a job requisition
  *     tags:
- *       - Onboarding Task
+ *       - Job Requisitions
  *     security:
  *       - bearerAuth: []
  *
@@ -15,108 +15,199 @@
  *           schema:
  *             type: object
  *             required:
- *               - title
- *               - responsibility
+ *               - departmentId
+ *               - jobTitle
+ *               - numberOfPositions
+ *               - salaryRangeMin
+ *               - salaryRangeMax
+ *               - reason
+ *               - priority
  *             properties:
- *               title:
- *                 type: string
- *                 example: Complete Employee Handbook Review
- *               description:
- *                 type: string
- *                 example: Employee must review and acknowledge handbook
- *               responsibility:
- *                 type: string
- *                 enum:
- *                   - EMPLOYEE
- *                   - MANAGER
- *                   - HR_ADMIN
- *                   - SPECIFIC_USER
- *               assignedUserId:
+ *               departmentId:
  *                 type: string
  *                 format: uuid
- *                 example: d290f1ee-6c54-4b01-90e6-d701748f0851
+ *               jobTitle:
+ *                 type: string
+ *               numberOfPositions:
+ *                 type: integer
+ *               salaryRangeMin:
+ *                 type: number
+ *               salaryRangeMax:
+ *                 type: number
+ *               reason:
+ *                 type: string
+ *               priority:
+ *                 type: string
  *
  *     responses:
  *       201:
- *         description: Onboarding task template created successfully
+ *         description: Job requisition created successfully
  *       400:
  *         description: Validation error
  *       401:
  *         description: Unauthorized
+ *       409:
+ *         description: Requisition already exists
  */
 
 /**
  * @swagger
- * /onboarding-task/template:
+ * /requisitions/job-requisitions:
  *   get:
- *     summary: Get onboarding task templates
+ *     summary: Get all job requisitions
  *     tags:
- *       - Onboarding Task
+ *       - Job Requisitions
  *     security:
  *       - bearerAuth: []
  *
  *     responses:
  *       200:
- *         description: Onboarding task templates fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
+ *         description: Job requisitions fetched successfully
  *       401:
  *         description: Unauthorized
  */
 
 /**
  * @swagger
- * /onboarding-task/template/{templateId}/deactivate:
- *   patch:
- *     summary: Deactivate onboarding task template
+ * /requisitions/job-requisitions/stats:
+ *   get:
+ *     summary: Get job requisition statistics
  *     tags:
- *       - Onboarding Task
+ *       - Job Requisitions
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: Job requisition statistics fetched successfully
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /requisitions/job-requisitions/{requisitionId}:
+ *   get:
+ *     summary: Get a single job requisition
+ *     tags:
+ *       - Job Requisitions
  *     security:
  *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: templateId
+ *         name: requisitionId
  *         required: true
  *         schema:
  *           type: string
+ *           format: uuid
  *
  *     responses:
  *       200:
- *         description: Onboarding task template deactivated successfully
+ *         description: Job requisition fetched successfully
  *       400:
- *         description: Invalid template ID
- *       404:
- *         description: Template not found
+ *         description: Invalid requisition ID
  *       401:
  *         description: Unauthorized
+ *       404:
+ *         description: Job requisition not found
  */
 
 /**
  * @swagger
- * /onboarding-task/task/{employeeId}:
- *   post:
- *     summary: Assign onboarding task to employee
+ * /requisitions/job-requisitions/{requisitionId}:
+ *   patch:
+ *     summary: Update a job requisition
  *     tags:
- *       - Onboarding Task
+ *       - Job Requisitions
  *     security:
  *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: employeeId
+ *         name: requisitionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               jobTitle:
+ *                 type: string
+ *               numberOfPositions:
+ *                 type: integer
+ *               salaryRangeMin:
+ *                 type: number
+ *               salaryRangeMax:
+ *                 type: number
+ *               reason:
+ *                 type: string
+ *               priority:
+ *                 type: string
+ *
+ *     responses:
+ *       200:
+ *         description: Job requisition updated successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Job requisition not found
+ *       409:
+ *         description: Only pending requisitions can be updated
+ */
+
+/**
+ * @swagger
+ * /requisitions/job-requisitions/{requisitionId}:
+ *   delete:
+ *     summary: Cancel a job requisition
+ *     tags:
+ *       - Job Requisitions
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: requisitionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
+ *     responses:
+ *       200:
+ *         description: Job requisition cancelled successfully
+ *       400:
+ *         description: Invalid requisition ID
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Job requisition not found
+ *       409:
+ *         description: Only pending requisitions can be cancelled
+ */
+
+/**
+ * @swagger
+ * /requisitions/job-requisitions/{requisitionId}/review:
+ *   patch:
+ *     summary: Approve or reject a job requisition
+ *     tags:
+ *       - Job Requisitions
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: requisitionId
  *         required: true
  *         schema:
  *           type: string
@@ -129,155 +220,23 @@
  *           schema:
  *             type: object
  *             required:
- *               - onboardingTaskTemplateId
+ *               - isRejected
  *             properties:
- *               onboardingTaskTemplateId:
+ *               isRejected:
+ *                 type: boolean
+ *                 example: false
+ *               rejectionReason:
  *                 type: string
- *                 format: uuid
- *                 example: 550e8400-e29b-41d4-a716-446655440000
+ *                 example: Budget constraints
+ *                 description: Required when isRejected is true.
  *
  *     responses:
- *       201:
- *         description: Onboarding task created successfully
+ *       200:
+ *         description: Job requisition reviewed successfully
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: Employee or template not found
- *       401:
- *         description: Unauthorized
+ *         description: Pending job requisition not found
  */
-
-/**
- * @swagger
- * /onboarding-task/task/me:
- *   get:
- *     summary: Get current user's onboarding tasks
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     responses:
- *       200:
- *         description: Onboarding tasks fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/{taskId}/start:
- *   patch:
- *     summary: Start onboarding task
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: taskId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     responses:
- *       200:
- *         description: Onboarding task started successfully
- *       400:
- *         description: Invalid task ID
- *       404:
- *         description: Task not found
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/{taskId}/complete:
- *   patch:
- *     summary: Complete onboarding task
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: taskId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     responses:
- *       200:
- *         description: Onboarding task completed successfully
- *       400:
- *         description: Invalid task ID
- *       404:
- *         description: Task not found
- *       401:
- *         description: Unauthorized
- */
-
-
-/**
- * @swagger
- * /onboarding-task/task/{employeeId}/incomplete:
- *   get:
- *     summary: Get incomplete onboarding tasks for an employee
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: employeeId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     responses:
- *       200:
- *         description: Incomplete onboarding tasks fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
- *       400:
- *         description: Invalid employee ID
- *       404:
- *         description: Employee not found
- *       401:
- *         description: Unauthorized
- */
-
-
