@@ -42,7 +42,7 @@ model Company {
 
   companyLeaveTypes LeaveType[]
   publicHolidays    PublicHoliday[]
-  leavePolicy     LeavePolicy?
+  leavePolicy       LeavePolicy?
 
   @@map("companies")
 }
@@ -427,7 +427,7 @@ model EmployeeDocument {
 }
 
 model OfferLetterTemplate {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
   fileName   String
   storageKey String
@@ -448,7 +448,7 @@ model OfferLetterTemplate {
 }
 
 model OfferLetterDocument {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
   fileName String
 
@@ -551,18 +551,18 @@ model EmployeeOnboardingTask {
 
 // WHere recruitment begins 
 model JobRequisition {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  companyId String
+  companyId String  @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
-  requestedById String
+  requestedById String @db.Uuid
   requestedBy   User   @relation("RequestedRequisitions", fields: [requestedById], references: [id])
 
-  approvedOrRejectedById String?
+  approvedOrRejectedById String? @db.Uuid
   approvedOrRejectedBy   User?   @relation("ApprovedOrRejectedRequisitions", fields: [approvedOrRejectedById], references: [id])
 
-  departmentId String
+  departmentId String     @db.Uuid
   department   Department @relation(fields: [departmentId], references: [id])
 
   jobTitle String
@@ -589,15 +589,15 @@ model JobRequisition {
 }
 
 model JobOpening {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  companyId String
+  companyId String  @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
-  requisitionId String         @unique
+  requisitionId String         @unique @db.Uuid
   requisition   JobRequisition @relation(fields: [requisitionId], references: [id])
 
-  departmentId String
+  departmentId String     @db.Uuid
   department   Department @relation(fields: [departmentId], references: [id])
 
   title String
@@ -625,9 +625,9 @@ model JobOpening {
 }
 
 model JobOpeningSettings {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  jobOpeningId String     @unique
+  jobOpeningId String     @unique @db.Uuid
   jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id])
 
   numberOfOpenings Int
@@ -649,8 +649,8 @@ model JobOpeningSettings {
 }
 
 model JobOpeningDocumentRequirement {
-  id                   String             @id @default(uuid())
-  jobOpeningSettingsId String
+  id                   String             @id @default(uuid()) @db.Uuid
+  jobOpeningSettingsId String             @db.Uuid
   jobOpeningSettings   JobOpeningSettings @relation(fields: [jobOpeningSettingsId], references: [id])
 
   name       JobOpeningDocumentType
@@ -661,12 +661,12 @@ model JobOpeningDocumentRequirement {
 }
 
 model JobOpeningHiringTeam {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  jobOpeningSettingsId String
+  jobOpeningSettingsId String             @db.Uuid
   jobOpeningSettings   JobOpeningSettings @relation(fields: [jobOpeningSettingsId], references: [id])
 
-  userId String
+  userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id])
 
   role HiringTeamRole
@@ -678,9 +678,9 @@ model JobOpeningHiringTeam {
 }
 
 model JobOpeningHiringStage {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  settingsId String
+  settingsId String             @db.Uuid
   settings   JobOpeningSettings @relation(fields: [settingsId], references: [id])
 
   name String
@@ -698,9 +698,9 @@ model JobOpeningHiringStage {
 }
 
 model Candidate {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  companyId String
+  companyId String  @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
   firstName String
@@ -729,11 +729,11 @@ model Candidate {
 }
 
 model JobApplicationDocument {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
   // candidateId String
   // candidate Candidate @relation(fields: [candidateId], references: [id])
-  jobApplicationId String
+  jobApplicationId String         @db.Uuid
   jobApplication   JobApplication @relation(fields: [jobApplicationId], references: [id])
 
   documentType CandidateDocumentType
@@ -750,9 +750,9 @@ model JobApplicationDocument {
 }
 
 model RecruitmentStage {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  companyId String
+  companyId String  @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
   name String
@@ -770,21 +770,21 @@ model RecruitmentStage {
 }
 
 model JobApplication {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  companyId String
+  companyId String  @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
-  candidateId String
+  candidateId String    @db.Uuid
   candidate   Candidate @relation(fields: [candidateId], references: [id])
 
-  jobOpeningId String
+  jobOpeningId String     @db.Uuid
   jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id])
 
   // currentStageId String?
   // currentStage RecruitmentStage? @relation(fields: [currentStageId], references: [id])
 
-  currentStageId String?
+  currentStageId String?                @db.Uuid
   currentStage   JobOpeningHiringStage? @relation(fields: [currentStageId], references: [id])
 
   documents JobApplicationDocument[]
@@ -800,7 +800,7 @@ model JobApplication {
   activities RecruitmentActivity[]
 
   rejectionReason String?
-  rejectedById    String?
+  rejectedById    String? @db.Uuid
   rejectedBy      User?   @relation(fields: [rejectedById], references: [id])
 
   offers JobOffer[]
@@ -814,18 +814,18 @@ model JobApplication {
 }
 
 model ApplicationStageHistory {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  applicationId String
+  applicationId String         @db.Uuid
   application   JobApplication @relation(fields: [applicationId], references: [id])
 
-  fromStageId String?
+  fromStageId String?                @db.Uuid
   fromStage   JobOpeningHiringStage? @relation("FromStage", fields: [fromStageId], references: [id])
 
-  toStageId String
+  toStageId String                @db.Uuid
   toStage   JobOpeningHiringStage @relation("ToStage", fields: [toStageId], references: [id])
 
-  movedById String
+  movedById String @db.Uuid
   movedBy   User   @relation(fields: [movedById], references: [id])
 
   notes String?
@@ -834,18 +834,18 @@ model ApplicationStageHistory {
 }
 
 model JobOffer {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  companyId String
+  companyId String  @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
-  applicationId String
+  applicationId String         @db.Uuid
   application   JobApplication @relation(fields: [applicationId], references: [id])
 
-  candidateId String
+  candidateId String    @db.Uuid
   candidate   Candidate @relation(fields: [candidateId], references: [id])
 
-  jobOpeningId String
+  jobOpeningId String     @db.Uuid
   jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id])
 
   salary Decimal @db.Decimal(18, 2)
@@ -867,15 +867,15 @@ model JobOffer {
 }
 
 model RecruitmentActivity {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  companyId String
+  companyId String  @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
-  applicationId String
+  applicationId String         @db.Uuid
   application   JobApplication @relation(fields: [applicationId], references: [id])
 
-  actorId String
+  actorId String @db.Uuid
   actor   User   @relation(fields: [actorId], references: [id])
 
   activityType String
@@ -886,15 +886,15 @@ model RecruitmentActivity {
 }
 
 model CandidateNote {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  candidateId String
+  candidateId String    @db.Uuid
   candidate   Candidate @relation(fields: [candidateId], references: [id])
 
-  applicationId String?
+  applicationId String?         @db.Uuid
   application   JobApplication? @relation(fields: [applicationId], references: [id])
 
-  createdById String
+  createdById String @db.Uuid
   createdBy   User   @relation(fields: [createdById], references: [id])
 
   note String @db.Text
@@ -903,7 +903,7 @@ model CandidateNote {
 }
 
 model Notification {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
   userId String @db.Uuid
 
@@ -919,9 +919,9 @@ model Notification {
 // LEAVE MODULE 
 
 model LeaveType {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  companyId String
+  companyId String  @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
   name String
@@ -974,12 +974,12 @@ model LeaveType {
 }
 
 model EmployeeLeaveBalance {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  employeeId String
+  employeeId String   @db.Uuid
   employee   Employee @relation(fields: [employeeId], references: [id])
 
-  leaveTypeId String
+  leaveTypeId String    @db.Uuid
   leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
 
   allocatedDays Int
@@ -995,12 +995,12 @@ model EmployeeLeaveBalance {
 }
 
 model LeaveRequest {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  employeeId String
+  employeeId String   @db.Uuid
   employee   Employee @relation("currentLeaveRequests", fields: [employeeId], references: [id])
 
-  leaveTypeId String
+  leaveTypeId String    @db.Uuid
   leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
 
   startDate DateTime
@@ -1013,13 +1013,13 @@ model LeaveRequest {
 
   status LeaveRequestStatus @default(PENDING)
 
-  approvedById String?
+  approvedById String? @db.Uuid
   approvedBy   User?   @relation("acceptance", fields: [approvedById], references: [id])
 
-  rejectedById String?
+  rejectedById String? @db.Uuid
   rejectedBy   User?   @relation("rejection", fields: [rejectedById], references: [id])
 
-  relievedById String?   @unique
+  relievedById String?   @unique @db.Uuid
   relievedBy   Employee? @relation("assignedReliever", fields: [relievedById], references: [id])
 
   approvedAt DateTime?
@@ -1036,12 +1036,12 @@ model LeaveRequest {
 }
 
 model LeaveApprovalHistory {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  leaveRequestId String
+  leaveRequestId String       @db.Uuid
   leaveRequest   LeaveRequest @relation(fields: [leaveRequestId], references: [id])
 
-  actedById String?
+  actedById String? @db.Uuid
   actedBy   User?   @relation(fields: [actedById], references: [id])
 
   action LeaveActionType
@@ -1052,9 +1052,9 @@ model LeaveApprovalHistory {
 }
 
 model PublicHoliday {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  companyId String
+  companyId String  @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
   name String
@@ -1065,9 +1065,9 @@ model PublicHoliday {
 }
 
 model LeavePolicy {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  companyId String  @unique
+  companyId String  @unique @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
   // Calendar rules
@@ -1107,7 +1107,7 @@ model LeavePolicy {
 }
 
 model LeaveRequestDocument {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
   fileName String
 
@@ -1307,6 +1307,7 @@ enum ApprovalFrom {
   HR
   HOD
 }
+
 enum WeekDay {
   MONDAY
   TUESDAY

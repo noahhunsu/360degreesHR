@@ -100,7 +100,7 @@ export class EmployeeService {
 
     const hashedPassword = await hashpassword(generatedPassword)
     const result = await prismaClient.$transaction(async (tx) => {
-      if(!payload.isProbation && payload.probationPeriod === undefined){
+      if(payload.isProbation && payload.probationPeriod === undefined){
         throw new BadRequestError("Probation period must be set")
       }
 
