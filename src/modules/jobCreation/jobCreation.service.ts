@@ -624,7 +624,12 @@ export class JobOpeningCreationService {
       include: {
         jobOpeningSettings: {
           include : {
-            jobOpeningDocuments : true
+            jobOpeningDocuments : {
+              select : {
+                name : true, 
+                isRequired : true
+              }
+            }
           }
         },
       },
