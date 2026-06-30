@@ -84,12 +84,14 @@ export class JobOpeningCreationController {
         });
       }
       const result = await JobOpeningCreationService.updateJobOpeningService(jobOpeningId , req.body , user)
+
       return res.status(200).json({
         success: true,
         message: "Job opening updated successfully",
         data : result
       });
     } catch (error) {
+      console.log("The error is " , error);
       next(error);
     }
   }
