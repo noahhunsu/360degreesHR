@@ -27,6 +27,7 @@ export class JobOpeningCreationService {
     const requisition = await prismaClient.jobRequisition.findFirst({
       where: {
         id: payload.requisitionId,
+
         companyId: hrUser.companyId,
       },
     });

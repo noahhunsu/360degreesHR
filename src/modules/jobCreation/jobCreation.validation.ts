@@ -34,7 +34,6 @@ export const createJobOpeningSchema = z.object({
     .number()
     .nonnegative()
     .optional(),
-    isDraft : z.boolean(),
 
   settings: z.object({
     numberOfOpenings: z
