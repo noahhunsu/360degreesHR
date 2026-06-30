@@ -226,6 +226,9 @@ export class JobOpeningCreationService {
             },
 
             stages: {
+              select : {
+                name : true , 
+              },
               orderBy: {
                 position: "asc",
               },
