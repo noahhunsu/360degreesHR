@@ -39,7 +39,7 @@ export class JobApplicationController {
 
       const result =
         await JobApplicationService.getAllJobApplicationService(user);
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
         message: "Job applications fetched successfully",
         data: result,
@@ -67,7 +67,7 @@ export class JobApplicationController {
         user,
         applicationId,
       );
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
         message: "Job application fetched successfully",
         data: result,

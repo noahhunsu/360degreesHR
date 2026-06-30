@@ -43,6 +43,7 @@ model Company {
   companyLeaveTypes LeaveType[]
   publicHolidays    PublicHoliday[]
   leavePolicy       LeavePolicy?
+  salaryComponents  SalaryComponent[]
 
   @@map("companies")
 }
@@ -86,7 +87,8 @@ model Employee {
   uploadedLeaveDocuments LeaveRequestDocument[]
   leaveRequests          LeaveRequest[]         @relation("currentLeaveRequests")
   relievedRequests       LeaveRequest?          @relation("assignedReliever")
-
+  employeeCompensations  EmployeeCompensation[]
+  
   @@unique([companyId, employeeCode])
   @@index([companyId])
   @@index([managerId])
@@ -1130,6 +1132,49 @@ model LeaveRequestDocument {
   @@map("leave_request_documents")
 }
 
+model SalaryComponent {
+  id String @id @default(uuid()) @db.Uuid
+
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id])
+
+  name String
+
+  description String?
+
+  type SalaryComponentType
+
+  isTaxable Boolean @default(false)
+
+  isActive Boolean @default(true)
+
+  employeeCompensations EmployeeCompensation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, name])
+  @@map("salary_components")
+}
+
+model EmployeeCompensation {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String   @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  componentId String          @db.Uuid
+  component   SalaryComponent @relation(fields: [componentId], references: [id])
+
+  amount Decimal @db.Decimal(18, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([employeeId, componentId])
+  @@map("employee_compensations")
+}
+
 enum Gender {
   MALE
   FEMALE
@@ -1316,4 +1361,9 @@ enum WeekDay {
   FRIDAY
   SATURDAY
   SUNDAY
+}
+
+enum SalaryComponentType {
+  EARNING
+  DEDUCTION
 }
