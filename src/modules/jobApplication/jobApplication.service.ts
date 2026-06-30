@@ -76,6 +76,7 @@ export class JobApplicationService {
       (doc: any) => doc.documentType,
     );
     console.log("uploaded documentTypes", uploadedDocumentTypes);
+    console.log("required documentTypes", requiredDocuments);
 
     const missingDocuments = requiredDocuments.filter(
       (doc) =>
