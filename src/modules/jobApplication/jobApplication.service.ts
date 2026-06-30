@@ -69,27 +69,26 @@ export class JobApplicationService {
     // Check if all the document requirements were supplied by candidate
 
     // validate required documents
-    const requiredDocuments = jobOpening.jobOpeningSettings
-      ?.jobOpeningDocuments as any[];
+    // const requiredDocuments = jobOpening.jobOpeningSettings
+    //   ?.jobOpeningDocuments as any[];
 
-    const uploadedDocumentTypes = payload.documents.map(
-      (doc: any) => doc.documentType,
-    );
-    console.log("uploaded documentTypes", uploadedDocumentTypes);
-    console.log("required documentTypes", requiredDocuments);
+    // const uploadedDocumentTypes = payload.documents.map(
+    //   (doc: any) => doc.documentType,
+    // );
 
-    const missingDocuments = requiredDocuments.filter(
-      (doc) =>
-        doc.isRequired && !uploadedDocumentTypes.includes(doc.documentType),
-    );
 
-    if (missingDocuments.length > 0) {
-      throw new BadRequestError(
-        `Missing required documents: ${missingDocuments
-          .map((doc) => doc.documentType)
-          .join(", ")}`,
-      );
-    }
+    // const missingDocuments = requiredDocuments.filter(
+    //   (doc) =>
+    //     doc.isRequired && !uploadedDocumentTypes.includes(doc.documentType),
+    // );
+
+    // if (missingDocuments.length > 0) {
+    //   throw new BadRequestError(
+    //     `Missing required documents: ${missingDocuments
+    //       .map((doc) => doc.documentType)
+    //       .join(", ")}`,
+    //   );
+    // }
 
     const currentStage = jobOpening.jobOpeningSettings?.stages[0];
 
