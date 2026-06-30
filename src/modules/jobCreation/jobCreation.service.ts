@@ -606,12 +606,7 @@ export class JobOpeningCreationService {
       },
 
       include: {
-        jobOpeningSettings: {
-          include : {
-            jobOpeningDocuments  : true , 
-
-          }
-        },
+        jobOpeningSettings: true,
       },
     });
 
@@ -627,7 +622,11 @@ export class JobOpeningCreationService {
       },
 
       include: {
-        jobOpeningSettings: true,
+        jobOpeningSettings: {
+          include : {
+            jobOpeningDocuments : true
+          }
+        },
       },
     });
 
