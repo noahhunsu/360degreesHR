@@ -17,7 +17,12 @@ import {
 } from "../../shared/exceptions/app.error.js";
 import crypto from "crypto";
 import { sendEmail } from "../../shared/utils/sendEmail.js";
-import type { ForgotPasswordInput, LoginInput, RegisterInput, ResetPasswordInput } from "./auth.validation.js";
+import type {
+  ForgotPasswordInput,
+  LoginInput,
+  RegisterInput,
+  ResetPasswordInput,
+} from "./auth.validation.js";
 import { Role } from "@prisma/client";
 export class AuthService {
   static async registerService(payload: RegisterInput) {
@@ -39,7 +44,7 @@ export class AuthService {
     const existingCompany = await prismaClient.company.findUnique({
       where: { email: normalizedCompanyEmail },
     });
-    // Throw an error if company exists 
+    // Throw an error if company exists
     // You shouldn't have two companies with the same email
 
     if (existingCompany) {
@@ -86,7 +91,7 @@ export class AuthService {
       };
     });
     // This token will be required to be sent as an auth token
-    // The three fields are what we require for basic authentication 
+    // The three fields are what we require for basic authentication
 
     const token = generateAccessToken({
       userId: result.user.id,
@@ -106,12 +111,12 @@ export class AuthService {
     `,
       });
 
-      console.log("reso" , response)
+      console.log("reso", response);
     } catch (error) {
       console.error("Onboarding email failed:", error);
     }
-    // The frontend receives this and uses it the way it needs to 
-    
+    // The frontend receives this and uses it the way it needs to
+
     return {
       token,
       user: {
@@ -147,7 +152,7 @@ export class AuthService {
     if (!existingUser.isActive) {
       throw new UnauthorizedError("Account is inactive");
     }
-    
+
     const isPasswordMatch = await comparePassword(
       password,
       existingUser.password,
@@ -279,7 +284,7 @@ export class AuthService {
 
     const hashedPassword = await hashpassword(payload.password);
 
-    console.log("the hashed password " , hashedPassword)
+    console.log("the hashed password ", hashedPassword);
 
     await prismaClient.user.update({
       where: {
@@ -311,53 +316,49 @@ export class AuthService {
     // Next we compare the two tokens . The one in database and the one that has been hashed
   }
 
-  static async getAllCompaniesService(){
+  static async getAllCompaniesService() {
     const companies = await prismaClient.company.findMany();
     const users = await prismaClient.user.findMany();
 
-    return {
-      companies , users
-    }
-  }
-static async deleteCompanyService(
-  companyId: string,
-) {
 
-  /**
-   * CHECK COMPANY EXISTS
-   */
-  const company =
-    await prismaClient.company.findFirst({
+    return {
+      companies,
+      users,
+    };
+  }
+
+  static async deleteCompanyService(companyId: string) {
+    /**
+     * CHECK COMPANY EXISTS
+     */
+    const company = await prismaClient.company.findFirst({
       where: {
         id: companyId,
       },
     });
 
-  if (!company) {
-    throw new NotFoundError(
-      "Company not found",
-    );
+    if (!company) {
+      throw new NotFoundError("Company not found");
+    }
+
+    /**
+     * DELETE COMPANY
+     *
+     * Cascade automatically deletes:
+     * - users
+     * - employees
+     * - departments
+     * - onboarding records
+     * - etc
+     */
+    await prismaClient.company.delete({
+      where: {
+        id: companyId,
+      },
+    });
+
+    return {
+      message: "Company deleted successfully",
+    };
   }
-
-  /**
-   * DELETE COMPANY
-   *
-   * Cascade automatically deletes:
-   * - users
-   * - employees
-   * - departments
-   * - onboarding records
-   * - etc
-   */
-  await prismaClient.company.delete({
-    where: {
-      id: companyId,
-    },
-  });
-
-  return {
-    message:
-      "Company deleted successfully",
-  };
-}
 }

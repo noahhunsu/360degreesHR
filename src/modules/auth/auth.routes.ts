@@ -12,5 +12,4 @@ router.get("/me" , AuthController.authMeController)
 router.post("/forgot-password" ,  validate(forgotPasswordSchema), AuthController.forgotPasswordController)
 router.post("/reset-password" ,  validate(resetPasswordInputSchema) ,AuthController.resetPasswordController)
 
-
 export default router
