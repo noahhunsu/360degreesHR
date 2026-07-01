@@ -235,12 +235,7 @@ export class JobApplicationService {
           },
         },
 
-        currentStage: {
-          select : {
-            id : true , 
-            name : true 
-          }
-        },
+        currentStage: true,
 
         documents: true,
       },
