@@ -947,7 +947,8 @@ static async updateLeavePolicyService(
             }),
 
             ...(payload.workingDays && {
-                workingDays: payload.workingDays,
+                workingDays: {
+                  set : payload.workingDays},
             }),
 
             ...(payload.minimumMonthsBeforeLeave !== undefined && {

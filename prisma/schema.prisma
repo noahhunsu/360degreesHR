@@ -1076,7 +1076,7 @@ model LeavePolicy {
   excludeWeekends       Boolean @default(true)
   excludePublicHolidays Boolean @default(true)
 
-  workingDays WeekDay
+  workingDays WeekDay[]
 
   // Eligibility
   minimumMonthsBeforeLeave Int @default(0)

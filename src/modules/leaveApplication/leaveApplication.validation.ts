@@ -1,4 +1,4 @@
-import { ApprovalFrom } from "@prisma/client";
+import { ApprovalFrom, WeekDay } from "@prisma/client";
 import z from "zod";
 
 export const createLeaveTypeSchema = z.object({
@@ -119,15 +119,7 @@ export const leavePolicyInputSchema = z.object({
 
   workingDays: z
     .array(
-      z.enum([
-        "MONDAY",
-        "TUESDAY",
-        "WEDNESDAY",
-        "THURSDAY",
-        "FRIDAY",
-        "SATURDAY",
-        "SUNDAY",
-      ]),
+      z.enum(WeekDay),
     )
     .optional(),
 
