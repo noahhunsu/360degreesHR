@@ -1168,10 +1168,13 @@ model EmployeeCompensation {
 
   amount Decimal @db.Decimal(18, 2)
 
+  effectiveFrom DateTime
+  effectiveTo DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([employeeId, componentId])
+  @@index(employeeId)
+  @@index(componentId)
   @@map("employee_compensations")
 }
 

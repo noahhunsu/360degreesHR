@@ -18,7 +18,7 @@ import postOnboardingRouter from "./src/modules/postOnboarding/postOnboarding.ro
 import jobRequisitionsRouter from "./src/modules/jobRequisitions/jobRequisitions.routes.js";
 import jobCreationRouter from "./src/modules/jobCreation/jobCreation.routes.js";
 import jobApplicationRouter from "./src/modules/jobApplication/jobApplication.routes.js";
-// import leaveApplicationRouter from "./src/modules/leaveApplication/leaveApplication.routes.js";
+import leaveApplicationRouter from "./src/modules/leaveApplication/leaveApplication.routes.js";
 import documentUploadRouter from "./src/modules/s3FilesUploads/s3.files.routes.js";
 import { swaggerSpec } from "./src/config/swagger.js";
 import { errorMiddleware } from "./src/shared/middleware/error.middleware.js";
@@ -54,7 +54,7 @@ app.use("/api/v1/onboarding-task" , postOnboardingRouter)
 app.use("/api/v1/requisitions" , jobRequisitionsRouter)
 app.use("/api/v1/recruitment" , jobCreationRouter)
 app.use("/api/v1/job-applications" , jobApplicationRouter)
-// app.use("/api/v1/leave-applications" , leaveApplicationRouter)
+app.use("/api/v1/leave-applications" , leaveApplicationRouter)
 
 
 export default app;
