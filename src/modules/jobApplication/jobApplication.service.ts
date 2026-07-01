@@ -232,6 +232,16 @@ export class JobApplicationService {
         jobOpening: {
           include: {
             department: true,
+            jobOpeningSettings : {
+              include : {
+                stages : {
+                  select : {
+                    id : true , 
+                    name : true
+                  }
+                }
+              }
+            }
           },
         },
 
