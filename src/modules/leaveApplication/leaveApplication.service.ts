@@ -65,9 +65,9 @@ export class LeaveManagementService {
       data: {
         companyId: hrUser.companyId,
         name: payload.name.toLowerCase(),
-        ...(payload.description && { description: payload.description }),
+         description: payload.description ,
         daysPerYear: payload.daysPerYear,
-        ...(payload.isPaid !== undefined && { isPaid: payload.isPaid }),
+         isPaid: payload.isPaid,
         ...(payload.requiresDocument !== undefined && {
           requiresDocument: payload.requiresDocument,
         }),
@@ -136,13 +136,19 @@ export class LeaveManagementService {
       });
     }
 
-    return await prismaClient.leaveType.findFirst({
+    const leave = await prismaClient.leaveType.findFirst({
       where: {
         id: leaveTypeId,
         companyId: user.companyId,
         isActive: true,
       },
     });
+
+    if (!leave) {
+      throw new NotFoundError("Leave with ID not found");
+    }
+
+    return leave;
   }
 
   static async updateLeaveTypeService(
@@ -154,15 +160,43 @@ export class LeaveManagementService {
       throw new UnauthorizedError();
     }
 
+    if (payload.name) {
+      const leaveWithName = await prismaClient.leaveType.findFirst({
+        where: {
+          companyId: user.companyId,
+          name: {
+            equals: payload.name,
+            mode: "insensitive",
+          },
+          id: {
+            not: leaveTypeId,
+          },
+        },
+      });
+      if (leaveWithName) {
+        throw new ConflictError("Leave with name exists");
+      }
+    }
     const leave = await prismaClient.leaveType.findFirst({
       where: {
-        companyId: user.companyId,
         id: leaveTypeId,
+        companyId: user.companyId,
       },
     });
 
     if (!leave) {
       throw new NotFoundError("Leave type not found");
+    }
+      if (payload.requiresDocument && !payload.documentType) {
+      throw new BadRequestError(
+        "Document type is required when requiresDocument is true",
+      );
+    }
+
+    if (payload.requiresApproval && !payload.approvalFrom) {
+      throw new BadRequestError(
+        "Approval source is required when requiresApproval is true",
+      );
     }
     const leaveType = await prismaClient.leaveType.update({
       where: {
@@ -209,6 +243,7 @@ export class LeaveManagementService {
 
   static async createOrUpdateEmployeeLeaveBalanceService(
     user: User,
+    employeeId : string , leaveTypeId : string ,
     payload: CreateOrUpdateEmployeeLeaveBalanceInput,
   ) {
     if (!user || user.role !== "HR_ADMIN") {
@@ -218,7 +253,7 @@ export class LeaveManagementService {
     const employee = await prismaClient.employee.findFirst({
       where: {
         companyId: user.companyId,
-        id: payload.employeeId,
+        id: employeeId,
       },
     });
 
@@ -228,7 +263,7 @@ export class LeaveManagementService {
 
     const leaveType = await prismaClient.leaveType.findFirst({
       where: {
-        id: payload.leaveTypeId,
+        id: leaveTypeId,
         companyId: user.companyId,
       },
     });
@@ -239,8 +274,8 @@ export class LeaveManagementService {
 
     const existingBalance = await prismaClient.employeeLeaveBalance.findFirst({
       where: {
-        employeeId: payload.employeeId,
-        leaveTypeId: payload.leaveTypeId,
+        employeeId: employeeId,
+        leaveTypeId: leaveTypeId,
       },
     });
 
@@ -250,8 +285,8 @@ export class LeaveManagementService {
 
       return prismaClient.employeeLeaveBalance.create({
         data: {
-          employeeId: payload.employeeId,
-          leaveTypeId: payload.leaveTypeId,
+          employeeId: employeeId,
+          leaveTypeId: leaveTypeId,
 
           allocatedDays,
           remainingDays: allocatedDays,
@@ -431,6 +466,7 @@ export class LeaveManagementService {
       payload.startDate,
       payload.endDate,
       leavePolicy?.excludeWeekends ?? true,
+      leavePolicy?.excludePublicHolidays ?? true ,
       publicHolidayDates,
     );
 
@@ -574,92 +610,86 @@ export class LeaveManagementService {
     });
     return transaction;
   }
-static async rejectLeaveRequestService(
-  user: User,
-  leaveRequestId: string,
-  payload: RejectLeaveRequestInput,
-) {
-  if (!user) {
-    throw new UnauthorizedError("You need to be authorized");
-  }
-
-  const leaveRequest = await prismaClient.leaveRequest.findUnique({
-    where: {
-      id: leaveRequestId,
-    },
-    include: {
-      leaveType: true,
-      employee: true,
-    },
-  });
-
-  if (!leaveRequest) {
-    throw new NotFoundError("Leave request not found");
-  }
-
-  if (leaveRequest.employee.companyId !== user.companyId) {
-    throw new UnauthorizedError("Unauthorized");
-  }
-
-  if (leaveRequest.status !== "PENDING") {
-    throw new BadRequestError(
-      "Only pending leave requests can be rejected",
-    );
-  }
-
-  // get the leave type 
-  const leaveType = await prismaClient.leaveType.findFirst({
-    where : {
-      id : leaveRequest.leaveTypeId,
-      companyId : user.companyId , 
-    }
-  })
-   if(!leaveType){
-    throw new NotFoundError("No leave type  found")
-  }
-  const employee = await prismaClient.employee.findFirst({
-    where : {
-      companyId : user.companyId , id : leaveRequest.employeeId
-    }
-  })
-  if(!employee){
-    throw new NotFoundError("No employee found")
-  }
-  
-  const department = await prismaClient.department.findFirst({
-    where : {
-       id : employee.departmentId!,
-      companyId : user.companyId 
-    }
-  })
-  if(!department){
-    throw new NotFoundError("No department found")
-  }
-  const isHR = user.role === "HR_ADMIN";
-
-  const isHOD = leaveType.approvalFrom === "HOD" && user.userId === department.headEmployeeId
-
-  if (
-    leaveRequest.leaveType.approvalFrom === "HR" &&
-    !isHR
+  static async rejectLeaveRequestService(
+    user: User,
+    leaveRequestId: string,
+    payload: RejectLeaveRequestInput,
   ) {
-    throw new UnauthorizedError(
-      "Only HR can reject this leave request",
-    );
-  }
+    if (!user) {
+      throw new UnauthorizedError("You need to be authorized");
+    }
 
-  if (
-    leaveRequest.leaveType.approvalFrom === "HOD" &&
-    !(isHR || isHOD)
-  ) {
-    throw new UnauthorizedError(
-      "Only HR or HOD can reject this leave request",
-    );
-  }
+    const leaveRequest = await prismaClient.leaveRequest.findUnique({
+      where: {
+        id: leaveRequestId,
+      },
+      include: {
+        leaveType: true,
+        employee: true,
+      },
+    });
 
-  return await prismaClient.$transaction(async (tx) => {
-    const updatedRequest =
-      await tx.leaveRequest.update({
+    if (!leaveRequest) {
+      throw new NotFoundError("Leave request not found");
+    }
+
+    if (leaveRequest.employee.companyId !== user.companyId) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+
+    if (leaveRequest.status !== "PENDING") {
+      throw new BadRequestError("Only pending leave requests can be rejected");
+    }
+
+    // get the leave type
+    const leaveType = await prismaClient.leaveType.findFirst({
+      where: {
+        id: leaveRequest.leaveTypeId,
+        companyId: user.companyId,
+      },
+    });
+    if (!leaveType) {
+      throw new NotFoundError("No leave type  found");
+    }
+    const employee = await prismaClient.employee.findFirst({
+      where: {
+        companyId: user.companyId,
+        id: leaveRequest.employeeId,
+      },
+    });
+    if (!employee) {
+      throw new NotFoundError("No employee found");
+    }
+    if(!employee.departmentId){
+      throw new NotFoundError("Department Not Found")
+    }
+    const department = await prismaClient.department.findFirst({
+      where: {
+        id: employee.departmentId,
+        companyId: user.companyId,
+      },
+    });
+    if (!department) {
+      throw new NotFoundError("No department found");
+    }
+    const isHR = user.role === "HR_ADMIN";
+
+    const isHOD =
+      leaveType.approvalFrom === "HOD" &&
+      user.userId === department.headEmployeeId;
+
+    if (leaveRequest.leaveType.approvalFrom === "HR" && !isHR) {
+      throw new UnauthorizedError("Only HR can reject this leave request");
+    }
+
+    if (leaveRequest.leaveType.approvalFrom === "HOD" && !(isHR || isHOD)) {
+      throw new UnauthorizedError(
+        "Only HR or HOD can reject this leave request",
+      );
+    }
+
+    return await prismaClient.$transaction(async (tx) => {
+      const updatedRequest = await tx.leaveRequest.update({
         where: {
           id: leaveRequest.id,
         },
@@ -671,104 +701,88 @@ static async rejectLeaveRequestService(
         },
       });
 
-    await tx.leaveApprovalHistory.create({
-      data: {
-        leaveRequestId: leaveRequest.id,
-        actedById: user.userId,
-        action: "REJECTED",
-        comment: payload.reason,
+      await tx.leaveApprovalHistory.create({
+        data: {
+          leaveRequestId: leaveRequest.id,
+          actedById: user.userId,
+          action: "REJECTED",
+          comment: payload.reason,
+        },
+      });
+
+      return updatedRequest;
+    });
+  }
+
+  static async approveLeaveRequestService(
+    user: User,
+    leaveRequestId: string,
+    payload: ApproveLeaveRequestInput,
+  ) {
+    if (!user) {
+      throw new UnauthorizedError("You need to be authorized");
+    }
+
+    const leaveRequest = await prismaClient.leaveRequest.findUnique({
+      where: {
+        id: leaveRequestId,
+      },
+      include: {
+        leaveType: true,
+        employee: true,
       },
     });
 
-    return updatedRequest;
-  });
-}
-
- static async approveLeaveRequestService(
-  user: User,
-  leaveRequestId: string,
-  payload: ApproveLeaveRequestInput,
-) {
-  if (!user) {
-    throw new UnauthorizedError("You need to be authorized");
-  }
-
-  const leaveRequest = await prismaClient.leaveRequest.findUnique({
-    where: {
-      id: leaveRequestId,
-    },
-    include: {
-      leaveType: true,
-      employee: true,
-    },
-  });
-
-  if (!leaveRequest) {
-    throw new NotFoundError("Leave request not found");
-  }
-
-  if (leaveRequest.employee.companyId !== user.companyId) {
-    throw new UnauthorizedError("Unauthorized");
-  }
-
-  if (leaveRequest.status !== "PENDING") {
-    throw new BadRequestError(
-      "Only pending leave requests can be approved",
-    );
-  }
-
-  // get the leave type 
-  const leaveType = await prismaClient.leaveType.findFirst({
-    where : {
-      id : leaveRequest.leaveTypeId,
-      companyId : user.companyId , 
+    if (!leaveRequest) {
+      throw new NotFoundError("Leave request not found");
     }
-  })
-   if(!leaveType){
-    throw new NotFoundError("No leave type  found")
-  }
-  const employee = await prismaClient.employee.findFirst({
-    where : {
-      companyId : user.companyId , id : leaveRequest.employeeId
+
+    if (leaveRequest.employee.companyId !== user.companyId) {
+      throw new UnauthorizedError("Unauthorized");
     }
-  })
-  if(!employee){
-    throw new NotFoundError("No employee found")
-  }
-  
-  const department = await prismaClient.department.findFirst({
-    where : {
-       id : employee.departmentId!,
-      companyId : user.companyId 
+
+    if (leaveRequest.status !== "PENDING") {
+      throw new BadRequestError("Only pending leave requests can be approved");
     }
-  })
-  if(!department){
-    throw new NotFoundError("No department found")
-  }
 
-  const isHR = user.role === "HR_ADMIN";
+    const leaveType = leaveRequest.leaveType
+    if (!leaveType) {
+      throw new NotFoundError("No leave type  found");
+    }
+    const employee = await prismaClient.employee.findFirst({
+      where: {
+        companyId: user.companyId,
+        id: leaveRequest.employeeId,
+      },
+      include : {
+        department : true
+      }
+    });
+    if (!employee) {
+      throw new NotFoundError("No employee found");
+    }
 
-  const isHOD = leaveType.approvalFrom === "HOD" && user.userId === department.headEmployeeId 
-  if (
-    leaveRequest.leaveType.approvalFrom === "HR" &&
-    !isHR
-  ) {
-    throw new UnauthorizedError(
-      "Only HR can approve this leave request",
-    );
-  }
+    const department = employee.department
+    if (!department) {
+      throw new NotFoundError("No department found");
+    }
 
-  if (
-    leaveRequest.leaveType.approvalFrom === "HOD" &&
-    !(isHR || isHOD)
-  ) {
-    throw new UnauthorizedError(
-      "Only HR or HOD can approve this leave request",
-    );
-  }
+    const isHR = user.role === "HR_ADMIN";
 
-  const balance =
-    await prismaClient.employeeLeaveBalance.findUnique({
+    const isHOD =
+      leaveType.approvalFrom === "HOD" &&
+      user.userId === department.headEmployeeId;
+    if (leaveRequest.leaveType.approvalFrom === "HR" && !isHR) {
+      throw new UnauthorizedError("Only HR can approve this leave request");
+    }
+
+    if (leaveRequest.leaveType.approvalFrom === "HOD" && !(isHR || isHOD)) {
+      throw new UnauthorizedError(
+        "Only HR or HOD can approve this leave request",
+      );
+    }
+
+    const balance = await prismaClient.employeeLeaveBalance.findUnique({
       where: {
         employeeId_leaveTypeId: {
           employeeId: leaveRequest.employeeId,
@@ -777,34 +791,29 @@ static async rejectLeaveRequestService(
       },
     });
 
-  if (!balance) {
-    throw new NotFoundError(
-      "Employee leave balance not found",
-    );
-  }
+    if (!balance) {
+      throw new NotFoundError("Employee leave balance not found");
+    }
 
-  if (balance.remainingDays < leaveRequest.totalDays) {
-    throw new BadRequestError(
-      "Employee no longer has sufficient leave balance",
-    );
-  }
+    if (balance.remainingDays < leaveRequest.totalDays) {
+      throw new BadRequestError(
+        "Employee no longer has sufficient leave balance",
+      );
+    }
 
-  return await prismaClient.$transaction(async (tx) => {
-    await tx.employeeLeaveBalance.update({
-      where: {
-        id: balance.id,
-      },
-      data: {
-        remainingDays:
-          balance.remainingDays - leaveRequest.totalDays,
+    return await prismaClient.$transaction(async (tx) => {
+      await tx.employeeLeaveBalance.update({
+        where: {
+          id: balance.id,
+        },
+        data: {
+          remainingDays: balance.remainingDays - leaveRequest.totalDays,
 
-        usedDays:
-          balance.usedDays + leaveRequest.totalDays,
-      },
-    });
+          usedDays: balance.usedDays + leaveRequest.totalDays,
+        },
+      });
 
-    const updatedRequest =
-      await tx.leaveRequest.update({
+      const updatedRequest = await tx.leaveRequest.update({
         where: {
           id: leaveRequest.id,
         },
@@ -815,356 +824,290 @@ static async rejectLeaveRequestService(
         },
       });
 
-    await tx.leaveApprovalHistory.create({
-      data: {
-        leaveRequestId: leaveRequest.id,
-        actedById: user.userId,
-        action: "APPROVED",
-        comment: payload.comment,
+      await tx.leaveApprovalHistory.create({
+        data: {
+          leaveRequestId: leaveRequest.id,
+          actedById: user.userId,
+          action: "APPROVED",
+          comment: payload.comment,
+        },
+      });
+
+      return updatedRequest;
+    });
+  }
+
+  static async createLeavePolicyService(user: User, payload: LeavePolicyInput) {
+    if (!user || user.role !== "HR_ADMIN") {
+      throw new UnauthorizedError(
+        "You are not authorized to perform this action",
+      );
+    }
+
+    const existingPolicy = await prismaClient.leavePolicy.findUnique({
+      where: {
+        companyId: user.companyId,
       },
     });
 
-    return updatedRequest;
-  });
-}
-
-static async createLeavePolicyService(
-    user: User,
-    payload: LeavePolicyInput,
-) {
-    if (!user || user.role !== "HR_ADMIN") {
-        throw new UnauthorizedError(
-            "You are not authorized to perform this action",
-        );
-    }
-
-    const existingPolicy =
-        await prismaClient.leavePolicy.findUnique({
-            where: {
-                companyId: user.companyId,
-            },
-        });
-
     if (existingPolicy) {
-        throw new ConflictError(
-            "Leave policy already exists for this company.",
-        );
+      throw new ConflictError("Leave policy already exists for this company.");
     }
 
     return await prismaClient.leavePolicy.create({
-        data: {
-  companyId: user.companyId,
+      data: {
+        companyId: user.companyId,
 
-  excludeWeekends:
-    payload.excludeWeekends ?? true,
+        excludeWeekends: payload.excludeWeekends ?? true,
 
-  excludePublicHolidays:
-    payload.excludePublicHolidays ?? true,
+        excludePublicHolidays: payload.excludePublicHolidays ?? true,
 
-  workingDays:
-    payload.workingDays ?? [
-      "MONDAY",
-      "TUESDAY",
-      "WEDNESDAY",
-      "THURSDAY",
-      "FRIDAY",
-    ],
+        workingDays: payload.workingDays ?? [
+          "MONDAY",
+          "TUESDAY",
+          "WEDNESDAY",
+          "THURSDAY",
+          "FRIDAY",
+        ],
 
-  minimumMonthsBeforeLeave:
-    payload.minimumMonthsBeforeLeave ?? 0,
+        minimumMonthsBeforeLeave: payload.minimumMonthsBeforeLeave ?? 0,
 
-  minimumNoticeDays:
-    payload.minimumNoticeDays ?? 0,
+        minimumNoticeDays: payload.minimumNoticeDays ?? 0,
 
-  allowCarryForward:
-    payload.allowCarryForward ?? false,
+        allowCarryForward: payload.allowCarryForward ?? false,
 
-  ...(payload.maxCarryForwardDays !== undefined && {
-    maxCarryForwardDays:
-      payload.maxCarryForwardDays,
-  }),
+        ...(payload.maxCarryForwardDays !== undefined && {
+          maxCarryForwardDays: payload.maxCarryForwardDays,
+        }),
 
-  allowNegativeBalance:
-    payload.allowNegativeBalance ?? false,
+        allowNegativeBalance: payload.allowNegativeBalance ?? false,
 
-  allowLeaveEncashment:
-    payload.allowLeaveEncashment ?? false,
+        allowLeaveEncashment: payload.allowLeaveEncashment ?? false,
 
-  allowEmployeeCancellation:
-    payload.allowEmployeeCancellation ?? true,
+        allowEmployeeCancellation: payload.allowEmployeeCancellation ?? true,
 
-  ...(payload.cancellationNoticeDays !== undefined && {
-    cancellationNoticeDays:
-      payload.cancellationNoticeDays,
-  }),
+        ...(payload.cancellationNoticeDays !== undefined && {
+          cancellationNoticeDays: payload.cancellationNoticeDays,
+        }),
 
-  allowHalfDayLeave:
-    payload.allowHalfDayLeave ?? false,
+        allowHalfDayLeave: payload.allowHalfDayLeave ?? false,
 
-  allowLeaveDuringProbation:
-    payload.allowLeaveDuringProbation ?? false,
-}
+        allowLeaveDuringProbation: payload.allowLeaveDuringProbation ?? false,
+      },
     });
-}
+  }
 
-static async updateLeavePolicyService(
-    user: User,
-    payload: LeavePolicyInput,
-) {
+  static async updateLeavePolicyService(user: User, payload: LeavePolicyInput) {
     if (!user || user.role !== "HR_ADMIN") {
-        throw new UnauthorizedError(
-            "You are not authorized to perform this action",
-        );
+      throw new UnauthorizedError(
+        "You are not authorized to perform this action",
+      );
     }
 
-    const policy =
-        await prismaClient.leavePolicy.findUnique({
-            where: {
-                companyId: user.companyId,
-            },
-        });
+    const policy = await prismaClient.leavePolicy.findUnique({
+      where: {
+        companyId: user.companyId,
+      },
+    });
 
     if (!policy) {
-        throw new NotFoundError(
-            "Leave policy not found.",
-        );
+      throw new NotFoundError("Leave policy not found.");
     }
 
     return await prismaClient.leavePolicy.update({
-        where: {
-            companyId: user.companyId,
-        },
+      where: {
+        companyId: user.companyId,
+      },
 
-        data: {
-            ...(payload.excludeWeekends !== undefined && {
-                excludeWeekends:
-                    payload.excludeWeekends,
-            }),
+      data: {
+        ...(payload.excludeWeekends !== undefined && {
+          excludeWeekends: payload.excludeWeekends,
+        }),
 
-            ...(payload.excludePublicHolidays !== undefined && {
-                excludePublicHolidays:
-                    payload.excludePublicHolidays,
-            }),
+        ...(payload.excludePublicHolidays !== undefined && {
+          excludePublicHolidays: payload.excludePublicHolidays,
+        }),
 
-            ...(payload.workingDays && {
-                workingDays: {
-                  set : payload.workingDays},
-            }),
+        ...(payload.workingDays && {
+          workingDays: {
+            set: payload.workingDays,
+          },
+        }),
 
-            ...(payload.minimumMonthsBeforeLeave !== undefined && {
-                minimumMonthsBeforeLeave:
-                    payload.minimumMonthsBeforeLeave,
-            }),
+        ...(payload.minimumMonthsBeforeLeave !== undefined && {
+          minimumMonthsBeforeLeave: payload.minimumMonthsBeforeLeave,
+        }),
 
-            ...(payload.minimumNoticeDays !== undefined && {
-                minimumNoticeDays:
-                    payload.minimumNoticeDays,
-            }),
+        ...(payload.minimumNoticeDays !== undefined && {
+          minimumNoticeDays: payload.minimumNoticeDays,
+        }),
 
-            ...(payload.allowCarryForward !== undefined && {
-                allowCarryForward:
-                    payload.allowCarryForward,
-            }),
+        ...(payload.allowCarryForward !== undefined && {
+          allowCarryForward: payload.allowCarryForward,
+        }),
 
-            ...(payload.maxCarryForwardDays !== undefined && {
-                maxCarryForwardDays:
-                    payload.maxCarryForwardDays,
-            }),
+        ...(payload.maxCarryForwardDays !== undefined && {
+          maxCarryForwardDays: payload.maxCarryForwardDays,
+        }),
 
-            ...(payload.allowNegativeBalance !== undefined && {
-                allowNegativeBalance:
-                    payload.allowNegativeBalance,
-            }),
+        ...(payload.allowNegativeBalance !== undefined && {
+          allowNegativeBalance: payload.allowNegativeBalance,
+        }),
 
-            ...(payload.allowLeaveEncashment !== undefined && {
-                allowLeaveEncashment:
-                    payload.allowLeaveEncashment,
-            }),
+        ...(payload.allowLeaveEncashment !== undefined && {
+          allowLeaveEncashment: payload.allowLeaveEncashment,
+        }),
 
-            ...(payload.allowEmployeeCancellation !== undefined && {
-                allowEmployeeCancellation:
-                    payload.allowEmployeeCancellation,
-            }),
+        ...(payload.allowEmployeeCancellation !== undefined && {
+          allowEmployeeCancellation: payload.allowEmployeeCancellation,
+        }),
 
-            ...(payload.cancellationNoticeDays !== undefined && {
-                cancellationNoticeDays:
-                    payload.cancellationNoticeDays,
-            }),
+        ...(payload.cancellationNoticeDays !== undefined && {
+          cancellationNoticeDays: payload.cancellationNoticeDays,
+        }),
 
-            ...(payload.allowHalfDayLeave !== undefined && {
-                allowHalfDayLeave:
-                    payload.allowHalfDayLeave,
-            }),
+        ...(payload.allowHalfDayLeave !== undefined && {
+          allowHalfDayLeave: payload.allowHalfDayLeave,
+        }),
 
-            ...(payload.allowLeaveDuringProbation !== undefined && {
-                allowLeaveDuringProbation:
-                    payload.allowLeaveDuringProbation,
-            }),
-        },
+        ...(payload.allowLeaveDuringProbation !== undefined && {
+          allowLeaveDuringProbation: payload.allowLeaveDuringProbation,
+        }),
+      },
     });
-}
+  }
 
-static async getLeavePolicyService(
-    user: User,
-) {
+  static async getLeavePolicyService(user: User) {
     if (!user) {
-        throw new UnauthorizedError(
-            "You need to be authorized",
-        );
+      throw new UnauthorizedError("You need to be authorized");
     }
 
-    const policy =
-        await prismaClient.leavePolicy.findUnique({
-            where: {
-                companyId: user.companyId,
-            },
-        });
+    const policy = await prismaClient.leavePolicy.findUnique({
+      where: {
+        companyId: user.companyId,
+      },
+    });
 
     if (!policy) {
-        throw new NotFoundError(
-            "Leave policy not found.",
-        );
+      throw new NotFoundError("Leave policy not found.");
     }
 
     return policy;
-}
+  }
 
-
-static async createPublicHolidayService(
+  static async createPublicHolidayService(
     user: User,
     payload: CreatePublicHolidayInput,
-) {
+  ) {
     if (!user || user.role !== "HR_ADMIN") {
-        throw new UnauthorizedError(
-            "You are not authorized.",
-        );
+      throw new UnauthorizedError("You are not authorized.");
     }
 
     // Prevent duplicate dates inside the request itself
     const duplicateDates = new Set<string>();
 
     for (const holiday of payload.holidays) {
-        const key = holiday.date
-            .toISOString()
-            .split("T")[0];
+      const key = holiday.date.toISOString().split("T")[0];
 
-        if (duplicateDates.has(key!)) {
-            throw new ConflictError(
-                `Duplicate holiday date detected: ${key}`,
-            );
-        }
+      if (duplicateDates.has(key!)) {
+        throw new ConflictError(`Duplicate holiday date detected: ${key}`);
+      }
 
-        duplicateDates.add(key!);
+      duplicateDates.add(key!);
     }
 
     // Prevent duplicate names inside the request
     const duplicateNames = new Set<string>();
 
     for (const holiday of payload.holidays) {
-        const key = holiday.name
-            .trim()
-            .toLowerCase();
+      const key = holiday.name.trim().toLowerCase();
 
-        if (duplicateNames.has(key)) {
-            throw new ConflictError(
-                `Duplicate holiday name detected: ${holiday.name}`,
-            );
-        }
+      if (duplicateNames.has(key)) {
+        throw new ConflictError(
+          `Duplicate holiday name detected: ${holiday.name}`,
+        );
+      }
 
-        duplicateNames.add(key);
+      duplicateNames.add(key);
     }
 
     // Check against existing holidays
-    const existing =
-        await prismaClient.publicHoliday.findMany({
-            where: {
-                companyId: user.companyId,
-                OR: [
-                    {
-                        name: {
-                            in: payload.holidays.map((h) =>
-                                h.name.trim(),
-                            ),
-                            mode: "insensitive",
-                        },
-                    },
-                    {
-                        date: {
-                            in: payload.holidays.map(
-                                (h ) => h.date,
-                            ),
-                        },
-                    },
-                ],
+    const existing = await prismaClient.publicHoliday.findMany({
+      where: {
+        companyId: user.companyId,
+        OR: [
+          {
+            name: {
+              in: payload.holidays.map((h) => h.name.trim()),
+              mode: "insensitive",
             },
-        });
+          },
+          {
+            date: {
+              in: payload.holidays.map((h) => h.date),
+            },
+          },
+        ],
+      },
+    });
 
     if (existing.length > 0) {
-        throw new ConflictError(
-            "One or more public holidays already exist.",
-        );
+      throw new ConflictError("One or more public holidays already exist.");
     }
 
     await prismaClient.publicHoliday.createMany({
-        data: payload.holidays.map((holiday : any ) => ({
-            companyId: user.companyId,
-            name: holiday.name.trim(),
-            date: holiday.date,
-        })),
+      data: payload.holidays.map((holiday: any) => ({
+        companyId: user.companyId,
+        name: holiday.name.trim(),
+        date: holiday.date,
+      })),
     });
 
     return {
-        message:
-            "Public holidays created successfully.",
-        count: payload.holidays.length,
+      message: "Public holidays created successfully.",
+      count: payload.holidays.length,
     };
-}
-
-static async updatePublicHolidayService(
-  user: User,
-  holidayId: string,
-  payload: UpdatePublicHolidayInput,
-) {
-  if (!user || user.role !== "HR_ADMIN") {
-    throw new UnauthorizedError(
-      "You are not authorized.",
-    );
   }
 
-  const holiday =
-    await prismaClient.publicHoliday.findFirst({
+  static async updatePublicHolidayService(
+    user: User,
+    holidayId: string,
+    payload: UpdatePublicHolidayInput,
+  ) {
+    if (!user || user.role !== "HR_ADMIN") {
+      throw new UnauthorizedError("You are not authorized.");
+    }
+
+    const holiday = await prismaClient.publicHoliday.findFirst({
       where: {
         id: holidayId,
         companyId: user.companyId,
       },
     });
 
-  if (!holiday) {
-    throw new NotFoundError(
-      "Public holiday not found.",
-    );
-  }
+    if (!holiday) {
+      throw new NotFoundError("Public holiday not found.");
+    }
 
-  const orConditions: Prisma.PublicHolidayWhereInput[] = [];
+    const orConditions: Prisma.PublicHolidayWhereInput[] = [];
 
-  if (payload.name) {
-    orConditions.push({
-      name: {
-        equals: payload.name.trim(),
-        // mode: Prisma.QueryMode.insensitive,
-      },
-    });
-  }
+    if (payload.name) {
+      orConditions.push({
+        name: {
+          equals: payload.name.trim(),
+          // mode: Prisma.QueryMode.insensitive,
+        },
+      });
+    }
 
-  if (payload.date) {
-    orConditions.push({
-      date: payload.date,
-    });
-  }
+    if (payload.date) {
+      orConditions.push({
+        date: payload.date,
+      });
+    }
 
-  if (orConditions.length > 0) {
-    const duplicate =
-      await prismaClient.publicHoliday.findFirst({
+    if (orConditions.length > 0) {
+      const duplicate = await prismaClient.publicHoliday.findFirst({
         where: {
           companyId: user.companyId,
           id: {
@@ -1174,15 +1117,14 @@ static async updatePublicHolidayService(
         },
       });
 
-    if (duplicate) {
-      throw new ConflictError(
-        "Another public holiday already exists with this name or date.",
-      );
+      if (duplicate) {
+        throw new ConflictError(
+          "Another public holiday already exists with this name or date.",
+        );
+      }
     }
-  }
 
-  const updatedHoliday =
-    await prismaClient.publicHoliday.update({
+    const updatedHoliday = await prismaClient.publicHoliday.update({
       where: {
         id: holiday.id,
       },
@@ -1197,62 +1139,52 @@ static async updatePublicHolidayService(
       },
     });
 
-  return updatedHoliday;
-}
+    return updatedHoliday;
+  }
 
-static async deletePublicHolidayService(
-    user: User,
-    holidayId: string,
-) {
+  static async deletePublicHolidayService(user: User, holidayId: string) {
     if (!user || user.role !== "HR_ADMIN") {
-        throw new UnauthorizedError(
-            "You are not authorized.",
-        );
+      throw new UnauthorizedError("You are not authorized.");
     }
 
-    const holiday =
-        await prismaClient.publicHoliday.findFirst({
-            where: {
-                id: holidayId,
-                companyId: user.companyId,
-            },
-        });
+    const holiday = await prismaClient.publicHoliday.findFirst({
+      where: {
+        id: holidayId,
+        companyId: user.companyId,
+      },
+    });
 
     if (!holiday) {
-        throw new NotFoundError(
-            "Public holiday not found.",
-        );
+      throw new NotFoundError("Public holiday not found.");
     }
 
     await prismaClient.publicHoliday.delete({
-        where: {
-            id: holiday.id,
-        },
+      where: {
+        id: holiday.id,
+      },
     });
 
     return {
-        message:
-            "Public holiday deleted successfully.",
+      message: "Public holiday deleted successfully.",
     };
-}
+  }
 
   static async generatePresignedUrlApplicationService(
-    user : User,
+    user: User,
     payload: GetPresignedUrlInputForLeaveApplicationInput,
   ) {
-
-    if (!user){
-      throw new BadRequestError("You must be authorized")
+    if (!user) {
+      throw new BadRequestError("You must be authorized");
     }
 
     const employee = await prismaClient.employee.findFirst({
-      where : {
-        companyId : user.companyId, 
-        userId : user.userId
-      }
-    })
-    if(!employee){
-      throw new NotFoundError("Employee not found in company")
+      where: {
+        companyId: user.companyId,
+        userId: user.userId,
+      },
+    });
+    if (!employee) {
+      throw new NotFoundError("Employee not found in company");
     }
     // generate unique storage key
     // const fileExtension = payload.fileName.split(".").pop();
@@ -1294,48 +1226,49 @@ static async deletePublicHolidayService(
     documentId: string,
     user: User,
   ) {
-    if (!user ) {
+    if (!user) {
       throw new UnauthorizedError("You need to be authorized");
     }
     const leaveRequest = await prismaClient.leaveRequest.findUnique({
-      where : {
-        id : leaveRequestId
-      }
-})
-  if(!leaveRequest) {
-    throw new NotFoundError("Leave request not found")
-  }
-const employee = await prismaClient.employee.findFirst({
-    where : {
-      companyId : user.companyId , id : leaveRequest.employeeId
+      where: {
+        id: leaveRequestId,
+      },
+    });
+    if (!leaveRequest) {
+      throw new NotFoundError("Leave request not found");
     }
-  })
-  if(!employee){
-    throw new NotFoundError("No employee found")
-  }
-  
-  const department = await prismaClient.department.findFirst({
-    where : {
-       id : employee.departmentId!,
-      companyId : user.companyId 
+    const employee = await prismaClient.employee.findFirst({
+      where: {
+        companyId: user.companyId,
+        id: leaveRequest.employeeId,
+      },
+    });
+    if (!employee) {
+      throw new NotFoundError("No employee found");
     }
-  })
-  if(!department){
-    throw new NotFoundError("No department found")
-  }
-  const isHr = user.role === "HR_ADMIN"
-  const isHod = user.userId === department.headEmployeeId
-  const leaveOwner = user.userId === employee.userId
 
-  if(!isHr || !isHod ||!leaveOwner){
-    throw new BadRequestError("You are not authorized to view this")
-  }
+    const department = await prismaClient.department.findFirst({
+      where: {
+        id: employee.departmentId!,
+        companyId: user.companyId,
+      },
+    });
+    if (!department) {
+      throw new NotFoundError("No department found");
+    }
+    const isHr = user.role === "HR_ADMIN";
+    const isHod = user.userId === department.headEmployeeId;
+    const leaveOwner = user.userId === employee.userId;
 
-   const applicationDocument =
+    if (!isHr && !isHod && !leaveOwner) {
+      throw new BadRequestError("You are not authorized to view this");
+    }
+
+    const applicationDocument =
       await prismaClient.leaveRequestDocument.findFirst({
         where: {
           id: documentId,
-          leaveId : leaveRequestId
+          leaveId: leaveRequestId,
         },
       });
 
@@ -1353,10 +1286,6 @@ const employee = await prismaClient.employee.findFirst({
       fileName: applicationDocument.fileName,
       mimeType: applicationDocument.mimeType,
     };
-
-    
-
-    
   }
 
   static async getPresignedDownloadUrl(storageKey: string, expiresIn = 900) {
@@ -1374,6 +1303,7 @@ const employee = await prismaClient.employee.findFirst({
     startDate: Date,
     endDate: Date,
     excludeWeekends: boolean,
+    excludePublicHolidays : boolean ,
     holidays: Date[],
   ) {
     let days = 0;
@@ -1385,7 +1315,7 @@ const employee = await prismaClient.employee.findFirst({
 
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-      const isHoliday = holidays.some(
+      const isHoliday = excludePublicHolidays && holidays.some(
         (holiday) => holiday.toDateString() === current.toDateString(),
       );
 

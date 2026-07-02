@@ -68,8 +68,7 @@ export const updateLeaveTypeInputInputSchema = z.object({
 });
 
 export const createOrUpdateEmployeeLeaveBalanceSchema = z.object({
-  employeeId: z.string(),
-  leaveTypeId: z.string(),
+  
   allocatedDays: z.coerce.number().optional(),
   usedDays: z.coerce.number().optional(),
 });
@@ -117,11 +116,7 @@ export const leavePolicyInputSchema = z.object({
 
   excludePublicHolidays: z.boolean().optional(),
 
-  workingDays: z
-    .array(
-      z.enum(WeekDay),
-    )
-    .optional(),
+  workingDays: z.array(z.enum(WeekDay)).optional(),
 
   minimumMonthsBeforeLeave: z.coerce.number().min(0).optional(),
 
@@ -145,11 +140,7 @@ export const leavePolicyInputSchema = z.object({
 });
 
 const publicHolidaySchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2)
-    .max(100),
+  name: z.string().trim().min(2).max(100),
 
   date: z.coerce.date(),
 });
@@ -158,14 +149,8 @@ export const createPublicHolidaySchema = z.object({
   holidays: z.array(publicHolidaySchema).min(1),
 });
 
-
 export const updatePublicHolidaySchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2)
-    .max(100)
-    .optional(),
+  name: z.string().trim().min(2).max(100).optional(),
 
   date: z.coerce.date().optional(),
 });
@@ -175,7 +160,6 @@ export const getPresignedUrlInputForLeaveApplicationSchema = z.object({
   mimeType: z.string(),
   documentType: z.string(),
 });
-
 
 export type CreateLeaveTypeInput = z.infer<typeof createLeaveTypeSchema>;
 export type CreateOrUpdateEmployeeLeaveBalanceInput = z.infer<
@@ -195,7 +179,9 @@ export type ApproveLeaveRequestInput = z.infer<
 >;
 export type LeavePolicyInput = z.infer<typeof leavePolicyInputSchema>;
 export type CreatePublicHolidayInput = z.infer<
-    typeof createPublicHolidaySchema
+  typeof createPublicHolidaySchema
 >;
 
-export type UpdatePublicHolidayInput = z.infer<typeof updatePublicHolidaySchema>;
+export type UpdatePublicHolidayInput = z.infer<
+  typeof updatePublicHolidaySchema
+>;

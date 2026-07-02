@@ -2,7 +2,7 @@ import { Router } from "express";
 import { LeaveManagementController } from "./leaveApplication.controller.js";
 import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
-import { approveLeaveRequestSchema, createLeaveRequestSchema, createLeaveTypeSchema, createOrUpdateEmployeeLeaveBalanceSchema, createPublicHolidaySchema, leavePolicyInputSchema, rejectLeaveRequestSchema, updateLeaveTypeInputInputSchema, updatePublicHolidaySchema } from "./leaveApplication.validation.js";
+import { approveLeaveRequestSchema, createLeaveRequestSchema, createLeaveTypeSchema, createOrUpdateEmployeeLeaveBalanceSchema, createPublicHolidaySchema, getPresignedUrlInputForLeaveApplicationSchema, leavePolicyInputSchema, rejectLeaveRequestSchema, updateLeaveTypeInputInputSchema, updatePublicHolidaySchema } from "./leaveApplication.validation.js";
 
 
 
@@ -14,7 +14,7 @@ router.get("/leave-type"  , parseAuthHeaderMiddleware() , LeaveManagementControl
 router.get("/leave-type/:leaveTypeId" , parseAuthHeaderMiddleware() , LeaveManagementController.getSingleLeaveTypeController)
 router.patch("/leave-type/:leaveTypeId" , parseAuthHeaderMiddleware() , validate(updateLeaveTypeInputInputSchema) , LeaveManagementController.updateLeaveTypeController)
 router.post("/leave-balance/employee/:employeeId/:leaveTypeId" , parseAuthHeaderMiddleware() , validate(createOrUpdateEmployeeLeaveBalanceSchema) , LeaveManagementController.createOrUpdateEmployeeLeaveBalanceController)
-router.post("/leave-request/create", parseAuthHeaderMiddleware(),validate(createLeaveRequestSchema))
+router.post("/leave-request/:leaveTypeId/create", parseAuthHeaderMiddleware(),validate(createLeaveRequestSchema), LeaveManagementController.createLeaveRequestController)
 router.patch("/leave-request/:leaveRequestId/cancel" , parseAuthHeaderMiddleware(), LeaveManagementController.cancelLeaveRequestController)
 router.patch("/leave-request/:leaveRequestId/reject" , parseAuthHeaderMiddleware(), validate(rejectLeaveRequestSchema), LeaveManagementController.rejectLeaveRequestController)
 router.patch("/leave-request/:leaveRequestId/approve" , parseAuthHeaderMiddleware(), validate(approveLeaveRequestSchema), LeaveManagementController.approveLeaveRequestController)
@@ -24,7 +24,7 @@ router.patch("/leave-policy/update" , parseAuthHeaderMiddleware(), validate(leav
 router.post("/create-holiday/create" , parseAuthHeaderMiddleware(), validate(createPublicHolidaySchema), LeaveManagementController.createPublicHolidayController)
 router.patch("/create-holiday/:holidayId/update" , parseAuthHeaderMiddleware(), validate(updatePublicHolidaySchema), LeaveManagementController.updatePublicHolidayController)
 router.delete("/create-holiday/:holidayId" , parseAuthHeaderMiddleware(), LeaveManagementController.deletePublicHolidayController)
-router.post("/upload/upload-url" ,  LeaveManagementController.generatePresignedUrlLeaveApplicationController)
+router.post("/upload/upload-url" , parseAuthHeaderMiddleware(), validate(getPresignedUrlInputForLeaveApplicationSchema), LeaveManagementController.generatePresignedUrlLeaveApplicationController)
 router.get("/:leaveRequestId/document/:documentId" , parseAuthHeaderMiddleware() , LeaveManagementController.leaveApplicationSubmissionDocumentViewController)
 
 export default router

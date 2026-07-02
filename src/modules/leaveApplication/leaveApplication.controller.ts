@@ -124,14 +124,14 @@ export class LeaveManagementController {
       }
 
       const payload = {
-        employeeId,
-        leaveTypeId,
+        
         ...req.body,
       };
       const result =
         await LeaveManagementService.createOrUpdateEmployeeLeaveBalanceService(
           user,
-          payload,
+          employeeId , leaveTypeId,
+          payload
         );
       return res.status(200).json({
         success: true,
@@ -311,13 +311,10 @@ export class LeaveManagementController {
     try {
       const user = (req as any).user;
 
-      const result = await LeaveManagementService.createLeavePolicyService(
-        user,
-        req.body,
-      );
-      return res.status(201).json({
+      const result = await LeaveManagementService.updateLeavePolicyService(user , req.body)
+      return res.status(200).json({
         success: true,
-        message: " Leave Policy created successfully",
+        message: " Leave Policy updated successfully",
         data: result,
       });
     } catch (error) {
@@ -365,7 +362,7 @@ export class LeaveManagementController {
         holidayId,
         req.body,
       );
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
         message: " Public Holiday updated successfully",
         data: result,
@@ -393,7 +390,7 @@ export class LeaveManagementController {
         user,
         holidayId,
       );
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
         message: " Public Holiday deleted successfully",
         data: result,
@@ -412,8 +409,8 @@ export class LeaveManagementController {
       const user = (req as any).user;
       const result =
         await LeaveManagementService.generatePresignedUrlApplicationService(
-          req.body,
           user,
+          req.body
         );
       return res.status(200).json({
         success: true,
