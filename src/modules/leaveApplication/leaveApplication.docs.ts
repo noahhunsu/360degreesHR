@@ -1,10 +1,22 @@
 /**
  * @swagger
- * /onboarding-task/template:
+ * /leave-applications/leave-type:
  *   post:
- *     summary: Create onboarding task template
+ *     summary: Create leave type
+ *     description: |
+ *       Creates a new leave type for the authenticated company.
+ *
+ *       Only users with the HR_ADMIN role can access this endpoint.
+ *
+ *       The endpoint:
+ *       - validates leave type uniqueness within the company
+ *       - validates approval configuration
+ *       - validates document requirements
+ *       - creates the leave type
+ *
  *     tags:
- *       - Onboarding Task
+ *       - Leave Management
+ *
  *     security:
  *       - bearerAuth: []
  *
@@ -13,51 +25,112 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - title
- *               - responsibility
- *             properties:
- *               title:
- *                 type: string
- *                 example: Complete Employee Handbook Review
- *               description:
- *                 type: string
- *                 example: Employee must review and acknowledge handbook
- *               responsibility:
- *                 type: string
- *                 enum:
- *                   - EMPLOYEE
- *                   - MANAGER
- *                   - HR_ADMIN
- *                   - SPECIFIC_USER
- *               assignedUserId:
- *                 type: string
- *                 format: uuid
- *                 example: d290f1ee-6c54-4b01-90e6-d701748f0851
+ *             $ref: '#/components/schemas/CreateLeaveTypeRequest'
+ *
+ *           examples:
+ *             annualLeave:
+ *               summary: Annual Leave
+ *               value:
+ *                 name: "Annual Leave"
+ *                 description: "Paid annual vacation leave."
+ *                 daysPerYear: 21
+ *                 isPaid: true
+ *                 requiresApproval: true
+ *                 approvalFrom: HOD
+ *                 requiresDocument: false
+ *                 minimumMonthsOfService: 6
+ *                 noticePeriodDays: 14
+ *                 allowCarryForward: true
+ *                 maxCarryForwardDays: 5
+ *                 allowHalfDay: true
+ *                 availableDuringProbation: false
  *
  *     responses:
  *       201:
- *         description: Onboarding task template created successfully
+ *         description: Leave type created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LeaveTypeResponse'
+ *
  *       400:
  *         description: Validation error
+ *
+ *       401:
+ *         description: Unauthorized
+ *
+ *       403:
+ *         description: Only HR administrators can create leave types
+ *
+ *       409:
+ *         description: Leave type already exists
+ */
+
+
+/**
+ * @swagger
+ * /leave-applications/leave-type:
+ *   get:
+ *     summary: Get all leave types
+ *     description: |
+ *       Returns all leave types belonging to the authenticated user's company.
+ *
+ *       - HR Admins receive both active and inactive leave types.
+ *       - Employees receive only active leave types.
+ *
+ *     tags:
+ *       - Leave Management
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: Leave types fetched successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Leave Types Fetched successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/LeaveTypeResponse'
+ *
  *       401:
  *         description: Unauthorized
  */
 
 /**
  * @swagger
- * /onboarding-task/template:
+ * /leave-applications/leave-type/{leaveTypeId}:
  *   get:
- *     summary: Get onboarding task templates
+ *     summary: Get single leave type
+ *     description: Returns a single leave type.
+ *
  *     tags:
- *       - Onboarding Task
+ *       - Leave Management
+ *
  *     security:
  *       - bearerAuth: []
  *
+ *     parameters:
+ *       - in: path
+ *         name: leaveTypeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
  *     responses:
  *       200:
- *         description: Onboarding task templates fetched successfully
+ *         description: Leave type fetched successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -68,55 +141,31 @@
  *                 message:
  *                   type: string
  *                 data:
- *                   type: array
- *                   items:
- *                     type: object
+ *                   $ref: '#/components/schemas/LeaveTypeResponse'
  *
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/template/{templateId}/deactivate:
- *   patch:
- *     summary: Deactivate onboarding task template
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: templateId
- *         required: true
- *         schema:
- *           type: string
- *
- *     responses:
- *       200:
- *         description: Onboarding task template deactivated successfully
- *       400:
- *         description: Invalid template ID
  *       404:
- *         description: Template not found
- *       401:
- *         description: Unauthorized
+ *         description: Leave type not found
  */
 
 /**
  * @swagger
- * /onboarding-task/task/{employeeId}:
- *   post:
- *     summary: Assign onboarding task to employee
+ * /leave-applications/leave-type/{leaveTypeId}:
+ *   patch:
+ *     summary: Update leave type
+ *     description: |
+ *       Updates an existing leave type.
+ *
+ *       Only HR Admins can update leave types.
+ *
  *     tags:
- *       - Onboarding Task
+ *       - Leave Management
+ *
  *     security:
  *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: employeeId
+ *         name: leaveTypeId
  *         required: true
  *         schema:
  *           type: string
@@ -127,157 +176,32 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - onboardingTaskTemplateId
- *             properties:
- *               onboardingTaskTemplateId:
- *                 type: string
- *                 format: uuid
- *                 example: 550e8400-e29b-41d4-a716-446655440000
+ *             $ref: '#/components/schemas/UpdateLeaveTypeRequest'
  *
  *     responses:
- *       201:
- *         description: Onboarding task created successfully
+ *       200:
+ *         description: Leave type updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/LeaveTypeResponse'
+ *
  *       400:
  *         description: Validation error
+ *
+ *       401:
+ *         description: Unauthorized
+ *
  *       404:
- *         description: Employee or template not found
- *       401:
- *         description: Unauthorized
+ *         description: Leave type not found
+ *
+ *       409:
+ *         description: Leave type with the same name already exists
  */
-
-/**
- * @swagger
- * /onboarding-task/task/me:
- *   get:
- *     summary: Get current user's onboarding tasks
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     responses:
- *       200:
- *         description: Onboarding tasks fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/{taskId}/start:
- *   patch:
- *     summary: Start onboarding task
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: taskId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     responses:
- *       200:
- *         description: Onboarding task started successfully
- *       400:
- *         description: Invalid task ID
- *       404:
- *         description: Task not found
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/{taskId}/complete:
- *   patch:
- *     summary: Complete onboarding task
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: taskId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     responses:
- *       200:
- *         description: Onboarding task completed successfully
- *       400:
- *         description: Invalid task ID
- *       404:
- *         description: Task not found
- *       401:
- *         description: Unauthorized
- */
-
-
-/**
- * @swagger
- * /onboarding-task/task/{employeeId}/incomplete:
- *   get:
- *     summary: Get incomplete onboarding tasks for an employee
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: employeeId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     responses:
- *       200:
- *         description: Incomplete onboarding tasks fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
- *       400:
- *         description: Invalid employee ID
- *       404:
- *         description: Employee not found
- *       401:
- *         description: Unauthorized
- */
-
-

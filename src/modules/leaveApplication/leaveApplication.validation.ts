@@ -70,7 +70,6 @@ export const updateLeaveTypeInputInputSchema = z.object({
 export const createOrUpdateEmployeeLeaveBalanceSchema = z.object({
   
   allocatedDays: z.coerce.number().optional(),
-  usedDays: z.coerce.number().optional(),
 });
 
 export const createLeaveRequestSchema = z
