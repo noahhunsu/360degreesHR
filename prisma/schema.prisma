@@ -45,6 +45,8 @@ model Company {
   leavePolicy       LeavePolicy?
   salaryComponents  SalaryComponent[]
 
+  payrollRuns PayrollRun[]
+
   @@map("companies")
 }
 
@@ -89,6 +91,7 @@ model Employee {
   relievedRequests       LeaveRequest?          @relation("assignedReliever")
   employeeCompensations  EmployeeCompensation[]
   
+  payrollItems PayrollItem[]
   @@unique([companyId, employeeCode])
   @@index([companyId])
   @@index([managerId])
@@ -143,6 +146,8 @@ model User {
   approvedLeaveRequest LeaveRequest[]         @relation("acceptance")
   rejectedLeaveRequest LeaveRequest[]         @relation("rejection")
   leaveApprovalHistory LeaveApprovalHistory[]
+
+  generatedPayrollRuns PayrollRun[]
 
   @@index([companyId])
   @@map("users")
@@ -1153,6 +1158,8 @@ model SalaryComponent {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  payrollBreakdowns PayrollBreakdown[]
+
   @@unique([companyId, name])
   @@map("salary_components")
 }
@@ -1178,6 +1185,84 @@ model EmployeeCompensation {
   @@map("employee_compensations")
 }
 
+// Payroll
+
+model PayrollRun {
+  id String @id @default(uuid()) @db.Uuid
+
+  companyId String @db.Uuid
+  company Company @relation(fields: [companyId], references: [id])
+
+  month Int
+  year Int
+
+  status PayrollStatus @default(DRAFT)
+
+  generatedById String @db.Uuid
+  generatedBy User @relation(fields: [generatedById], references: [id])
+
+  generatedAt DateTime @default(now())
+
+  lockedAt DateTime?
+
+  paidAt DateTime?
+
+  notes String?
+
+  payrollItems PayrollItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, month, year])
+  @@map("payroll_runs")
+}
+
+model PayrollItem {
+  id String @id @default(uuid()) @db.Uuid
+
+  payrollRunId String @db.Uuid
+  payrollRun PayrollRun @relation(fields: [payrollRunId], references: [id] ,  onDelete: Cascade)
+
+  employeeId String @db.Uuid
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  grossPay Decimal @db.Decimal(18,2)
+
+  totalEarnings Decimal @db.Decimal(18,2)
+
+  totalDeductions Decimal @db.Decimal(18,2)
+
+  netPay Decimal @db.Decimal(18,2)
+
+  breakdown PayrollBreakdown[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([payrollRunId, employeeId])
+  @@map("payroll_items")
+}
+
+model PayrollBreakdown {
+  id String @id @default(uuid()) @db.Uuid
+
+  payrollItemId String @db.Uuid
+  payrollItem PayrollItem @relation(fields: [payrollItemId], references: [id] , onDelete: Cascade)
+
+  salaryComponentId String? @db.Uuid
+  salaryComponent SalaryComponent? @relation(fields: [salaryComponentId], references: [id])
+
+  name String
+
+  type SalaryComponentType
+
+  amount Decimal @db.Decimal(18,2)
+
+  taxable Boolean
+
+  createdAt DateTime @default(now())
+  @@map("payroll_breakdown")
+}
 enum Gender {
   MALE
   FEMALE
@@ -1369,4 +1454,9 @@ enum WeekDay {
 enum SalaryComponentType {
   EARNING
   DEDUCTION
+}
+enum PayrollStatus {
+  DRAFT
+  LOCKED
+  PAID
 }

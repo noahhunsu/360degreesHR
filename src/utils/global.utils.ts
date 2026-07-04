@@ -3,7 +3,11 @@ import type { User } from "../shared/types/global.types.js"
 
 
 export const assertHR = (user : User) =>  {
-    if(!user || user.role !== "HR_ADMIN"){
+}
+
+export const assertUser = ( user : User) =>{
+    
+    if(!user ){
         throw new UnauthorizedError("You are unauthorized to perform this action")
     }
 }

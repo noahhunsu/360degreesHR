@@ -44,10 +44,23 @@ export class EmployeeService {
     if (existingUser) {
       throw new ConflictError("Email already exists");
     }
+    let department ; 
+    let HOD;
+    if(payload.departmentId){
+      department = await prismaClient.department.findFirst({
+        where : {
+          companyId : hrUser.companyId , 
+          id : payload.departmentId
+        }
+      })
 
+      if(!department){
+        throw new NotFoundError("Department not found")
+      }
+    }
     // Check if manager exists or is a manager
     if (payload.managerId) {
-      const manager = await prismaClient.employee.findFirst({
+      HOD = await prismaClient.employee.findFirst({
         where: {
           id: payload.managerId,
           companyId: hrUser.companyId,
@@ -58,13 +71,13 @@ export class EmployeeService {
         },
       });
 
-      if (!manager) {
+      if (!HOD) {
         throw new NotFoundError("Manager not found");
       }
 
-      if (manager.user.role !== "MANAGER") {
-        throw new ConflictError("Selected employee is not a manager");
-      }
+    }
+    if (HOD?.id !== department?.headEmployeeId) {
+      throw new ConflictError("Selected employee is not the HOD");
     }
 
     // Check if department exists
