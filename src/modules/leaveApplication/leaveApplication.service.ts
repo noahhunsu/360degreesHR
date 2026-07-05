@@ -1007,7 +1007,7 @@ export class LeaveManagementService {
     const duplicateDates = new Set<string>();
 
     for (const holiday of payload.holidays) {
-      const key = holiday.date;
+      const key = holiday.date.toISOString();
 
       if (duplicateDates.has(key!)) {
         throw new ConflictError(`Duplicate holiday date detected: ${key}`);
