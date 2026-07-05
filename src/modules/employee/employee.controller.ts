@@ -203,7 +203,7 @@ export class EmployeeController {
         name: req.query.name?.toString(),
       };
 
-      const employeeData = await EmployeeService.getAllEmployeeService(
+      const employeeData = await EmployeeService.getAllForEmployeeService(
         user,
         query,
       );
