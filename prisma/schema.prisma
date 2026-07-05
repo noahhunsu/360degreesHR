@@ -47,6 +47,8 @@ model Company {
 
   payrollRuns PayrollRun[]
 
+  salaryAdvance SalaryAdvance[]
+
   @@map("companies")
 }
 
@@ -90,8 +92,10 @@ model Employee {
   leaveRequests          LeaveRequest[]         @relation("currentLeaveRequests")
   relievedRequests       LeaveRequest?          @relation("assignedReliever")
   employeeCompensations  EmployeeCompensation[]
-  
-  payrollItems PayrollItem[]
+
+  payrollItems  PayrollItem[]
+  salaryAdvance SalaryAdvance[]
+
   @@unique([companyId, employeeCode])
   @@index([companyId])
   @@index([managerId])
@@ -147,7 +151,9 @@ model User {
   rejectedLeaveRequest LeaveRequest[]         @relation("rejection")
   leaveApprovalHistory LeaveApprovalHistory[]
 
-  generatedPayrollRuns PayrollRun[]
+  generatedPayrollRuns     PayrollRun[]
+  salary_advance_approvals SalaryAdvance[] @relation("salary_advance_approvals")
+  salary_advance_reqs      SalaryAdvance[] @relation("salary_advance_reqs")
 
   @@index([companyId])
   @@map("users")
@@ -1176,9 +1182,9 @@ model EmployeeCompensation {
   amount Decimal @db.Decimal(18, 2)
 
   effectiveFrom DateTime
-  effectiveTo DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  effectiveTo   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index(employeeId)
   @@index(componentId)
@@ -1190,16 +1196,16 @@ model EmployeeCompensation {
 model PayrollRun {
   id String @id @default(uuid()) @db.Uuid
 
-  companyId String @db.Uuid
-  company Company @relation(fields: [companyId], references: [id])
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id])
 
   month Int
-  year Int
+  year  Int
 
   status PayrollStatus @default(DRAFT)
 
   generatedById String @db.Uuid
-  generatedBy User @relation(fields: [generatedById], references: [id])
+  generatedBy   User   @relation(fields: [generatedById], references: [id])
 
   generatedAt DateTime @default(now())
 
@@ -1210,6 +1216,7 @@ model PayrollRun {
   notes String?
 
   payrollItems PayrollItem[]
+  salaryAdvanc SalaryAdvance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1221,19 +1228,19 @@ model PayrollRun {
 model PayrollItem {
   id String @id @default(uuid()) @db.Uuid
 
-  payrollRunId String @db.Uuid
-  payrollRun PayrollRun @relation(fields: [payrollRunId], references: [id] ,  onDelete: Cascade)
+  payrollRunId String     @db.Uuid
+  payrollRun   PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
 
-  employeeId String @db.Uuid
-  employee Employee @relation(fields: [employeeId], references: [id])
+  employeeId String   @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-  grossPay Decimal @db.Decimal(18,2)
+  grossPay Decimal @db.Decimal(18, 2)
 
-  totalEarnings Decimal @db.Decimal(18,2)
+  totalEarnings Decimal @db.Decimal(18, 2)
 
-  totalDeductions Decimal @db.Decimal(18,2)
+  totalDeductions Decimal @db.Decimal(18, 2)
 
-  netPay Decimal @db.Decimal(18,2)
+  netPay Decimal @db.Decimal(18, 2)
 
   breakdown PayrollBreakdown[]
 
@@ -1246,23 +1253,61 @@ model PayrollItem {
 model PayrollBreakdown {
   id String @id @default(uuid()) @db.Uuid
 
-  payrollItemId String @db.Uuid
-  payrollItem PayrollItem @relation(fields: [payrollItemId], references: [id] , onDelete: Cascade)
+  payrollItemId String      @db.Uuid
+  payrollItem   PayrollItem @relation(fields: [payrollItemId], references: [id], onDelete: Cascade)
 
-  salaryComponentId String? @db.Uuid
-  salaryComponent SalaryComponent? @relation(fields: [salaryComponentId], references: [id])
+  salaryComponentId String?          @db.Uuid
+  salaryComponent   SalaryComponent? @relation(fields: [salaryComponentId], references: [id])
 
   name String
 
   type SalaryComponentType
 
-  amount Decimal @db.Decimal(18,2)
+  amount Decimal @db.Decimal(18, 2)
 
   taxable Boolean
 
   createdAt DateTime @default(now())
+
   @@map("payroll_breakdown")
 }
+
+model SalaryAdvance {
+  id String @id @default(uuid()) @db.Uuid
+
+  employeeId String   @db.Uuid
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  requestedAmount Decimal @db.Decimal(18, 2)
+
+  approvedAmount Decimal? @db.Decimal(18, 2)
+  reason         String?
+
+  requestedById String @db.Uuid
+  requestedBy   User   @relation("salary_advance_reqs", fields: [requestedById], references: [id])
+
+  payrollRunId String? @db.Uuid
+
+  payrollRun    PayrollRun? @relation(fields: [payrollRunId], references: [id])
+  requestedDate DateTime    @default(now())
+
+  approvedById String? @db.Uuid
+  approvedBy   User?   @relation("salary_advance_approvals", fields: [approvedById], references: [id])
+
+  status AdvanceStatus @default(PENDING)
+
+  approvedDate  DateTime?
+  reviewComment String?
+  createdAt     DateTime  @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@map("salary_advance")
+}
+
 enum Gender {
   MALE
   FEMALE
@@ -1455,8 +1500,17 @@ enum SalaryComponentType {
   EARNING
   DEDUCTION
 }
+
 enum PayrollStatus {
   DRAFT
   LOCKED
   PAID
+}
+
+enum AdvanceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+  CANCELLED
 }

@@ -59,9 +59,17 @@ const options: swaggerJsdoc.Options = {
               example: "+2348012345678",
             },
 
-            adminName: {
+            firstName: {
               type: "string",
               example: "Arthur",
+            },
+            lastName: {
+              type: "string",
+              example: "Arthur",
+            },
+            gender: {
+              type: "string",
+              example: "MALE",
             },
 
             adminEmail: {

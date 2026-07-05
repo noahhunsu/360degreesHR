@@ -31,10 +31,11 @@ export class AuthService {
       companyEmail,
       companyName,
       adminEmail,
-      adminName,
+      firstName,
       password,
       companyAddress,
       companyPhone,
+      lastName , gender
     } = payload;
     // We take out every whitespace from input
 
@@ -63,6 +64,8 @@ export class AuthService {
     }
     // Next , we hash the password
     const hashedPassword = await hashpassword(password);
+
+
     // Next , we start a transaction
     const result = await prismaClient.$transaction(async (tx) => {
       // We create the company record . We require the email , name , phone(optional ) , address ( optional)
@@ -78,16 +81,28 @@ export class AuthService {
 
       const user = await tx.user.create({
         data: {
-          name: adminName,
+          name: firstName,
           email: normalizedAdminEmail,
           password: hashedPassword,
           role: Role.HR_ADMIN,
           companyId: company.id,
         },
       });
+
+      const employee = await tx.employee.create({
+        data: {
+          companyId : company.id , 
+          userId : user.id , 
+          firstName : firstName, 
+          lastName, 
+          gender, employeeCode : "001"
+
+        }
+      })
       return {
         company,
         user,
+        employee
       };
     });
     // This token will be required to be sent as an auth token

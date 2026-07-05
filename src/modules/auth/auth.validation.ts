@@ -1,3 +1,4 @@
+import { Gender } from "@prisma/client";
 import * as z from "zod";
 
 export const registerSchema = z.object({
@@ -9,9 +10,11 @@ export const registerSchema = z.object({
     .string()
     .regex(/^\+?[0-9]+$/)
     .optional(),
-  adminName: z.string().min(3),
+  firstName: z.string().min(3),
   adminEmail: z.email(),
   password: z.string().min(8),
+  gender : z.enum(Gender),
+  lastName : z.string()
 });
 
 export const loginSchema = z.object({
