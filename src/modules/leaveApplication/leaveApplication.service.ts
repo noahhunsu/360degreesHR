@@ -1182,6 +1182,18 @@ export class LeaveManagementService {
       }
     })
   }
+  static async getSinglePublicHolidaysService(user : User , holidayId : string){
+    if(!user){
+      throw new UnauthorizedError("You need to be authorized")
+    }
+
+    return await prismaClient.publicHoliday.findFirst({
+      where : {
+        id : holidayId,
+        companyId : user.companyId
+      }
+    })
+  }
 
   static async generatePresignedUrlApplicationService(
     user: User,

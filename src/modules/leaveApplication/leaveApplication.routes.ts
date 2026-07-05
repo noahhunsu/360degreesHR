@@ -22,6 +22,7 @@ router.get("/leave-policy" , parseAuthHeaderMiddleware(),  LeaveManagementContro
 router.post("/leave-policy/create" , parseAuthHeaderMiddleware(), validate(leavePolicyInputSchema), LeaveManagementController.createLeavePolicyController)
 router.patch("/leave-policy/update" , parseAuthHeaderMiddleware(), validate(leavePolicyInputSchema), LeaveManagementController.updateLeavePolicyController)
 router.get("/company-holidays" , parseAuthHeaderMiddleware(),  LeaveManagementController.getAllPublicHolidaysController)
+router.get("/company-holidays/:holidayId" , parseAuthHeaderMiddleware(),  LeaveManagementController.getSinglePublicHolidaysController)
 router.post("/create-holiday/create" , parseAuthHeaderMiddleware(), validate(createPublicHolidaySchema), LeaveManagementController.createPublicHolidayController)
 router.patch("/create-holiday/:holidayId/update" , parseAuthHeaderMiddleware(), validate(updatePublicHolidaySchema), LeaveManagementController.updatePublicHolidayController)
 router.delete("/create-holiday/:holidayId" , parseAuthHeaderMiddleware(), LeaveManagementController.deletePublicHolidayController)

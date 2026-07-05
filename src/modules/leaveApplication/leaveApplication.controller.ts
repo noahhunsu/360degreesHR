@@ -362,6 +362,34 @@ export class LeaveManagementController {
       next(error);
     }
   }
+  static async getSinglePublicHolidaysController(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+
+      const holidayId = req.params.holidayId;
+       if (!holidayId || Array.isArray(holidayId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid holiday ID",
+        });
+      }
+
+      const result = await LeaveManagementService.getSinglePublicHolidaysService(
+        user, holidayId
+      );
+      return res.status(201).json({
+        success: true,
+        message: " Public Holiday created successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   static async updatePublicHolidayController(
     req: Request,
     res: Response,
