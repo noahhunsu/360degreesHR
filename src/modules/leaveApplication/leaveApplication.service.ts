@@ -1007,7 +1007,7 @@ export class LeaveManagementService {
     const duplicateDates = new Set<string>();
 
     for (const holiday of payload.holidays) {
-      const key = holiday.date.toISOString().split("T")[0];
+      const key = holiday.date;
 
       if (duplicateDates.has(key!)) {
         throw new ConflictError(`Duplicate holiday date detected: ${key}`);
@@ -1167,6 +1167,18 @@ export class LeaveManagementService {
     return {
       message: "Public holiday deleted successfully.",
     };
+  }
+
+  static async getAllPublicHolidays(user : User){
+    if(!user){
+      throw new UnauthorizedError("You need to be authorized")
+    }
+
+    return await prismaClient.publicHoliday.findMany({
+      where : {
+        companyId : user.companyId
+      }
+    })
   }
 
   static async generatePresignedUrlApplicationService(
