@@ -17,6 +17,7 @@ router.get("/bulk-upload/template", parseAuthHeaderMiddleware(), EmployeeControl
 );
 router.post("/bulk-uploads" , parseAuthHeaderMiddleware(), upload.single("file"), EmployeeController.createBulkEmployeeViaSheetController)
 router.get("/" , parseAuthHeaderMiddleware(), EmployeeController.getAllEmployeesController)
+router.get("/for-employee" , parseAuthHeaderMiddleware(), EmployeeController.getAllForEmployeeController)
 router.get("/:employeeId" , parseAuthHeaderMiddleware(), EmployeeController.getSingleEmployeeController)
 router.put("/:employeeId" , parseAuthHeaderMiddleware(), validate(updateEmployeeSchema) ,EmployeeController.updateEmployeeController)
 router.delete("/:employeeId" , parseAuthHeaderMiddleware(), EmployeeController.deleteEmployeeController)

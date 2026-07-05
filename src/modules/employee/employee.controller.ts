@@ -188,4 +188,33 @@ export class EmployeeController {
       }
     }
 
+      static async getAllForEmployeeController(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+      // normally , we'd get the pagination / filter queries and then pass it to the getAllEmployeeService
+
+      const query = {
+        page: Number(req.query.page) || 1,
+        limit: Number(req.query.limit) || 10,
+        name: req.query.name?.toString(),
+      };
+
+      const employeeData = await EmployeeService.getAllForEmployeeService(
+        user,
+        query,
+      );
+      return res.status(200).json({
+        success: true,
+        message: "Employees gotten successfully",
+        data: employeeData,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
 }
