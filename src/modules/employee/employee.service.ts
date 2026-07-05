@@ -747,4 +747,63 @@ export class EmployeeService {
       message: "Employee deleted successfully",
     };
   }
+
+   static async getAllForEmployeeService(
+    user: User,
+    querySearch: FilterQueryInput,
+  ) {
+    if (!user) {
+      throw new UnauthorizedError("You Are Not Authorized To Do This");
+    }
+
+    const { page = 1, limit = 10, name } = querySearch;
+
+    /**
+     * Base query
+     */
+    const whereClause: any = {
+      companyId: user.companyId,
+      // deletedAt: null,
+    };
+
+    /**
+     * Fetch employees
+     */
+    const employees = await prismaClient.employee.findMany({
+      where: whereClause,
+
+      skip: (page - 1) * limit,
+
+      take: limit,
+
+      orderBy: {
+        createdAt: "desc",
+      },
+      select : {
+        id : true , 
+        firstName : true,
+        lastName : true
+      }
+
+        
+      
+    });
+
+    /**
+     * Total count for pagination
+     */
+    const total = await prismaClient.employee.count({
+      where: whereClause,
+    });
+
+    return {
+      employees,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
 }
