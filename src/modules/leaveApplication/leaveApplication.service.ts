@@ -1007,6 +1007,9 @@ export class LeaveManagementService {
     const duplicateDates = new Set<string>();
 
     for (const holiday of payload.holidays) {
+
+      console.log(typeof holiday.date)
+      console.log(holiday.date)
       const key = holiday.date.toISOString();
 
       if (duplicateDates.has(key!)) {
@@ -1169,7 +1172,7 @@ export class LeaveManagementService {
     };
   }
 
-  static async getAllPublicHolidays(user : User){
+  static async getAllPublicHolidaysService(user : User){
     if(!user){
       throw new UnauthorizedError("You need to be authorized")
     }

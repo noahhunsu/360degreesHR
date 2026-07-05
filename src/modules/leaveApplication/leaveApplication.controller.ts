@@ -342,6 +342,26 @@ export class LeaveManagementController {
       next(error);
     }
   }
+  static async getAllPublicHolidaysController(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+
+      const result = await LeaveManagementService.getAllPublicHolidaysService(
+        user
+      );
+      return res.status(201).json({
+        success: true,
+        message: " Public Holiday created successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   static async updatePublicHolidayController(
     req: Request,
     res: Response,
