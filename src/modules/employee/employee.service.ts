@@ -763,7 +763,7 @@ export class EmployeeService {
      */
     const whereClause: any = {
       companyId: user.companyId,
-      // deletedAt: null,
+      deletedAt: null,
     };
 
     /**
