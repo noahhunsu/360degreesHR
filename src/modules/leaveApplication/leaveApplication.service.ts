@@ -535,6 +535,24 @@ export class LeaveManagementService {
     });
     return transaction;
   }
+ static async getAllLeaveRequestService(user : User){
+  if (!user){
+    throw new UnauthorizedError("You are not authorized ")
+  }
+  
+  if (user.role !== "HR_ADMIN"){
+    
+    throw new UnauthorizedError("You are not authorized ")
+  }
+
+  const leaves = await prismaClient.leaveRequest.findMany({
+    where : {
+      companyId : user.companyId
+    }
+  })
+
+  return leaves
+ }
 
   static async cancelLeaveRequestService(user: User, leaveRequestId: string) {
     if (!user) {

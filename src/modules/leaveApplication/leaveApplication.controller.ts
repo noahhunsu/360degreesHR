@@ -303,6 +303,26 @@ export class LeaveManagementController {
       next(error);
     }
   }
+  static async getAllLeaveController(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+
+      const result = await LeaveManagementService.getAllLeaveRequestService(
+        user
+      );
+      return res.status(201).json({
+        success: true,
+        message: " Leave requests fetched successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   static async updateLeavePolicyController(
     req: Request,
     res: Response,
