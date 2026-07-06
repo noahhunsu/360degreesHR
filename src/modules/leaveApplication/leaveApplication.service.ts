@@ -65,9 +65,9 @@ export class LeaveManagementService {
       data: {
         companyId: hrUser.companyId,
         name: payload.name.toLowerCase(),
-         description: payload.description ,
+        description: payload.description,
         daysPerYear: payload.daysPerYear,
-         isPaid: payload.isPaid,
+        isPaid: payload.isPaid,
         ...(payload.requiresDocument !== undefined && {
           requiresDocument: payload.requiresDocument,
         }),
@@ -160,22 +160,23 @@ export class LeaveManagementService {
       throw new UnauthorizedError();
     }
 
-    //if (payload.name) {
-     // const leaveWithName = await prismaClient.leaveType.findFirst({
-      //  where: {
-       //   companyId: user.companyId,
-     //     name: {
-       //     equals: payload.name,
-      //      mode: "insensitive",
-      //    },
-     //     id: {
-    //        not: leaveTypeId,
-     //     },
-    //    },
-   //   });
-  //    if (leaveWithName) {
-   //     throw new ConflictError("Leave with name exists");
- //         }
+    if (payload.name) {
+      const leaveWithName = await prismaClient.leaveType.findFirst({
+        where: {
+          companyId: user.companyId,
+          name: {
+            equals: payload.name,
+            mode: "insensitive",
+          },
+          id: {
+            not: leaveTypeId,
+          },
+        },
+      });
+      if (leaveWithName) {
+        throw new ConflictError("Leave with name exists");
+      }
+    }
     const leave = await prismaClient.leaveType.findFirst({
       where: {
         id: leaveTypeId,
@@ -186,7 +187,7 @@ export class LeaveManagementService {
     if (!leave) {
       throw new NotFoundError("Leave type not found");
     }
-      if (payload.requiresDocument && !payload.documentType) {
+    if (payload.requiresDocument && !payload.documentType) {
       throw new BadRequestError(
         "Document type is required when requiresDocument is true",
       );
@@ -236,15 +237,16 @@ export class LeaveManagementService {
           availableDuringProbation: payload.availableDuringProbation,
         }),
       },
-    })
-    console.log("the leave type is ", leaveType)
-    console.log("the payload is ", payload.minimumMonthsOfService )
+    });
+    console.log("the leave type is ", leaveType);
+    console.log("the payload is ", payload.minimumMonthsOfService);
     return leaveType;
   }
 
   static async createOrUpdateEmployeeLeaveBalanceService(
     user: User,
-    employeeId : string , leaveTypeId : string ,
+    employeeId: string,
+    leaveTypeId: string,
     payload: CreateOrUpdateEmployeeLeaveBalanceInput,
   ) {
     if (!user || user.role !== "HR_ADMIN") {
@@ -337,6 +339,15 @@ export class LeaveManagementService {
     if (!employee) {
       throw new NotFoundError("This employee does not exist");
     }
+    const startDate = new Date(payload.startDate);
+    const endDate = new Date(payload.endDate);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new BadRequestError("Invalid leave dates supplied.");
+    }
+
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
     if (payload.reliever) {
       const reliever = await prismaClient.employee.findFirst({
         where: {
@@ -401,14 +412,11 @@ export class LeaveManagementService {
     const thisDay = new Date();
     thisDay.setHours(0, 0, 0, 0);
 
-    payload.startDate.setHours(0, 0, 0, 0);
-    payload.endDate.setHours(0, 0, 0, 0);
-
-    if (payload.startDate > payload.endDate) {
+    if (startDate > endDate) {
       throw new BadRequestError("Start date cannot be after end date.");
     }
     const daysBeforeLeave = Math.ceil(
-      (payload.startDate.getTime() - thisDay.getTime()) / (1000 * 60 * 60 * 24),
+      (startDate.getTime() - thisDay.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     if (daysBeforeLeave < leaveType.noticePeriodDays) {
@@ -467,7 +475,7 @@ export class LeaveManagementService {
       payload.startDate,
       payload.endDate,
       leavePolicy?.excludeWeekends ?? true,
-      leavePolicy?.excludePublicHolidays ?? true ,
+      leavePolicy?.excludePublicHolidays ?? true,
       publicHolidayDates,
     );
 
@@ -492,7 +500,7 @@ export class LeaveManagementService {
     const transaction = await prismaClient.$transaction(async (tx) => {
       const leaveRequest = await tx.leaveRequest.create({
         data: {
-          companyId : user.companyId , 
+          companyId: user.companyId,
           employeeId: employee.id,
           leaveTypeId: leaveType.id,
           startDate: payload.startDate,
@@ -537,48 +545,46 @@ export class LeaveManagementService {
     });
     return transaction;
   }
- static async getAllLeaveRequestService(user : User){
-  if (!user){
-    throw new UnauthorizedError("You are not authorized ")
-  }
-  
-  if (user.role !== "HR_ADMIN"){
-    
-    throw new UnauthorizedError("You are not authorized ")
-  }
-
-  const leaves = await prismaClient.leaveRequest.findMany({
-    where : {
-      companyId : user.companyId
+  static async getAllLeaveRequestService(user: User) {
+    if (!user) {
+      throw new UnauthorizedError("You are not authorized ");
     }
-  })
 
-  return leaves
- }
- static async getSingleLeaveRequestService(user : User , leaveRequestId : string){
-  if (!user){
-    throw new UnauthorizedError("You are not authorized ")
+    if (user.role !== "HR_ADMIN") {
+      throw new UnauthorizedError("You are not authorized ");
+    }
+
+    const leaves = await prismaClient.leaveRequest.findMany({
+      where: {
+        companyId: user.companyId,
+      },
+    });
+
+    return leaves;
   }
-  
-  if (user.role !== "HR_ADMIN"){
+  static async getSingleLeaveRequestService(
+    user: User,
+    leaveRequestId: string,
+  ) {
+    if (!user) {
+      throw new UnauthorizedError("You are not authorized ");
+    }
+
+    if (user.role !== "HR_ADMIN") {
+      return await prismaClient.leaveRequest.findMany({
+        where: {
+          companyId: user.companyId,
+          id: leaveRequestId,
+        },
+      });
+    }
+
     return await prismaClient.leaveRequest.findMany({
-      where : {
-        companyId : user.companyId , 
-        id : leaveRequestId
-      }
-    })
+      where: {
+        companyId: user.companyId,
+      },
+    });
   }
-
-  return await prismaClient.leaveRequest.findMany({
-      where : {
-        companyId : user.companyId 
-        
-      }
-    })
-  }
-
-  
- 
 
   static async cancelLeaveRequestService(user: User, leaveRequestId: string) {
     if (!user) {
@@ -704,8 +710,8 @@ export class LeaveManagementService {
     if (!employee) {
       throw new NotFoundError("No employee found");
     }
-    if(!employee.departmentId){
-      throw new NotFoundError("Department Not Found")
+    if (!employee.departmentId) {
+      throw new NotFoundError("Department Not Found");
     }
     const department = await prismaClient.department.findFirst({
       where: {
@@ -789,7 +795,7 @@ export class LeaveManagementService {
       throw new BadRequestError("Only pending leave requests can be approved");
     }
 
-    const leaveType = leaveRequest.leaveType
+    const leaveType = leaveRequest.leaveType;
     if (!leaveType) {
       throw new NotFoundError("No leave type  found");
     }
@@ -798,15 +804,15 @@ export class LeaveManagementService {
         companyId: user.companyId,
         id: leaveRequest.employeeId,
       },
-      include : {
-        department : true
-      }
+      include: {
+        department: true,
+      },
     });
     if (!employee) {
       throw new NotFoundError("No employee found");
     }
 
-    const department = employee.department
+    const department = employee.department;
     if (!department) {
       throw new NotFoundError("No department found");
     }
@@ -1051,9 +1057,10 @@ export class LeaveManagementService {
     const duplicateDates = new Set<string>();
 
     for (const holiday of payload.holidays) {
-
-      
-      const key = typeof holiday.date == "string" ? holiday.date : holiday.date.toISOString();
+      const key =
+        typeof holiday.date == "string"
+          ? holiday.date
+          : holiday.date.toISOString();
 
       if (duplicateDates.has(key!)) {
         throw new ConflictError(`Duplicate holiday date detected: ${key}`);
@@ -1215,28 +1222,28 @@ export class LeaveManagementService {
     };
   }
 
-  static async getAllPublicHolidaysService(user : User){
-    if(!user){
-      throw new UnauthorizedError("You need to be authorized")
+  static async getAllPublicHolidaysService(user: User) {
+    if (!user) {
+      throw new UnauthorizedError("You need to be authorized");
     }
 
     return await prismaClient.publicHoliday.findMany({
-      where : {
-        companyId : user.companyId
-      }
-    })
+      where: {
+        companyId: user.companyId,
+      },
+    });
   }
-  static async getSinglePublicHolidaysService(user : User , holidayId : string){
-    if(!user){
-      throw new UnauthorizedError("You need to be authorized")
+  static async getSinglePublicHolidaysService(user: User, holidayId: string) {
+    if (!user) {
+      throw new UnauthorizedError("You need to be authorized");
     }
 
     return await prismaClient.publicHoliday.findFirst({
-      where : {
-        id : holidayId,
-        companyId : user.companyId
-      }
-    })
+      where: {
+        id: holidayId,
+        companyId: user.companyId,
+      },
+    });
   }
 
   static async generatePresignedUrlApplicationService(
@@ -1373,7 +1380,7 @@ export class LeaveManagementService {
     startDate: Date,
     endDate: Date,
     excludeWeekends: boolean,
-    excludePublicHolidays : boolean ,
+    excludePublicHolidays: boolean,
     holidays: Date[],
   ) {
     let days = 0;
@@ -1385,9 +1392,11 @@ export class LeaveManagementService {
 
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-      const isHoliday = excludePublicHolidays && holidays.some(
-        (holiday) => holiday.toDateString() === current.toDateString(),
-      );
+      const isHoliday =
+        excludePublicHolidays &&
+        holidays.some(
+          (holiday) => holiday.toDateString() === current.toDateString(),
+        );
 
       if ((!excludeWeekends || !isWeekend) && !isHoliday) {
         days++;
