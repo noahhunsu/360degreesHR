@@ -552,7 +552,7 @@ export class LeaveManagementService {
     }
 
     if (user.role !== "HR_ADMIN") {
-      const employee = await prismaClient.findFirst({
+      const employee = await prismaClient.employee.findFirst({
         where:{
           companyId : user.companyId,
           userId :user.userId
@@ -564,7 +564,7 @@ export class LeaveManagementService {
       return await prismaClient.leaveRequest.findMany({
       where: {
         employeeId : employee.id
-        companyId: user.companyId,
+        
       }
     });
 }
