@@ -160,23 +160,22 @@ export class LeaveManagementService {
       throw new UnauthorizedError();
     }
 
-    if (payload.name) {
-      const leaveWithName = await prismaClient.leaveType.findFirst({
-        where: {
-          companyId: user.companyId,
-          name: {
-            equals: payload.name,
-            mode: "insensitive",
-          },
-          id: {
-            not: leaveTypeId,
-          },
-        },
-      });
-      if (leaveWithName) {
-        throw new ConflictError("Leave with name exists");
-      }
-    }
+    //if (payload.name) {
+     // const leaveWithName = await prismaClient.leaveType.findFirst({
+      //  where: {
+       //   companyId: user.companyId,
+     //     name: {
+       //     equals: payload.name,
+      //      mode: "insensitive",
+      //    },
+     //     id: {
+    //        not: leaveTypeId,
+     //     },
+    //    },
+   //   });
+  //    if (leaveWithName) {
+   //     throw new ConflictError("Leave with name exists");
+ //         }
     const leave = await prismaClient.leaveType.findFirst({
       where: {
         id: leaveTypeId,
@@ -239,7 +238,7 @@ export class LeaveManagementService {
       },
     })
     console.log("the leave type is ", leaveType)
-    console.log("the payload is ", payload )
+    console.log("the payload is ", payload.minimumMonthsOfService )
     return leaveType;
   }
 
