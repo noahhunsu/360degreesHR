@@ -531,15 +531,18 @@ export class LeaveManagementService {
           actedById: user.userId,
         },
       });
-
-      await tx.leaveRequestDocument.createMany({
-        data: payload.documents!.map((doc) => ({
-          leaveId: leaveRequest.id,
-          fileName: doc.fileName,
-          storageKey: doc.storageKey,
-          mimeType: doc.mimeType,
-          uploadedById: employee.id,
-        })),
+if (leaveType.requiresDocument && payload.documents?.length) {
+  await tx.leaveRequestDocument.createMany({
+    data: payload.documents.map((doc) => ({
+      leaveId: leaveRequest.id,
+      fileName: doc.fileName,
+      storageKey: doc.storageKey,
+      mimeType: doc.mimeType,
+      uploadedById: employee.id,
+    })),
+  });
+}
+      
       });
 
       return leaveRequest;
