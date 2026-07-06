@@ -533,7 +533,7 @@ export class LeaveManagementService {
 
       if (leaveType.requiresDocument && payload.documents){
         await tx.leaveRequestDocument.createMany({
-        data: payload.documents!.map((doc) => ({
+        data: payload.documents.map((doc) => ({
           leaveId: leaveRequest.id,
           fileName: doc.fileName,
           storageKey: doc.storageKey,
