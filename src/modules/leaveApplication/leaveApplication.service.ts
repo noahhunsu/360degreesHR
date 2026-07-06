@@ -239,6 +239,7 @@ export class LeaveManagementService {
       },
     })
     console.log("the leave type is ", leaveType)
+    console.log("the payload is ", payload )
     return leaveType;
   }
 
