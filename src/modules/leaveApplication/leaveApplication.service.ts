@@ -322,33 +322,6 @@ export class LeaveManagementService {
     });
   }
 
-    static async getMyEmployeeBalanceService(user : User , leaveTypeId : string) {
-    if(!user){
-      throw new UnauthorizedError("You are not authorized")
-    }
-
-    const employee = await prismaClient.employee.findFirst({
-      where : {
-        userId : user.userId
-      }
-    })
-
-    if(!employee){
-      throw new NotFoundError("Employee not found")
-    }
-    const employeeBalance = prismaClient.employeeLeaveBalance.findFirst({
-      where : {
-        employeeId : employee.id,
-        leaveTypeId, 
-      }
-    })
-
-    if (!employeeBalance){
-      throw new NotFoundError("No leave balance for this kind of leave")
-    }
-    return employeeBalance
-  }
-
   static async createLeaveRequestService(
     user: User,
     leaveTypeId: string,
@@ -591,7 +564,6 @@ export class LeaveManagementService {
       return await prismaClient.leaveRequest.findMany({
       where: {
         employeeId : employee.id
-        
       }
     });
 }
