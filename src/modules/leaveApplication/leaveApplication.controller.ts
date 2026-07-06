@@ -142,6 +142,35 @@ export class LeaveManagementController {
       next(error);
     }
   }
+
+   static async getMyEmployeeBalanceController(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+      const leaveTypeId = req.params.leaveTypeId;
+
+      if (!leaveTypeId || Array.isArray(leaveTypeId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid leaveType ID",
+        });
+      }
+      const result = await LeaveManagementService.getMyEmployeeBalanceService(
+        user,
+        leaveTypeId,
+      );
+      return res.status(200).json({
+        success: true,
+        message: "Single Leave balance Fetched successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   static async createLeaveRequestController(
     req: Request,
     res: Response,

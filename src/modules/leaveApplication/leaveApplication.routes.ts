@@ -14,7 +14,7 @@ router.get("/leave-type"  , parseAuthHeaderMiddleware() , LeaveManagementControl
 router.get("/leave-type/:leaveTypeId" , parseAuthHeaderMiddleware() , LeaveManagementController.getSingleLeaveTypeController)
 router.patch("/leave-type/:leaveTypeId" , parseAuthHeaderMiddleware() , validate(updateLeaveTypeInputInputSchema) , LeaveManagementController.updateLeaveTypeController)
 router.post("/leave-balance/employee/:employeeId/:leaveTypeId" , parseAuthHeaderMiddleware() , validate(createOrUpdateEmployeeLeaveBalanceSchema) , LeaveManagementController.createOrUpdateEmployeeLeaveBalanceController)
-router.post("/leave-request/:leaveTypeId/create", parseAuthHeaderMiddleware(),validate(createLeaveRequestSchema), LeaveManagementController.createLeaveRequestController)
+router.get("/leave-balance/:leaveTypeId" , parseAuthHeaderMiddleware() , LeaveManagementController.getMyEmployeeBalanceController)
 router.get("/leave-request/all", parseAuthHeaderMiddleware(), LeaveManagementController.getAllLeaveController)
 router.get("/leave-request/single/:leaveRequestId", parseAuthHeaderMiddleware(), LeaveManagementController.getSingleLeaveRequestController)
 router.patch("/leave-request/:leaveRequestId/cancel" , parseAuthHeaderMiddleware(), LeaveManagementController.cancelLeaveRequestController)
