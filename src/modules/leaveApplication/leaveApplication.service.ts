@@ -434,12 +434,12 @@ export class LeaveManagementService {
         AND: [
           {
             startDate: {
-              lte: payload.endDate,
+              lte: endDate,
             },
           },
           {
             endDate: {
-              gte: payload.startDate,
+              gte: startDate,
             },
           },
         ],
@@ -467,13 +467,13 @@ export class LeaveManagementService {
 
     const totalCalendarDays =
       Math.floor(
-        (payload.endDate.getTime() - payload.startDate.getTime()) /
+        (endDate.getTime() - startDate.getTime()) /
           (1000 * 60 * 60 * 24),
       ) + 1;
 
     const totalDays = this.calculateLeaveDays(
-      payload.startDate,
-      payload.endDate,
+      startDate,
+      endDate,
       leavePolicy?.excludeWeekends ?? true,
       leavePolicy?.excludePublicHolidays ?? true,
       publicHolidayDates,
@@ -503,8 +503,8 @@ export class LeaveManagementService {
           companyId: user.companyId,
           employeeId: employee.id,
           leaveTypeId: leaveType.id,
-          startDate: payload.startDate,
-          endDate: payload.endDate,
+          startDate: startDate,
+          endDate: endDate,
           totalDays: totalDays,
           ...(payload.reliever && { relievedById: payload.reliever }),
           status: leaveType.requiresApproval ? "PENDING" : "APPROVED",
