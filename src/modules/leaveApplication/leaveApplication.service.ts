@@ -237,7 +237,8 @@ export class LeaveManagementService {
           availableDuringProbation: payload.availableDuringProbation,
         }),
       },
-    });
+    })
+    console.log("the leave type is ", leaveType)
     return leaveType;
   }
 
