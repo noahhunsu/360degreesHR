@@ -323,6 +323,34 @@ export class LeaveManagementController {
       next(error);
     }
   }
+  static async getSingleLeaveRequestController(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const user = (req as any).user;
+
+       const leaveRequestId = req.params.leaveRequestId;
+
+      if (!leaveRequestId || Array.isArray(leaveRequestId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid leaveRequest ID",
+        });
+      }
+      const result = await LeaveManagementService.getSingleLeaveRequestService(
+        user , leaveRequestId
+      );
+      return res.status(201).json({
+        success: true,
+        message: " Leave requests fetched successfully",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   static async updateLeavePolicyController(
     req: Request,
     res: Response,

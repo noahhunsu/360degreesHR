@@ -491,6 +491,7 @@ export class LeaveManagementService {
     const transaction = await prismaClient.$transaction(async (tx) => {
       const leaveRequest = await tx.leaveRequest.create({
         data: {
+          companyId : user.companyId , 
           employeeId: employee.id,
           leaveTypeId: leaveType.id,
           startDate: payload.startDate,
@@ -553,6 +554,30 @@ export class LeaveManagementService {
 
   return leaves
  }
+ static async getSingleLeaveRequestService(user : User , leaveRequestId : string){
+  if (!user){
+    throw new UnauthorizedError("You are not authorized ")
+  }
+  
+  if (user.role !== "HR_ADMIN"){
+    return await prismaClient.leaveRequest.findMany({
+      where : {
+        companyId : user.companyId , 
+        id : leaveRequestId
+      }
+    })
+  }
+
+  return await prismaClient.leaveRequest.findMany({
+      where : {
+        companyId : user.companyId 
+        
+      }
+    })
+  }
+
+  
+ 
 
   static async cancelLeaveRequestService(user: User, leaveRequestId: string) {
     if (!user) {
