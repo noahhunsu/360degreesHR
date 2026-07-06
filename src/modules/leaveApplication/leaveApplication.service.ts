@@ -565,9 +565,10 @@ export class LeaveManagementService {
       where: {
         employeeId : employee.id
         companyId: user.companyId,
-      },
+      }
     });
-    }
+}
+    
 
     const leaves = await prismaClient.leaveRequest.findMany({
       where: {
