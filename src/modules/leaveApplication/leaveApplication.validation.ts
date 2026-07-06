@@ -11,7 +11,7 @@ export const createLeaveTypeSchema = z.object({
   isPaid: z.boolean(),
   requiresApproval: z.boolean().optional(),
 
-  requiresDocument: z.boolean().optional(),
+  requiresDocument: z.boolean(),
   documentType: z.string().optional(),
   approvalFrom: z.enum(ApprovalFrom).optional(),
 

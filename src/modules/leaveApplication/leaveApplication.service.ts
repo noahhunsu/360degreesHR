@@ -259,7 +259,6 @@ export class LeaveManagementService {
         id: employeeId,
       },
     });
-    
 
     if (!employee) {
       throw new NotFoundError("Employee with ID not found");
@@ -435,12 +434,12 @@ export class LeaveManagementService {
         AND: [
           {
             startDate: {
-              lte: endDate,
+              lte: payload.endDate,
             },
           },
           {
             endDate: {
-              gte: startDate,
+              gte: payload.startDate,
             },
           },
         ],
@@ -468,13 +467,13 @@ export class LeaveManagementService {
 
     const totalCalendarDays =
       Math.floor(
-        (endDate.getTime() - startDate.getTime()) /
+        (payload.endDate.getTime() - payload.startDate.getTime()) /
           (1000 * 60 * 60 * 24),
       ) + 1;
 
     const totalDays = this.calculateLeaveDays(
-      startDate,
-      endDate,
+      payload.startDate,
+      payload.endDate,
       leavePolicy?.excludeWeekends ?? true,
       leavePolicy?.excludePublicHolidays ?? true,
       publicHolidayDates,
@@ -504,8 +503,8 @@ export class LeaveManagementService {
           companyId: user.companyId,
           employeeId: employee.id,
           leaveTypeId: leaveType.id,
-          startDate: startDate,
-          endDate: endDate,
+          startDate: payload.startDate,
+          endDate: payload.endDate,
           totalDays: totalDays,
           ...(payload.reliever && { relievedById: payload.reliever }),
           status: leaveType.requiresApproval ? "PENDING" : "APPROVED",
@@ -531,19 +530,17 @@ export class LeaveManagementService {
           actedById: user.userId,
         },
       });
-if (leaveType.requiresDocument && payload.documents?.length) {
-  await tx.leaveRequestDocument.createMany({
-    data: payload.documents.map((doc) => ({
-      leaveId: leaveRequest.id,
-      fileName: doc.fileName,
-      storageKey: doc.storageKey,
-      mimeType: doc.mimeType,
-      uploadedById: employee.id,
-    })),
-  });
-}
-      
-      });
+
+      if (leaveType.requiresDocument && payload.documents){
+        await tx.leaveRequestDocument.createMany({
+        data: payload.documents!.map((doc) => ({
+          leaveId: leaveRequest.id,
+          fileName: doc.fileName,
+          storageKey: doc.storageKey,
+          mimeType: doc.mimeType,
+          uploadedById: employee.id,
+        })),
+      });}
 
       return leaveRequest;
     });
