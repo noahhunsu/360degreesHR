@@ -552,7 +552,21 @@ export class LeaveManagementService {
     }
 
     if (user.role !== "HR_ADMIN") {
-      throw new UnauthorizedError("You are not authorized ");
+      const employee = await prismaClient.findFirst({
+        where:{
+          companyId : user.companyId,
+          userId :user.userId
+        }
+      })
+      if ( !employee){
+        throw new UnauthorizedError("You are not authorized ");
+      }
+      return await prismaClient.leaveRequest.findMany({
+      where: {
+        employeeId : employee.id
+        companyId: user.companyId,
+      },
+    });
     }
 
     const leaves = await prismaClient.leaveRequest.findMany({
