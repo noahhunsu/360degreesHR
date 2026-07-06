@@ -217,16 +217,16 @@ export class LeaveManagementService {
         }),
         ...(payload.requiresApproval &&
           payload.approvalFrom && { approvalFrom: payload.approvalFrom }),
-        ...(payload.minimumMonthsOfService && {
+        ...(payload.minimumMonthsOfService !== undefined && {
           minimumMonthsOfService: payload.minimumMonthsOfService,
         }),
-        ...(payload.noticePeriodDays && {
+        ...(payload.noticePeriodDays !== undefined && {
           noticePeriodDays: payload.noticePeriodDays,
         }),
         ...(payload.allowCarryForward !== undefined && {
           allowCarryForward: payload.allowCarryForward,
         }),
-        ...(payload.maxCarryForwardDays && {
+        ...(payload.maxCarryForwardDays !== undefined && {
           maxCarryForwardDays: payload.maxCarryForwardDays,
         }),
         ...(payload.allowHalfDay !== undefined && {
