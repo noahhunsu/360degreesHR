@@ -336,7 +336,7 @@ export class LeaveManagementService {
     if(!employee){
       throw new NotFoundError("Employee not found")
     }
-    const employeeBalance = prismaClient.employeeLeaveBalance.findFirst({
+    const employeeBalance = await prismaClient.employeeLeaveBalance.findFirst({
       where : {
         employeeId : employee.id,
         leaveTypeId, 

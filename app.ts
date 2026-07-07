@@ -35,7 +35,6 @@ app.get("/", (req , res ) => {
     res.send("Welcome to 360 degrees");
 })
 
-app.use(errorMiddleware)
 
 app.use("/api/v1/docs" , 
     swaggerUi.serve, swaggerUi.setup(swaggerSpec)
@@ -57,6 +56,12 @@ app.use("/api/v1/recruitment" , jobCreationRouter)
 app.use("/api/v1/job-applications" , jobApplicationRouter)
 app.use("/api/v1/leave-applications" , leaveApplicationRouter)
 // app.use("/api/v1/employee-benefits" , employeeBenefitRouter)
+
+
+
+
+
+app.use(errorMiddleware)
 
 
 export default app;
