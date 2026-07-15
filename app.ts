@@ -20,7 +20,7 @@ import jobCreationRouter from "./src/modules/jobCreation/jobCreation.routes.js";
 import jobApplicationRouter from "./src/modules/jobApplication/jobApplication.routes.js";
 import leaveApplicationRouter from "./src/modules/leaveApplication/leaveApplication.routes.js";
 import documentUploadRouter from "./src/modules/s3FilesUploads/s3.files.routes.js";
-// import employeeBenefitRouter from "./src/modules/employeeBenefits/employeeBenefits.routes.js";
+import employeeBenefitRouter from "./src/modules/employeeBenefits/employeeBenefits.routes.js";
 import { swaggerSpec } from "./src/config/swagger.js";
 import { errorMiddleware } from "./src/shared/middleware/error.middleware.js";
 

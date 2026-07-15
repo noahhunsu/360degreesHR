@@ -41,14 +41,15 @@ model Company {
   companyRecruitmentActivity    RecruitmentActivity[]
 
   companyLeaveTypes LeaveType[]
-  leaveRequests LeaveRequest[]
+  leaveRequests     LeaveRequest[]
   publicHolidays    PublicHoliday[]
   leavePolicy       LeavePolicy?
-  salaryComponents  SalaryComponent[]
+  salaryComponents  PayrollComponent[]
 
   payrollRuns PayrollRun[]
 
   salaryAdvance SalaryAdvance[]
+  payrollRules  PayrollRule[]
 
   @@map("companies")
 }
@@ -96,7 +97,6 @@ model Employee {
 
   payrollItems  PayrollItem[]
   salaryAdvance SalaryAdvance[]
-
 
   @@unique([companyId, employeeCode])
   @@index([companyId])
@@ -156,6 +156,8 @@ model User {
   generatedPayrollRuns     PayrollRun[]
   salary_advance_approvals SalaryAdvance[] @relation("salary_advance_approvals")
   salary_advance_reqs      SalaryAdvance[] @relation("salary_advance_reqs")
+
+  uploadedAdvanceReceipts AdvanceReceipt[]
 
   @@index([companyId])
   @@map("users")
@@ -1015,7 +1017,7 @@ model LeaveRequest {
   employeeId String   @db.Uuid
   employee   Employee @relation("currentLeaveRequests", fields: [employeeId], references: [id])
 
-  companyId String   @db.Uuid
+  companyId String  @db.Uuid
   company   Company @relation(fields: [companyId], references: [id])
 
   leaveTypeId String    @db.Uuid
@@ -1148,31 +1150,38 @@ model LeaveRequestDocument {
   @@map("leave_request_documents")
 }
 
-model SalaryComponent {
+model PayrollComponent {
   id String @id @default(uuid()) @db.Uuid
 
-  companyId String  @db.Uuid
-  company   Company @relation(fields: [companyId], references: [id])
+  companyId String @db.Uuid
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   name String
 
   description String?
 
-  type SalaryComponentType
+  componentType PayrollComponentType
 
-  isTaxable Boolean @default(false)
+  calculationType ComponentCalculationType
+  /// Only used when calculationType == FIXED
+  fixedValue Decimal? @db.Decimal(18,2)
+
+  /// Only used when calculationType == FORMULA
+  ruleId String? @db.Uuid
+  rule PayrollRule? @relation(fields: [ruleId], references: [id])
 
   isActive Boolean @default(true)
 
   employeeCompensations EmployeeCompensation[]
 
+  payrollBreakdowns PayrollBreakdown[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  payrollBreakdowns PayrollBreakdown[]
-
   @@unique([companyId, name])
-  @@map("salary_components")
+
+  @@map("payroll_components")
 }
 
 model EmployeeCompensation {
@@ -1181,20 +1190,80 @@ model EmployeeCompensation {
   employeeId String   @db.Uuid
   employee   Employee @relation(fields: [employeeId], references: [id])
 
-  componentId String          @db.Uuid
-  component   SalaryComponent @relation(fields: [componentId], references: [id])
+  componentId String           @db.Uuid
+  component   PayrollComponent @relation(fields: [componentId], references: [id])
 
   amount Decimal @db.Decimal(18, 2)
 
   effectiveFrom DateTime
   effectiveTo   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
 
-  @@index(employeeId)
-  @@index(componentId)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([componentId])
   @@map("employee_compensations")
 }
+
+model PayrollRule {
+  id String @id @default(uuid()) @db.Uuid
+
+  companyId String @db.Uuid
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  name String
+
+  description String?
+
+  expression Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  components PayrollComponent[]
+
+  @@unique([companyId, name])
+
+  @@map("payroll_rules")
+}
+
+// model PayrollRuleStep {
+//   id String @id @default(uuid()) @db.Uuid
+
+//   ruleId String @db.Uuid
+
+//   rule PayrollRule @relation(    "RuleNodes",    fields: [ruleId],    references: [id],    onDelete: Cascade  )
+
+//   operation PayrollOperation
+
+//   // Used when operation == CONSTANT
+//   constantValue Decimal? @db.Decimal(18,6)
+
+//   // Used when operation == COMPONENT
+//   componentId String? @db.Uuid
+
+//   component PayrollComponent? @relation(    "RuleComponent",    fields: [componentId],    references: [id]   )
+
+//   leftNodeId String? @db.Uuid
+
+//   leftNode PayrollRuleNode? @relation(     "LeftNode",     fields: [leftNodeId],      references: [id]   )
+
+//   leftChildren PayrollRuleNode[] @relation("LeftNode")
+
+//   rightNodeId String? @db.Uuid
+
+//   rightNode PayrollRuleNode? @relation(    "RightNode",    fields: [rightNodeId],    references: [id]  )
+
+//   rightChildren PayrollRuleNode[] @relation("RightNode")
+
+//   // Opposite side of PayrollRule.rootNode
+//   rootForRule PayrollRule? @relation("RuleRootNode")
+
+//   createdAt DateTime @default(now())
+
+//   @@map("payroll_rule_nodes")
+// } 
 
 // Payroll
 
@@ -1261,20 +1330,17 @@ model PayrollBreakdown {
   payrollItemId String      @db.Uuid
   payrollItem   PayrollItem @relation(fields: [payrollItemId], references: [id], onDelete: Cascade)
 
-  salaryComponentId String?          @db.Uuid
-  salaryComponent   SalaryComponent? @relation(fields: [salaryComponentId], references: [id])
+  componentId String           @db.Uuid
+  component   PayrollComponent @relation(fields: [componentId], references: [id])
 
-  name String
-
-  type SalaryComponentType
-
+  componentName String
   amount Decimal @db.Decimal(18, 2)
 
-  taxable Boolean
+  type PayrollComponentType
 
   createdAt DateTime @default(now())
 
-  @@map("payroll_breakdown")
+  @@map("payroll_breakdowns")
 }
 
 model SalaryAdvance {
@@ -1305,12 +1371,35 @@ model SalaryAdvance {
   status AdvanceStatus @default(PENDING)
 
   approvedDate  DateTime?
+  rejectedDate  DateTime?
   reviewComment String?
   createdAt     DateTime  @default(now())
 
-  updatedAt DateTime @updatedAt
+  updatedAt      DateTime         @updatedAt
+  advanceReceipt AdvanceReceipt[]
 
   @@map("salary_advance")
+}
+
+model AdvanceReceipt {
+  id String @id @default(uuid()) @db.Uuid
+
+  fileName String
+
+  storageKey String
+
+  mimeType String
+
+  uploadedById String @db.Uuid
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  salaryAdvanceId String        @db.Uuid
+  salaryAdvance   SalaryAdvance @relation(fields: [salaryAdvanceId], references: [id])
+
+  @@index([salaryAdvanceId])
+  @@map("salary_advance_documents")
 }
 
 enum Gender {
@@ -1501,9 +1590,14 @@ enum WeekDay {
   SUNDAY
 }
 
-enum SalaryComponentType {
+enum PayrollComponentType {
   EARNING
+
   DEDUCTION
+
+  EMPLOYER_CONTRIBUTION
+
+  INFORMATIONAL
 }
 
 enum PayrollStatus {
@@ -1518,4 +1612,57 @@ enum AdvanceStatus {
   REJECTED
   PAID
   CANCELLED
+  CLOSED
+}
+
+enum ComponentCalculationType {
+  FIXED
+
+  FORMULA
+
+  EXTERNAL
+}
+
+enum ExternalCalculationProvider {
+  SALARY_ADVANCE
+
+  LOAN
+
+  ATTENDANCE
+
+  OVERTIME
+
+  BONUS
+
+  COMMISSION
+}
+
+enum PayrollOperation {
+  CONSTANT
+
+  COMPONENT
+
+  ADD
+
+  SUBTRACT
+
+  MULTIPLY
+
+  DIVIDE
+
+  MIN
+
+  MAX
+
+  ABS
+
+  NEGATE
+
+  ROUND
+
+  CEILING
+
+  FLOOR
+
+  PERCENTAGE
 }
