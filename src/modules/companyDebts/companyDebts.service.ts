@@ -1,4 +1,3 @@
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { prismaClient } from "../../config/db.js";
 
 import {
@@ -27,9 +26,7 @@ export class LoansAndAdvanceService {
     user: User,
     payload: CreateSalaryAdvanceInput,
   ) {
-    if (!user) {
-      throw new UnauthorizedError("You are not authorized");
-    }
+    assertUser(user)
 
     const employee = await getEmployee(user);
 
@@ -97,7 +94,6 @@ export class LoansAndAdvanceService {
   static async cancelSalaryAdvanceService(
     user: User,
     salaryAdvanceId: string,
-    payload: CancelSalaryAdvanceInput,
   ) {
     if (!user) {
       throw new UnauthorizedError("You are not authorized");
@@ -118,15 +114,15 @@ export class LoansAndAdvanceService {
       throw new NotFoundError("No salary advance request with this ID found");
     }
 
-    if (salaryAdvanceRequest.status === "CANCELLED") {
-      throw new ConflictError("This advance request has been canceled already");
-    }
+    // if (salaryAdvanceRequest.status === "CANCELLED") {
+    //   throw new ConflictError("This advance request has been canceled already");
+    // }
     const updatedSalaryAdvance = await prismaClient.salaryAdvance.update({
       where: {
         id: salaryAdvanceRequest.id,
       },
       data: {
-        ...(payload.reason && { reason: payload.reason }),
+        status : "CANCELLED",
       },
     });
     return updatedSalaryAdvance;
@@ -240,7 +236,7 @@ export class LoansAndAdvanceService {
 
   static async confirmPaidSalaryAdvanceRequestService(
     user: User,
-    salaryAdvanceRequestId: string,
+    salaryAdvanceId: string,
     payload: ConfirmPaidSalaryAdvanceRequestInput,
   ) {
     assertHR(user);
@@ -248,7 +244,7 @@ export class LoansAndAdvanceService {
     const salaryAdvanceRequest = await prismaClient.salaryAdvance.findFirst({
       where: {
         companyId: user.companyId,
-        id: salaryAdvanceRequestId,
+        id: salaryAdvanceId,
       },
     });
 
