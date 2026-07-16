@@ -186,7 +186,26 @@ export class LoansAndAdvanceController {
     }
   }
 
-
+ static async generatePresignedUrlApplicationController(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const result =
+        await LoansAndAdvanceService.generatePresignedUrlApplicationService(
+          req.body,
+        );
+      return res.status(200).json({
+        success: true,
+        message: "Upload url generated successfully",
+        data: result,
+      });
+    } catch (error) {
+      console.log("the error is ", error);
+      next(error);
+    }
+  }
   // static async confirmPaidSalaryAdvanceRequestController(
   //   req: Request,
   //   res: Response,

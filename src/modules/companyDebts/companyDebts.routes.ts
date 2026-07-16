@@ -17,6 +17,7 @@ router.get("/salary-advance" , parseAuthHeaderMiddleware() , LoansAndAdvanceCont
 router.get("/salary-advance/:salaryAdvanceId", parseAuthHeaderMiddleware() , LoansAndAdvanceController.getSingleSalaryAdvanceRequestController)
 router.patch("/salary-advance/:salaryAdvanceId/review", parseAuthHeaderMiddleware() , validate(approveOrRejectSalaryAdvanceRequestSchema) , LoansAndAdvanceController.approveOrRejectSalaryAdvanceRequestController)
 router.patch("/salary-advance/:salaryAdvanceId/mark-as-paid" ,  parseAuthHeaderMiddleware() , validate(confirmPaidSalaryAdvanceRequestSchema) ,LoansAndAdvanceController.confirmPaidSalaryAdvanceRequestController)
+router.post("/upload/upload-url" ,  LoansAndAdvanceController.generatePresignedUrlApplicationController)
 
 
 export default router

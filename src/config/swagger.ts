@@ -481,183 +481,207 @@ const options: swaggerJsdoc.Options = {
           },
         },
 
-        // Getting all employees 
+        // Getting all employees
         GetAllEmployeesResponse: {
-  type: "object",
-
-  properties: {
-
-    success: {
-      type: "boolean",
-      example: true,
-    },
-
-    message: {
-      type: "string",
-      example: "Employees gotten successfully",
-    },
-
-    data: {
-      type: "object",
-
-      properties: {
-
-        employees: {
-          type: "array",
-
-          items: {
-
-            type: "object",
-
-            properties: {
-
-              id: {
-                type: "string",
-                format: "uuid",
-              },
-
-              employeeCode: {
-                type: "string",
-                example: "EMP-0001",
-              },
-
-              firstName: {
-                type: "string",
-                example: "John",
-              },
-
-              lastName: {
-                type: "string",
-                example: "Doe",
-              },
-
-              gender: {
-                type: "string",
-                example: "MALE",
-              },
-
-              employmentStatus: {
-                type: "string",
-                example: "ACTIVE",
-              },
-
-              jobTitle: {
-                type: "string",
-                example: "Backend Engineer",
-              },
-
-              createdAt: {
-                type: "string",
-                format: "date-time",
-              },
-
-              department: {
-
-                type: "object",
-
-                nullable: true,
-
-                properties: {
-
-                  id: {
-                    type: "string",
-                    format: "uuid",
-                  },
-
-                  name: {
-                    type: "string",
-                    example: "Engineering",
-                  },
-                },
-              },
-
-              manager: {
-
-                type: "object",
-
-                nullable: true,
-
-                properties: {
-
-                  id: {
-                    type: "string",
-                    format: "uuid",
-                  },
-
-                  firstName: {
-                    type: "string",
-                    example: "Arthur",
-                  },
-
-                  lastName: {
-                    type: "string",
-                    example: "Chima",
-                  },
-                },
-              },
-
-              user: {
-
-                type: "object",
-
-                properties: {
-
-                  id: {
-                    type: "string",
-                    format: "uuid",
-                  },
-
-                  email: {
-                    type: "string",
-                    format: "email",
-                  },
-
-                  role: {
-                    type: "string",
-                    example: "EMPLOYEE",
-                  },
-
-                  isActive: {
-                    type: "boolean",
-                    example: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-
-        pagination: {
-
           type: "object",
 
           properties: {
-
-            total: {
-              type: "integer",
-              example: 50,
+            success: {
+              type: "boolean",
+              example: true,
             },
 
-            page: {
-              type: "integer",
-              example: 1,
+            message: {
+              type: "string",
+              example: "Employees gotten successfully",
             },
 
-            limit: {
-              type: "integer",
-              example: 10,
-            },
+            data: {
+              type: "object",
 
-            totalPages: {
-              type: "integer",
-              example: 5,
+              properties: {
+                employees: {
+                  type: "array",
+
+                  items: {
+                    type: "object",
+
+                    properties: {
+                      id: {
+                        type: "string",
+                        format: "uuid",
+                      },
+
+                      employeeCode: {
+                        type: "string",
+                        example: "EMP-0001",
+                      },
+
+                      firstName: {
+                        type: "string",
+                        example: "John",
+                      },
+
+                      lastName: {
+                        type: "string",
+                        example: "Doe",
+                      },
+
+                      gender: {
+                        type: "string",
+                        example: "MALE",
+                      },
+
+                      employmentStatus: {
+                        type: "string",
+                        example: "ACTIVE",
+                      },
+
+                      jobTitle: {
+                        type: "string",
+                        example: "Backend Engineer",
+                      },
+
+                      createdAt: {
+                        type: "string",
+                        format: "date-time",
+                      },
+
+                      department: {
+                        type: "object",
+
+                        nullable: true,
+
+                        properties: {
+                          id: {
+                            type: "string",
+                            format: "uuid",
+                          },
+
+                          name: {
+                            type: "string",
+                            example: "Engineering",
+                          },
+                        },
+                      },
+
+                      manager: {
+                        type: "object",
+
+                        nullable: true,
+
+                        properties: {
+                          id: {
+                            type: "string",
+                            format: "uuid",
+                          },
+
+                          firstName: {
+                            type: "string",
+                            example: "Arthur",
+                          },
+
+                          lastName: {
+                            type: "string",
+                            example: "Chima",
+                          },
+                        },
+                      },
+
+                      user: {
+                        type: "object",
+
+                        properties: {
+                          id: {
+                            type: "string",
+                            format: "uuid",
+                          },
+
+                          email: {
+                            type: "string",
+                            format: "email",
+                          },
+
+                          role: {
+                            type: "string",
+                            example: "EMPLOYEE",
+                          },
+
+                          isActive: {
+                            type: "boolean",
+                            example: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+
+                pagination: {
+                  type: "object",
+
+                  properties: {
+                    total: {
+                      type: "integer",
+                      example: 50,
+                    },
+
+                    page: {
+                      type: "integer",
+                      example: 1,
+                    },
+
+                    limit: {
+                      type: "integer",
+                      example: 10,
+                    },
+
+                    totalPages: {
+                      type: "integer",
+                      example: 5,
+                    },
+                  },
+                },
+              },
             },
           },
         },
-      },
-    },
-  },
-},
+        ReviewSalaryAdvanceRequest: {
+          type: "object",
+          required: ["reject"],
+          properties: {
+            reject: {
+              type: "boolean",
+              example: false,
+            },
+            rejection_reason: {
+              type: "string",
+              example: "Request exceeds policy limit",
+            },
+            review_comment: {
+              type: "string",
+              example: "Approved after management review",
+            },
+            approvedAmount: {
+              type: "number",
+              example: 120000,
+            },
+          },
+        },
+
+        UpdateSalaryAdvanceRequest: {
+          type: "object",
+          properties: {
+            requestedAmount: {
+              type: "number",
+              example: 200000,
+            },
+            reason: {
+              type: "string",
+              example: "Updated request amount",
+            },
+          },
+        },
       },
     },
   },

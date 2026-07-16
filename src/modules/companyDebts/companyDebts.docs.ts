@@ -1,14 +1,57 @@
 /**
  * @swagger
- * /job-applications/job-openings/{jobOpeningId}:
+ * /company-debts/salary-advance/create:
  *   post:
- *     summary: Submit a job application
+ *     summary: Create salary advance request
+ *     description: |
+ *       Creates a new salary advance request for the authenticated employee.
+ *
+ *       The endpoint allows an employee to request a salary advance by specifying
+ *       the requested amount and an optional reason.
+ *
  *     tags:
- *       - Job Applications
+ *       - Salary Advance
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateSalaryAdvanceRequest'
+ *
+ *     responses:
+ *       201:
+ *         description: Salary advance request created successfully
+ *
+ *       400:
+ *         description: Validation error
+ *
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /company-debts/salary-advance/{salaryAdvanceId}:
+ *   patch:
+ *     summary: Update salary advance request
+ *     description: |
+ *       Updates an existing salary advance request.
+ *
+ *       Only editable requests that have not yet been reviewed can be updated.
+ *
+ *     tags:
+ *       - Salary Advance
+ *
+ *     security:
+ *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: jobOpeningId
+ *         name: salaryAdvanceId
  *         required: true
  *         schema:
  *           type: string
@@ -19,262 +62,227 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - firstName
- *               - lastName
- *               - email
- *               - documents
- *             properties:
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *               email:
- *                 type: string
- *                 format: email
- *               phoneNumber:
- *                 type: string
- *               documents:
- *                 type: array
- *                 minItems: 1
- *                 items:
- *                   type: object
- *                   required:
- *                     - documentType
- *                     - fileName
- *                     - storageKey
- *                     - mimeType
- *                   properties:
- *                     documentType:
- *                       type: string
- *                       description: Candidate document type
- *                     fileName:
- *                       type: string
- *                     storageKey:
- *                       type: string
- *                     mimeType:
- *                       type: string
- *
- *     responses:
- *       201:
- *         description: Application created successfully
- *       400:
- *         description: Validation error
- *       404:
- *         description: Job opening not found
- */
-
-/**
- * @swagger
- * /job-applications:
- *   get:
- *     summary: Get all job applications
- *     tags:
- *       - Job Applications
- *     security:
- *       - bearerAuth: []
+ *             $ref: '#/components/schemas/UpdateSalaryAdvanceRequest'
  *
  *     responses:
  *       200:
- *         description: Job applications fetched successfully
+ *         description: Salary advance updated successfully
+ *
+ *       400:
+ *         description: Validation error
+ *
  *       401:
  *         description: Unauthorized
+ *
+ *       404:
+ *         description: Salary advance request not found
  */
 
 /**
  * @swagger
- * /job-applications/{applicationId}:
- *   get:
- *     summary: Get a single job application
+ * /company-debts/salary-advance/{salaryAdvanceId}/cancel:
+ *   patch:
+ *     summary: Cancel salary advance request
+ *     description: |
+ *       Cancels an existing salary advance request.
+ *
+ *       Only pending requests can be cancelled.
+ *
  *     tags:
- *       - Job Applications
+ *       - Salary Advance
+ *
  *     security:
  *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: applicationId
+ *         name: salaryAdvanceId
  *         required: true
  *         schema:
  *           type: string
+ *           format: uuid
  *
  *     responses:
  *       200:
- *         description: Job application fetched successfully
- *       400:
- *         description: Invalid application ID
+ *         description: Salary advance request cancelled successfully
+ *
  *       401:
  *         description: Unauthorized
+ *
  *       404:
- *         description: Application not found
+ *         description: Salary advance request not found
  */
 
 /**
  * @swagger
- * /job-applications/upload/upload-url:
+ * /company-debts/salary-advance:
+ *   get:
+ *     summary: Get all salary advance requests
+ *     description: |
+ *       Retrieves all salary advance requests available to the authenticated user.
+ *
+ *       HR administrators may retrieve all requests, while employees only retrieve
+ *       their own requests.
+ *
+ *     tags:
+ *       - Salary Advance
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: Salary advance requests retrieved successfully
+ *
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /company-debts/salary-advance/{salaryAdvanceId}:
+ *   get:
+ *     summary: Get single salary advance request
+ *     description: Retrieves details of a specific salary advance request.
+ *
+ *     tags:
+ *       - Salary Advance
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: salaryAdvanceId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
+ *     responses:
+ *       200:
+ *         description: Salary advance request retrieved successfully
+ *
+ *       401:
+ *         description: Unauthorized
+ *
+ *       404:
+ *         description: Salary advance request not found
+ */
+
+/**
+ * @swagger
+ * /company-debts/salary-advance/{salaryAdvanceId}/review:
+ *   patch:
+ *     summary: Review salary advance request
+ *     description: |
+ *       Approves or rejects a salary advance request.
+ *
+ *       The reviewer may approve with an approved amount or reject with a reason.
+ *
+ *     tags:
+ *       - Salary Advance
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: salaryAdvanceId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ReviewSalaryAdvanceRequest'
+ *
+ *     responses:
+ *       200:
+ *         description: Salary advance request reviewed successfully
+ *
+ *       400:
+ *         description: Validation error
+ *
+ *       401:
+ *         description: Unauthorized
+ *
+ *       404:
+ *         description: Salary advance request not found
+ */
+
+/**
+ * @swagger
+ * /company-debts/salary-advance/{salaryAdvanceId}/mark-as-paid:
+ *   patch:
+ *     summary: Mark salary advance as paid
+ *     description: |
+ *       Marks an approved salary advance request as paid and attaches
+ *       proof of payment.
+ *
+ *     tags:
+ *       - Salary Advance
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: salaryAdvanceId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ConfirmPaidSalaryAdvanceRequest'
+ *
+ *     responses:
+ *       200:
+ *         description: Salary advance marked as paid successfully
+ *
+ *       400:
+ *         description: Validation error
+ *
+ *       401:
+ *         description: Unauthorized
+ *
+ *       404:
+ *         description: Salary advance request not found
+ */
+
+/**
+ * @swagger
+ * /company-debts/upload/upload-url:
  *   post:
- *     summary: Generate a presigned upload URL for applicant documents
+ *     summary: Generate upload URL for salary advance documents
+ *     description: |
+ *       Generates a pre-signed upload URL that can be used to upload
+ *       supporting documents to cloud storage before submitting them.
+ *
  *     tags:
- *       - Job Applications
+ *       - Salary Advance
  *
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - fileName
- *               - mimeType
- *               - documentType
- *             properties:
- *               fileName:
- *                 type: string
- *               mimeType:
- *                 type: string
- *               documentType:
- *                 type: string
+ *             $ref: '#/components/schemas/GetPresignedUrlForCompanyDebtsRequest'
  *
  *     responses:
  *       200:
- *         description: Upload URL generated successfully
+ *         description: Pre-signed upload URL generated successfully
+ *
  *       400:
  *         description: Validation error
- */
-
-/**
- * @swagger
- * /job-applications/{applicationId}/move:
- *   patch:
- *     summary: Move a job application to another recruitment stage
- *     tags:
- *       - Job Applications
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: applicationId
- *         required: true
- *         schema:
- *           type: string
- *
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - stageId
- *             properties:
- *               stageId:
- *                 type: string
- *               notes:
- *                 type: string
- *
- *     responses:
- *       200:
- *         description: Job application updated successfully
- *       400:
- *         description: Validation error
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Application not found
- */
-
-/**
- * @swagger
- * /job-applications/{applicationId}/reject:
- *   patch:
- *     summary: Reject a job application
- *     tags:
- *       - Job Applications
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: applicationId
- *         required: true
- *         schema:
- *           type: string
- *
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - reason
- *             properties:
- *               reason:
- *                 type: string
- *
- *     responses:
- *       200:
- *         description: Job application rejected successfully
- *       400:
- *         description: Validation error
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Application not found
- */
-
-/**
- * @swagger
- * /job-applications/{applicationId}/document/{documentId}:
- *   get:
- *     summary: View an uploaded application document
- *     tags:
- *       - Job Applications
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: applicationId
- *         required: true
- *         schema:
- *           type: string
- *
- *       - in: path
- *         name: documentId
- *         required: true
- *         schema:
- *           type: string
- *
- *     responses:
- *       200:
- *         description: Document URL generated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: object
- *                   properties:
- *                     documentViewUrl:
- *                       type: string
- *                     fileName:
- *                       type: string
- *                     mimeType:
- *                       type: string
- *
- *       400:
- *         description: Invalid application or document ID
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Document not found
  */
 

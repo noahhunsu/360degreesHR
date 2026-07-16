@@ -32,6 +32,12 @@ export const confirmPaidSalaryAdvanceRequestSchema = z.object({
 });
 
 
+ export const getPresignedUrlInputForCompanyDebtsSchema = z.object({
+    fileName: z.string(),
+      mimeType: z.string(),
+      documentType: z.string()
+  })
+
 export type ApproveOrRejectSalaryAdvanceRequestInput = z.infer<
   typeof approveOrRejectSalaryAdvanceRequestSchema
 >;
@@ -47,4 +53,8 @@ export type CancelSalaryAdvanceInput = z.infer<
 
 export type ConfirmPaidSalaryAdvanceRequestInput = z.infer<
   typeof confirmPaidSalaryAdvanceRequestSchema
+>;
+
+export type GetPresignedUrlInputForCompanyDebtsInput = z.infer<
+  typeof getPresignedUrlInputForCompanyDebtsSchema
 >;

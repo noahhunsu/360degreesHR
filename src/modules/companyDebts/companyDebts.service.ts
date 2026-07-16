@@ -13,6 +13,7 @@ import type {
   CancelSalaryAdvanceInput,
   ConfirmPaidSalaryAdvanceRequestInput,
   CreateSalaryAdvanceInput,
+  GetPresignedUrlInputForCompanyDebtsInput,
 } from "./companyDebts.validation.js";
 import {
   assertHR,
@@ -20,6 +21,10 @@ import {
   getEmployee,
   getRole,
 } from "../../utils/global.utils.js";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { aws3Client } from "../../config/aws_s3.js";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import type { GetPresignedUrlInputForApplicationInput } from "../jobApplication/jobApplication.validation.js";
 
 export class LoansAndAdvanceService {
   static async createSalaryAdvanceService(
@@ -341,4 +346,42 @@ export class LoansAndAdvanceService {
     }
     return employeeSalaryAdvance
   }
+
+   static async generatePresignedUrlApplicationService(
+      payload: GetPresignedUrlInputForCompanyDebtsInput,
+    ) {
+      // generate unique storage key
+      // const fileExtension = payload.fileName.split(".").pop();
+  
+      const safeFileName = payload.fileName
+        .replace(/\s+/g, "-")
+        .replace(/[^a-zA-Z0-9.-]/g, "");
+      const storageKey = `paid_advance_docs/${Date.now()}-${safeFileName}`;
+  
+      // create upload command
+      const command = new PutObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+  
+        Key: storageKey,
+  
+        ContentType: payload.mimeType,
+      });
+  
+      // generate signed url
+      const uploadUrl = await getSignedUrl(aws3Client, command, {
+        expiresIn: 60 * 5,
+      });
+  
+      // This returned upload url is then used by frontend to do a put request
+  
+      return {
+        message: "Upload URL generated successfully",
+  
+        uploadUrl,
+  
+        storageKey,
+  
+        expiresIn: 300,
+      };
+    }
 }
