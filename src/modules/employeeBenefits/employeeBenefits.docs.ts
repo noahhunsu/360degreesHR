@@ -1,10 +1,13 @@
 /**
  * @swagger
- * /onboarding-task/template:
+ * /payroll-components/payroll-component/create:
  *   post:
- *     summary: Create onboarding task template
+ *     summary: Create payroll component
+ *     description: Creates a new payroll component such as Basic Salary, Tax, Bonus, Pension, or any custom earning/deduction component.
+ *
  *     tags:
- *       - Onboarding Task
+ *       - Payroll Components
+ *
  *     security:
  *       - bearerAuth: []
  *
@@ -13,110 +16,38 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - title
- *               - responsibility
- *             properties:
- *               title:
- *                 type: string
- *                 example: Complete Employee Handbook Review
- *               description:
- *                 type: string
- *                 example: Employee must review and acknowledge handbook
- *               responsibility:
- *                 type: string
- *                 enum:
- *                   - EMPLOYEE
- *                   - MANAGER
- *                   - HR_ADMIN
- *                   - SPECIFIC_USER
- *               assignedUserId:
- *                 type: string
- *                 format: uuid
- *                 example: d290f1ee-6c54-4b01-90e6-d701748f0851
+ *             $ref: '#/components/schemas/CreatePayrollComponentRequest'
  *
  *     responses:
  *       201:
- *         description: Onboarding task template created successfully
+ *         description: Payroll component created successfully
+ *
  *       400:
  *         description: Validation error
+ *
  *       401:
  *         description: Unauthorized
+ *
+ *       403:
+ *         description: Forbidden
  */
 
 /**
  * @swagger
- * /onboarding-task/template:
- *   get:
- *     summary: Get onboarding task templates
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     responses:
- *       200:
- *         description: Onboarding task templates fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/template/{templateId}/deactivate:
+ * /payroll-components/payroll-component/{payrollComponentId}:
  *   patch:
- *     summary: Deactivate onboarding task template
+ *     summary: Update payroll component
+ *     description: Updates an existing payroll component.
+ *
  *     tags:
- *       - Onboarding Task
+ *       - Payroll Components
+ *
  *     security:
  *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: templateId
- *         required: true
- *         schema:
- *           type: string
- *
- *     responses:
- *       200:
- *         description: Onboarding task template deactivated successfully
- *       400:
- *         description: Invalid template ID
- *       404:
- *         description: Template not found
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/{employeeId}:
- *   post:
- *     summary: Assign onboarding task to employee
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     parameters:
- *       - in: path
- *         name: employeeId
+ *         name: payrollComponentId
  *         required: true
  *         schema:
  *           type: string
@@ -127,70 +58,38 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - onboardingTaskTemplateId
- *             properties:
- *               onboardingTaskTemplateId:
- *                 type: string
- *                 format: uuid
- *                 example: 550e8400-e29b-41d4-a716-446655440000
+ *             $ref: '#/components/schemas/UpdatePayrollComponentRequest'
  *
  *     responses:
- *       201:
- *         description: Onboarding task created successfully
+ *       200:
+ *         description: Payroll component updated successfully
+ *
  *       400:
  *         description: Validation error
+ *
+ *       401:
+ *         description: Unauthorized
+ *
  *       404:
- *         description: Employee or template not found
- *       401:
- *         description: Unauthorized
+ *         description: Payroll component not found
  */
 
 /**
  * @swagger
- * /onboarding-task/task/me:
- *   get:
- *     summary: Get current user's onboarding tasks
- *     tags:
- *       - Onboarding Task
- *     security:
- *       - bearerAuth: []
- *
- *     responses:
- *       200:
- *         description: Onboarding tasks fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
- * /onboarding-task/task/{taskId}/start:
+ * /payroll-components/payroll-component/{payrollComponentId}/delete:
  *   patch:
- *     summary: Start onboarding task
+ *     summary: Delete payroll component
+ *     description: Soft deletes a payroll component.
+ *
  *     tags:
- *       - Onboarding Task
+ *       - Payroll Components
+ *
  *     security:
  *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: taskId
+ *         name: payrollComponentId
  *         required: true
  *         schema:
  *           type: string
@@ -198,28 +97,31 @@
  *
  *     responses:
  *       200:
- *         description: Onboarding task started successfully
- *       400:
- *         description: Invalid task ID
- *       404:
- *         description: Task not found
+ *         description: Payroll component deleted successfully
+ *
  *       401:
  *         description: Unauthorized
+ *
+ *       404:
+ *         description: Payroll component not found
  */
 
 /**
  * @swagger
- * /onboarding-task/task/{taskId}/complete:
- *   patch:
- *     summary: Complete onboarding task
+ * /payroll-components/payroll-component/{payrollComponentId}:
+ *   get:
+ *     summary: Get payroll component
+ *     description: Retrieves a payroll component by its ID.
+ *
  *     tags:
- *       - Onboarding Task
+ *       - Payroll Components
+ *
  *     security:
  *       - bearerAuth: []
  *
  *     parameters:
  *       - in: path
- *         name: taskId
+ *         name: payrollComponentId
  *         required: true
  *         schema:
  *           type: string
@@ -227,23 +129,46 @@
  *
  *     responses:
  *       200:
- *         description: Onboarding task completed successfully
- *       400:
- *         description: Invalid task ID
+ *         description: Payroll component retrieved successfully
+ *
+ *       401:
+ *         description: Unauthorized
+ *
  *       404:
- *         description: Task not found
+ *         description: Payroll component not found
+ */
+
+/**
+ * @swagger
+ * /payroll-components/payroll-component:
+ *   get:
+ *     summary: Get all payroll components
+ *     description: Retrieves all payroll components for the company.
+ *
+ *     tags:
+ *       - Payroll Components
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: Payroll components retrieved successfully
+ *
  *       401:
  *         description: Unauthorized
  */
 
-
 /**
  * @swagger
- * /onboarding-task/task/{employeeId}/incomplete:
+ * /payroll-components/employee-benefits/{employeeId}:
  *   get:
- *     summary: Get incomplete onboarding tasks for an employee
+ *     summary: Get employee payroll components
+ *     description: Retrieves all payroll components currently attached to an employee.
+ *
  *     tags:
- *       - Onboarding Task
+ *       - Employee Payroll Components
+ *
  *     security:
  *       - bearerAuth: []
  *
@@ -257,27 +182,132 @@
  *
  *     responses:
  *       200:
- *         description: Incomplete onboarding tasks fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
+ *         description: Employee payroll components retrieved successfully
  *
- *       400:
- *         description: Invalid employee ID
+ *       401:
+ *         description: Unauthorized
+ *
  *       404:
  *         description: Employee not found
+ */
+
+/**
+ * @swagger
+ * /payroll-components/employee-benefits/{employeeId}/attach:
+ *   post:
+ *     summary: Attach payroll components to employee
+ *     description: Assigns one or more payroll components to an employee.
+ *
+ *     tags:
+ *       - Employee Payroll Components
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: employeeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AttachEmployeeComponentRequest'
+ *
+ *     responses:
+ *       201:
+ *         description: Payroll components attached successfully
+ *
+ *       400:
+ *         description: Validation error
+ *
+ *       401:
+ *         description: Unauthorized
+ *
+ *       404:
+ *         description: Employee not found
+ */
+
+/**
+ * @swagger
+ * /payroll-components/employee-benefits/{employeeId}/update:
+ *   patch:
+ *     summary: Update employee payroll components
+ *     description: Updates payroll component values assigned to an employee.
+ *
+ *     tags:
+ *       - Employee Payroll Components
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: employeeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateEmployeeComponentRequest'
+ *
+ *     responses:
+ *       200:
+ *         description: Employee payroll components updated successfully
+ *
+ *       400:
+ *         description: Validation error
+ *
  *       401:
  *         description: Unauthorized
  */
 
+/**
+ * @swagger
+ * /payroll-components/employee-benefits/{employeeId}/remove:
+ *   patch:
+ *     summary: Remove payroll components from employee
+ *     description: Removes one or more payroll components from an employee.
+ *
+ *     tags:
+ *       - Employee Payroll Components
+ *
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: employeeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RemoveEmployeeComponentRequest'
+ *
+ *     responses:
+ *       200:
+ *         description: Employee payroll components removed successfully
+ *
+ *       400:
+ *         description: Validation error
+ *
+ *       401:
+ *         description: Unauthorized
+ */
 
