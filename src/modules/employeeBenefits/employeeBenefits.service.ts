@@ -362,12 +362,11 @@ export class PayrollComponentManagementService {
         );
         const payrollResult = this.buildPayrollResult(evaluatedComponents);
 
-        const adjustedPayroll =
-    await this.applyPayrollAdjustments(
-        tx,
-        employee,
-        payrollResult
-    );
+        const adjustedPayroll = await this.applyPayrollAdjustments(
+          // tx,
+          employee,
+          payrollResult,
+        );
         await this.saveEmployee(tx, payrollRun.id, employee, adjustedPayroll);
       }
     });
@@ -1383,7 +1382,7 @@ export class PayrollComponentManagementService {
   }
 
   private static async applyPayrollAdjustments(
-    tx: Prisma.TransactionClient,
+    // tx: Prisma.TransactionClient,
     employee: Employee,
     payrollResult: EmployeePayrollResult,
   ): Promise<EmployeePayrollResult> {

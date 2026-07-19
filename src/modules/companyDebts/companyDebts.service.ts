@@ -337,7 +337,7 @@ export class LoansAndAdvanceService {
     const employeeSalaryAdvance = await prismaClient.salaryAdvance.findFirst({
       where:{
         employeeId ,
-        status : "APPROVED"
+        status : "PAID"
       }
     })
 

@@ -1228,44 +1228,6 @@ model PayrollRule {
   @@map("payroll_rules")
 }
 
-// model PayrollRuleStep {
-//   id String @id @default(uuid()) @db.Uuid
-
-//   ruleId String @db.Uuid
-
-//   rule PayrollRule @relation(    "RuleNodes",    fields: [ruleId],    references: [id],    onDelete: Cascade  )
-
-//   operation PayrollOperation
-
-//   // Used when operation == CONSTANT
-//   constantValue Decimal? @db.Decimal(18,6)
-
-//   // Used when operation == COMPONENT
-//   componentId String? @db.Uuid
-
-//   component PayrollComponent? @relation(    "RuleComponent",    fields: [componentId],    references: [id]   )
-
-//   leftNodeId String? @db.Uuid
-
-//   leftNode PayrollRuleNode? @relation(     "LeftNode",     fields: [leftNodeId],      references: [id]   )
-
-//   leftChildren PayrollRuleNode[] @relation("LeftNode")
-
-//   rightNodeId String? @db.Uuid
-
-//   rightNode PayrollRuleNode? @relation(    "RightNode",    fields: [rightNodeId],    references: [id]  )
-
-//   rightChildren PayrollRuleNode[] @relation("RightNode")
-
-//   // Opposite side of PayrollRule.rootNode
-//   rootForRule PayrollRule? @relation("RuleRootNode")
-
-//   createdAt DateTime @default(now())
-
-//   @@map("payroll_rule_nodes")
-// } 
-
-// Payroll
 
 model PayrollRun {
   id String @id @default(uuid()) @db.Uuid

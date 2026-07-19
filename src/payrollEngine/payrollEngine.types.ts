@@ -95,3 +95,59 @@ export interface PayrollContext {
     evaluating: Set<string>;
     components : Map<string  , PayrollComponentWithRule>
 }
+
+export type ExpressionValue =
+    | Prisma.Decimal
+    | boolean;
+
+
+export interface IfExpression {
+
+    type: "IF";
+
+    condition: ExpressionToken[];
+
+    trueExpression: PayrollExpression;
+
+    falseExpression: PayrollExpression;
+}
+
+export type PayrollExpression =
+{
+    type: "ARITHMETIC";
+    tokens: ExpressionToken[];
+}
+|
+IfExpression
+
+
+
+// {
+//     type:"IF",
+
+//     condition:[
+//         Basic,
+//         GREATER_THAN,
+//         100000
+//     ],
+
+//     trueExpression:{
+//         type:"ARITHMETIC",
+
+//         tokens:[
+//             Basic,
+//             MULTIPLY,
+//             0.5
+//         ]
+//     },
+
+//     falseExpression:{
+//         type:"ARITHMETIC",
+
+//         tokens:[
+//             Basic,
+//             MULTIPLY,
+//             0.3
+//         ]
+//     }
+// }
