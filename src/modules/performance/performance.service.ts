@@ -16,6 +16,15 @@ import {
   BadRequestError,
   NotFoundError,
 } from "../../shared/exceptions/app.error.js";
+
+
+
+type ReviewNode = Prisma.PerformanceReviewNodeGetPayload<{
+  include: {
+    children: true;
+  };
+}>;
+
 export class PerformanceService {
   static async createPerformanceTemplateService(
     user: User,
@@ -906,11 +915,7 @@ export class PerformanceService {
     }
   }
   private static flattenReviewNodes(
-    nodes: Prisma.PerformanceReviewNodeGetPayload<{
-      include: {
-        children: true;
-      };
-    }>[],
+    nodes: ReviewNode[],
   ): Prisma.PerformanceReviewNodeGetPayload<{
     include: {
       children: true;
@@ -928,7 +933,7 @@ export class PerformanceService {
         continue;
       }
 
-      flattened.push(...this.flattenReviewNodes(node.children));
+      flattened.push(...this.flattenReviewNodes(node.children as ReviewNode[]));
     }
 
     return flattened;
