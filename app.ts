@@ -22,6 +22,7 @@ import leaveApplicationRouter from "./src/modules/leaveApplication/leaveApplicat
 import documentUploadRouter from "./src/modules/s3FilesUploads/s3.files.routes.js";
 import payrollComponentRouter from "./src/modules/employeeBenefits/employeeBenefits.routes.js";
 import companyDebtRouter from "./src/modules/companyDebts/companyDebts.routes.js";
+import performanceRouter from "./src/modules/performance/performance.routes.js";
 import { swaggerSpec } from "./src/config/swagger.js";
 import { errorMiddleware } from "./src/shared/middleware/error.middleware.js";
 
@@ -58,7 +59,7 @@ app.use("/api/v1/job-applications" , jobApplicationRouter)
 app.use("/api/v1/leave-applications" , leaveApplicationRouter)
 app.use("/api/v1/company-debts" , companyDebtRouter)
 app.use("/api/v1/payroll-components" , payrollComponentRouter)
-
+app.use("/api/v1/performance" , performanceRouter)
 
 
 

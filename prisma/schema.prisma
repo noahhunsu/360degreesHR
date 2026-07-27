@@ -51,6 +51,9 @@ model Company {
   salaryAdvance SalaryAdvance[]
   payrollRules  PayrollRule[]
 
+  performanceTemplates PerformanceTemplate[]
+  performanceReviews   PerformanceReview[]
+
   @@map("companies")
 }
 
@@ -95,8 +98,11 @@ model Employee {
   relievedRequests       LeaveRequest?          @relation("assignedReliever")
   employeeCompensations  EmployeeCompensation[]
 
-  payrollItems  PayrollItem[]
-  salaryAdvance SalaryAdvance[]
+  payrollItems               PayrollItem[]
+  salaryAdvance              SalaryAdvance[]
+  performanceReviewInstances PerformanceReviewInstance[] @relation("ReviewedEmployee")
+
+  reviewsHandled PerformanceReviewer[] @relation("PerformanceReviewerEmployee")
 
   @@unique([companyId, employeeCode])
   @@index([companyId])
@@ -157,7 +163,9 @@ model User {
   salary_advance_approvals SalaryAdvance[] @relation("salary_advance_approvals")
   salary_advance_reqs      SalaryAdvance[] @relation("salary_advance_reqs")
 
-  uploadedAdvanceReceipts AdvanceReceipt[]
+  uploadedAdvanceReceipts     AdvanceReceipt[]
+  createdPerformanceTemplates PerformanceTemplate[]
+  performanceReviews          PerformanceReview[]
 
   @@index([companyId])
   @@map("users")
@@ -183,8 +191,9 @@ model Department {
   onboardingSubmissions OnboardingSubmission[]
   onboardingInvitations OnboardingInvitation[]
 
-  departmentRequisitions JobRequisition[]
-  departmentOpenings     JobOpening[]
+  departmentRequisitions     JobRequisition[]
+  departmentOpenings         JobOpening[]
+  performanceReviewInstances PerformanceReviewInstance[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -1153,8 +1162,8 @@ model LeaveRequestDocument {
 model PayrollComponent {
   id String @id @default(uuid()) @db.Uuid
 
-  companyId String @db.Uuid
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   name String
 
@@ -1164,11 +1173,11 @@ model PayrollComponent {
 
   calculationType ComponentCalculationType
   /// Only used when calculationType == FIXED
-  fixedValue Decimal? @db.Decimal(18,2)
+  fixedValue      Decimal?                 @db.Decimal(18, 2)
 
   /// Only used when calculationType == FORMULA
-  ruleId String? @db.Uuid
-  rule PayrollRule? @relation(fields: [ruleId], references: [id])
+  ruleId String?      @db.Uuid
+  rule   PayrollRule? @relation(fields: [ruleId], references: [id])
 
   isActive Boolean @default(true)
 
@@ -1180,7 +1189,6 @@ model PayrollComponent {
   updatedAt DateTime @updatedAt
 
   @@unique([companyId, name])
-
   @@map("payroll_components")
 }
 
@@ -1209,8 +1217,8 @@ model EmployeeCompensation {
 model PayrollRule {
   id String @id @default(uuid()) @db.Uuid
 
-  companyId String @db.Uuid
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   name String
 
@@ -1224,10 +1232,8 @@ model PayrollRule {
   components PayrollComponent[]
 
   @@unique([companyId, name])
-
   @@map("payroll_rules")
 }
-
 
 model PayrollRun {
   id String @id @default(uuid()) @db.Uuid
@@ -1296,7 +1302,7 @@ model PayrollBreakdown {
   component   PayrollComponent @relation(fields: [componentId], references: [id])
 
   componentName String
-  amount Decimal @db.Decimal(18, 2)
+  amount        Decimal @db.Decimal(18, 2)
 
   type PayrollComponentType
 
@@ -1362,6 +1368,269 @@ model AdvanceReceipt {
 
   @@index([salaryAdvanceId])
   @@map("salary_advance_documents")
+}
+
+model PerformanceTemplate {
+  id String @id @default(uuid()) @db.Uuid
+
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  name String
+
+  description String?
+
+  reviewFrequency PerformanceReviewFrequency
+
+  status PerformanceTemplateStatus @default(DRAFT)
+
+  createdById String @db.Uuid
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  nodes PerformanceNode[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, name])
+  @@map("performance_templates")
+}
+
+model PerformanceNode {
+  id String @id @default(uuid()) @db.Uuid
+
+  templateId String              @db.Uuid
+  template   PerformanceTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  parentId String?          @db.Uuid
+  parent   PerformanceNode? @relation("PerformanceNodeHierarchy", fields: [parentId], references: [id])
+
+  children PerformanceNode[] @relation("PerformanceNodeHierarchy")
+
+  type PerformanceNodeType
+
+  name String
+
+  description String?
+
+  weight Decimal @default(1) @db.Decimal(10, 2)
+
+  displayOrder Int @default(0)
+
+  scoreType PerformanceScoreType?
+
+  maximumScore Decimal? @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@map("performance_nodes")
+}
+
+model PerformanceReview {
+  id String @id @default(uuid()) @db.Uuid
+
+  companyId String  @db.Uuid
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  name String
+
+  description String?
+
+  startDate DateTime
+
+  dueDate DateTime
+
+  status PerformanceReviewStatus
+
+  createdById String @db.Uuid
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  nodes PerformanceReviewNode[]
+
+  instances PerformanceReviewInstance[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt                    DateTime                      @updatedAt
+  performanceReviewAssignments PerformanceReviewAssignment[]
+
+  @@map("performance_reviews")
+}
+
+model PerformanceReviewNode {
+  id String @id @default(uuid()) @db.Uuid
+
+  reviewId String            @db.Uuid
+  review   PerformanceReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  parentId String?                @db.Uuid
+  parent   PerformanceReviewNode? @relation("ReviewNodeHierarchy", fields: [parentId], references: [id])
+
+  children PerformanceReviewNode[] @relation("ReviewNodeHierarchy")
+
+  type PerformanceNodeType
+
+  name String
+
+  description String?
+
+  weight Decimal @default(1) @db.Decimal(10, 2)
+
+  displayOrder Int @default(0)
+
+  scoreType PerformanceScoreType?
+
+  maximumScore Decimal? @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  updatedAt               DateTime                 @updatedAt
+  performanceReviewScores PerformanceReviewScore[]
+
+  @@map("performance_review_nodes")
+}
+
+model PerformanceReviewAssignment {
+  id String @id @default(uuid()) @db.Uuid
+
+  reviewId String            @db.Uuid
+  review   PerformanceReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  assignmentType PerformanceAssignmentType
+
+  departmentId String? @db.Uuid
+
+  employeeId String? @db.Uuid
+
+  positionId String? @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  @@map("performance_review_assignments")
+}
+
+model PerformanceReviewInstance {
+  id String @id @default(uuid()) @db.Uuid
+
+  reviewId String @db.Uuid
+
+  review PerformanceReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  subjectType PerformanceSubjectType
+
+  employeeId String? @db.Uuid
+
+  employee Employee? @relation("ReviewedEmployee", fields: [employeeId], references: [id])
+
+  departmentId String? @db.Uuid
+
+  department Department? @relation(fields: [departmentId], references: [id])
+
+  status ReviewInstanceStatus
+
+  overallScore Decimal?
+
+  completedAt DateTime?
+
+  reviewers PerformanceReviewer[]
+  createdAt DateTime @default(now())
+}
+
+model PerformanceReviewComment {
+  id String @id @default(uuid()) @db.Uuid
+
+  reviewerId String              @db.Uuid
+  reviewer   PerformanceReviewer @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  comment String
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@map("performance_review_comments")
+}
+
+model PerformanceReviewAttachment {
+  id String @id @default(uuid()) @db.Uuid
+
+  reviewerId String              @db.Uuid
+  reviewer   PerformanceReviewer @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  documentType String
+
+  originalFileName String
+
+  storageKey String
+
+  mimeType String
+
+  description String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@map("performance_review_attachments")
+}
+
+model PerformanceReviewScore {
+  id String @id @default(uuid()) @db.Uuid
+
+  reviewerId String @db.Uuid
+
+  reviewer PerformanceReviewer @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  reviewNodeId String @db.Uuid
+
+  reviewNode PerformanceReviewNode @relation(fields: [reviewNodeId], references: [id])
+
+  score Decimal?
+
+  comment String?
+
+  createdAt DateTime @default(now())
+}
+
+model PerformanceReviewer {
+  id String @id @default(uuid()) @db.Uuid
+
+  reviewInstanceId String @db.Uuid
+
+  reviewInstance PerformanceReviewInstance @relation(fields: [reviewInstanceId], references: [id], onDelete: Cascade)
+
+  reviewerId String @db.Uuid
+
+  reviewer Employee @relation("PerformanceReviewerEmployee", fields: [reviewerId], references: [id])
+
+
+  weight Decimal @default(1) @db.Decimal(10, 2)
+
+  status ReviewInstanceStatus @default(PENDING)
+
+  overallScore Decimal? @db.Decimal(10, 2)
+
+  submittedAt DateTime?
+
+  completedAt DateTime?
+
+  scores PerformanceReviewScore[]
+
+  comments PerformanceReviewComment[]
+
+  attachments PerformanceReviewAttachment[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([reviewInstanceId, reviewerId])
+  @@index([reviewInstanceId])
+  @@index([reviewerId])
+  @@map("performance_reviewers")
 }
 
 enum Gender {
@@ -1627,4 +1896,74 @@ enum PayrollOperation {
   FLOOR
 
   PERCENTAGE
+}
+
+enum PerformanceReviewFrequency {
+  ONE_TIME
+  MONTHLY
+  QUARTERLY
+  BIANNUALLY
+  YEARLY
+  CUSTOM
+}
+
+enum PerformanceTemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum PerformanceNodeType {
+  CATEGORY
+  ITEM
+}
+
+enum PerformanceScoreType {
+  PERCENTAGE
+  RATING_5
+  RATING_10
+  NUMERIC
+  BOOLEAN
+}
+
+enum PerformanceAssignmentType {
+  COMPANY
+  DEPARTMENT
+  POSITION
+  EMPLOYEE
+}
+
+enum PerformanceReviewStatus {
+  DRAFT
+  ASSIGNED
+  REVIEWED
+  CLOSED
+}
+
+enum PerformanceSubjectType {
+  EMPLOYEE
+  DEPARTMENT
+  TEAM
+  BRANCH
+  POSITION
+  COMPANY
+}
+
+enum ReviewInstanceStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  REVIEWED
+  APPROVED
+  COMPLETED
+  CANCELLED
+}
+
+enum PerformanceReviewerType {
+  MANAGER
+  SELF
+  PEER
+  HR
+  DEPARTMENT_HEAD
+  CUSTOM
 }
