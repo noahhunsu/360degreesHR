@@ -2,35 +2,51 @@ import { ComponentCalculationType, PayrollComponentType, PayrollOperation } from
 import z from "zod";
 
 
+export const expressionTokenSchema = z.object({
+  type: z.string(),
+  value: z.string().optional(),
+});
+
+export const arithmeticExpressionSchema = z.object({
+  type: z.literal("ARITHMETIC"),
+  tokens: z.array(expressionTokenSchema),
+});
+
+// Define the recursive schema directly
+export const payrollExpressionSchema: z.ZodType<
+  | { type: "ARITHMETIC"; tokens: z.infer<typeof expressionTokenSchema>[] }
+  | { type: "IF"; condition: z.infer<typeof expressionTokenSchema>[]; trueExpression: any; falseExpression: any }
+> = z.lazy(() =>
+  z.discriminatedUnion("type", [
+    arithmeticExpressionSchema,
+    z.object({
+      type: z.literal("IF"),
+      condition: z.array(expressionTokenSchema),
+      trueExpression: payrollExpressionSchema,
+      falseExpression: payrollExpressionSchema,
+    }),
+  ])
+);
+
+// Then use it in your main schema
 export const formulaExpressionSchema = z.object({
-  type : z.string(), 
-  componentId : z.string().optional()
-})
+  type: z.string(),
+  componentId: z.string().optional(),
+});
 
 export const createPayrollComponentSchema = z.object({
   name: z.string().trim().min(1),
-
   description: z.string().optional(),
-
   componentType: z.enum(PayrollComponentType),
-
   calculationType: z.enum(ComponentCalculationType),
-
   fixedValue: z.coerce.number().optional(),
-  rule : z.object({
-
+  rule: z.object({
     ruleName: z.string(),
-  
     ruleDescription: z.string().optional(),
-  
-    expression: z.array(formulaExpressionSchema),
-  }).optional()
-
+    expression: payrollExpressionSchema,
+  }).optional(),
 }).superRefine((data, ctx) => {
-  if (
-    data.calculationType === "FIXED" &&
-    data.fixedValue === undefined
-  ) {
+  if (data.calculationType === "FIXED" && data.fixedValue === undefined) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["fixedValue"],
@@ -38,11 +54,20 @@ export const createPayrollComponentSchema = z.object({
     });
   }
 
-  if (data.calculationType === "FORMULA" && data.rule !== undefined) {
-    if (!data.rule.ruleName) {
+  if (data.calculationType === "FORMULA") {
+    if (!data.rule) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["ruleName"],
+        path: ["rule"],
+        message: "Rule is required for FORMULA components.",
+      });
+      return;
+    }
+
+    if (!data.rule.ruleName || data.rule.ruleName.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["rule", "ruleName"],
         message: "Rule name is required.",
       });
     }
@@ -50,65 +75,14 @@ export const createPayrollComponentSchema = z.object({
     if (!data.rule.expression) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["expression"],
+        path: ["rule", "expression"],
         message: "Expression is required.",
       });
     }
   }
 });
 
-
-
-export const updatePayrollComponentSchema = z.object({
-  name: z.string().trim().min(1),
-
-  description: z.string().optional(),
-
-  componentType: z.enum(PayrollComponentType),
-
-  calculationType: z.enum(ComponentCalculationType),
-
-  fixedValue: z.coerce.number().optional(),
-  rule : z.object({
-
-    ruleName: z.string(),
-  
-    ruleDescription: z.string().optional(),
-  
-    expression: z.array(formulaExpressionSchema),
-  }).optional()
-
-}).superRefine((data, ctx) => {
-  if (
-    data.calculationType === "FIXED" &&
-    data.fixedValue === undefined
-  ) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["fixedValue"],
-      message: "Fixed value is required for FIXED components.",
-    });
-  }
-
-  if (data.calculationType === "FORMULA" && data.rule !== undefined) {
-    if (!data.rule.ruleName) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["ruleName"],
-        message: "Rule name is required.",
-      });
-    }
-
-    if (!data.rule.expression) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["expression"],
-        message: "Expression is required.",
-      });
-    }
-  }
-});
-
+export const updatePayrollComponentSchema = createPayrollComponentSchema;
 
 
 export const attachEmployeeComponentSchema = z.object({

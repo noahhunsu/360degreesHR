@@ -1334,9 +1334,6 @@ export class PayrollComponentManagementService {
 
     return dto;
   }
-  static async createPayrollRun() {}
-  static async processEmployees() {}
-  static async finalizePayroll() {}
 
   // Helper functions
 

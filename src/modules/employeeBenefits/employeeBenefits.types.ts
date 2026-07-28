@@ -1,4 +1,5 @@
 import type { PayrollComponentType, Prisma } from "@prisma/client";
+import type { ExpressionToken } from "../../payrollEngine/payrollEngine.types.js";
 
 export type PayrollBreakdownResult = {
   payrollComponentId: string;
@@ -15,3 +16,22 @@ export type EmployeePayrollResult = {
 
   breakdowns: PayrollBreakdownResult[];
 };
+
+export interface ArithmeticExpression {
+    type: "ARITHMETIC";
+    tokens: ExpressionToken[];
+}
+
+export interface IfExpression {
+    type: "IF";
+
+    condition: ExpressionToken[];
+
+    trueExpression: PayrollExpression;
+
+    falseExpression: PayrollExpression;
+}
+
+export type PayrollExpression =
+    | ArithmeticExpression
+    | IfExpression;
