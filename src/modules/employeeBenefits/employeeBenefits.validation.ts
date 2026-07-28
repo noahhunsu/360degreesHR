@@ -4,6 +4,8 @@ import z from "zod";
 
 export const expressionTokenSchema = z.object({
   type: z.string(),
+  componentId : z.string().optional(),
+  functionName : z.string().optional(),
   value: z.string().optional(),
 });
 
