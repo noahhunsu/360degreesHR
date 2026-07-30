@@ -416,10 +416,12 @@ export class PayrollComponentManagementService {
       throw new NotFoundError("Employee not found.");
     }
 
+    
     const componentIds = payload.components.map(
       (component) => component.componentId,
     );
 
+    console.log("The type of is ",typeof payload.components[0]?.effectiveFrom)
     const uniqueComponentIds = [...new Set(componentIds)];
 
     if (uniqueComponentIds.length !== componentIds.length) {
