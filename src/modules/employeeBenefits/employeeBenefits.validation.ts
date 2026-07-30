@@ -92,7 +92,7 @@ export const attachEmployeeComponentSchema = z.object({
     .array(
       z.object({
         componentId: z.string().uuid(),
-        amount: z.coerce.number().positive(),
+        amount: z.coerce.number(),
         effectiveFrom: z.coerce.date(),
         effectiveTo: z.coerce.date().optional(),
       }),
