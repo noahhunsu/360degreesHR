@@ -333,7 +333,10 @@ export class PayrollComponentManagementService {
       payload.month, // next month
       0, // last day of previous month
     );
+    console.log("Year is " , payload.year)
+    console.log("month is " , payload.month)
 
+    console.log("the payroll date" , payrollDate);
     const payrollComponent = await prismaClient.payrollComponent.findMany({
       where: {
         companyId: user.companyId,
