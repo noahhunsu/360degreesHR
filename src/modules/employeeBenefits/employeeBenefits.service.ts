@@ -35,12 +35,14 @@ export class PayrollComponentManagementService {
     payload: CreatePayrollComponentInput,
   ) {
     assertHR(user);
+    console.log("The payload to create " , payload)
 
     const existingPayrollComponent =
       await prismaClient.payrollComponent.findFirst({
         where: {
           companyId: user.companyId,
           name: payload.name.toLowerCase(),
+          isActive : true
         },
       });
     if (existingPayrollComponent) {
