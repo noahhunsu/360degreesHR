@@ -776,11 +776,11 @@ export class PayrollComponentManagementService {
     let totalEarnings = breakdown.payrollItem.totalEarnings;
     let totalDeductions = breakdown.payrollItem.totalDeductions;
 
-    if (breakdown.component.componentType === "EARNING") {
+    if (breakdown.component?.componentType === "EARNING") {
       totalEarnings = totalEarnings.minus(breakdown.amount);
       totalEarnings = totalEarnings.plus(payload.amount);
     }
-    if (breakdown.component.componentType === "DEDUCTION") {
+    if (breakdown.component?.componentType === "DEDUCTION") {
       totalDeductions = totalDeductions.minus(breakdown.amount);
       totalDeductions = totalDeductions.plus(payload.amount);
     }
@@ -947,7 +947,7 @@ export class PayrollComponentManagementService {
       let totalDeductions = new Prisma.Decimal(payrollItem.totalDeductions);
 
       for (const breakdown of payrollBreakdowns) {
-        if (breakdown.component.componentType === "EARNING") {
+        if (breakdown.component?.componentType === "EARNING") {
           totalEarnings = totalEarnings.minus(breakdown.amount);
         } else {
           totalDeductions = totalDeductions.minus(breakdown.amount);
@@ -1297,14 +1297,14 @@ export class PayrollComponentManagementService {
     }
 
     const earnings = payrollItem.breakdown
-      .filter((item) => item.component.componentType === "EARNING")
+      .filter((item) => item.component?.componentType === "EARNING")
       .map((item) => ({
         name: item.componentName,
         amount: Number(item.amount),
       }));
 
     const deductions = payrollItem.breakdown
-      .filter((item) => item.component.componentType === "DEDUCTION")
+      .filter((item) => item.component?.componentType === "DEDUCTION")
       .map((item) => ({
         name: item.componentName,
         amount: Number(item.amount),

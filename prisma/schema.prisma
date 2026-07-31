@@ -1298,8 +1298,8 @@ model PayrollBreakdown {
   payrollItemId String      @db.Uuid
   payrollItem   PayrollItem @relation(fields: [payrollItemId], references: [id], onDelete: Cascade)
 
-  componentId String           @db.Uuid
-  component   PayrollComponent @relation(fields: [componentId], references: [id])
+  componentId String?           @db.Uuid
+  component   PayrollComponent? @relation(fields: [componentId], references: [id])
 
   componentName String
   amount        Decimal @db.Decimal(18, 2)
