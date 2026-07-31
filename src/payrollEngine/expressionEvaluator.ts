@@ -72,6 +72,7 @@ export class ExpressionEvaluator {
       output.push(operators.pop()!);
     }
 
+    console.log("the output is " , output);
     return output;
   }
 
@@ -111,6 +112,8 @@ export class ExpressionEvaluator {
       throw new BadRequestError("Invalid expression");
     }
 
+    
+     console.log('the stack result is ' , stack[0]!);
     return stack[0]!;
   }
 
@@ -279,6 +282,7 @@ export class ExpressionEvaluator {
     component: PayrollComponentWithRule,
     context: PayrollContext,
   ): Promise<Prisma.Decimal> {
+    console.log("the component is " , component)
     if (!component.rule) {
       throw new BadRequestError("No rule found");
     }
