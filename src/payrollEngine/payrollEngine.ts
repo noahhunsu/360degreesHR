@@ -71,20 +71,20 @@ export class PayrollEngine {
         where: {
           employeeId: employee.id,
 
-          effectiveFrom: {
-            lte: payrollDate,
-          },
+          // effectiveFrom: {
+          //   lte: payrollDate,
+          // },
 
-          OR: [
-            {
-              effectiveTo: null,
-            },
-            {
-              effectiveTo: {
-                gte: payrollDate,
-              },
-            },
-          ],
+          // OR: [
+          //   {
+          //     effectiveTo: null,
+          //   },
+          //   {
+          //     effectiveTo: {
+          //       gte: payrollDate,
+          //     },
+          //   },
+          // ],
         },
 
         include: {
