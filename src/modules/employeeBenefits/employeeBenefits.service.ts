@@ -1410,7 +1410,7 @@ export class PayrollComponentManagementService {
     );
 
     payrollResult.breakdowns.push({
-      payrollComponentId: "null",
+      payrollComponentId: null,
       name: "Salary Advance",
       componentType: "DEDUCTION",
       amount: salaryAdvance.approvedAmount!,
