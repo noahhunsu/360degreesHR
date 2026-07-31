@@ -430,7 +430,6 @@ export class PayrollComponentManagementService {
       (component) => component.componentId,
     );
 
-    console.log("The type of is ",typeof payload.components[0]?.effectiveFrom)
     const uniqueComponentIds = [...new Set(componentIds)];
 
     if (uniqueComponentIds.length !== componentIds.length) {
@@ -469,7 +468,7 @@ export class PayrollComponentManagementService {
       );
     }
 
-    await prismaClient.employeeCompensation.createMany({
+    const compensation = await prismaClient.employeeCompensation.createMany({
       data: payload.components.map((component) => ({
         employeeId,
         componentId: component.componentId,
@@ -480,6 +479,7 @@ export class PayrollComponentManagementService {
     });
 
     return {
+      compensation ,
       message: "Payroll components attached successfully.",
     };
   }
