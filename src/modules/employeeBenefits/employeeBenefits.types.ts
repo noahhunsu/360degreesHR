@@ -2,7 +2,7 @@ import type { PayrollComponentType, Prisma } from "@prisma/client";
 import type { ExpressionToken } from "../../payrollEngine/payrollEngine.types.js";
 
 export type PayrollBreakdownResult = {
-  payrollComponentId: string | null;
+  payrollComponentId?: string ;
   name: string;
   componentType: PayrollComponentType;
   amount: Prisma.Decimal;

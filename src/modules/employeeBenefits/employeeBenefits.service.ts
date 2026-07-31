@@ -1410,7 +1410,7 @@ export class PayrollComponentManagementService {
     );
 
     payrollResult.breakdowns.push({
-      payrollComponentId: null,
+      
       name: "Salary Advance",
       componentType: "DEDUCTION",
       amount: salaryAdvance.approvedAmount!,
@@ -1418,7 +1418,6 @@ export class PayrollComponentManagementService {
 
     return payrollResult;
   }
-  private static async buildPayrollItem() {}
 
   private static async saveEmployee(
     tx: Prisma.TransactionClient,
@@ -1441,7 +1440,7 @@ export class PayrollComponentManagementService {
     await tx.payrollBreakdown.createMany({
       data: payrollResult.breakdowns.map((breakdown) => ({
         payrollItemId: payrollItem.id,
-        componentId: breakdown.payrollComponentId,
+        ...(breakdown.payrollComponentId && {componentId: breakdown.payrollComponentId}) ,
         amount: breakdown.amount,
         componentName: breakdown.name,
         type: breakdown.componentType,
