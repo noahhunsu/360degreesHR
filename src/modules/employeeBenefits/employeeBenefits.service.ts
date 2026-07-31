@@ -80,6 +80,7 @@ export class PayrollComponentManagementService {
           },
         });
       }
+      console.log("The payrolee component" , payrollComponent)
       return payrollComponent;
     });
     return payrollTransaction;
