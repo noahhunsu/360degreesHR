@@ -367,14 +367,14 @@ export class PayrollComponentManagementService {
           payrollDate,
           context,
         );
-        // const payrollResult = this.buildPayrollResult(evaluatedComponents);
+        const payrollResult = this.buildPayrollResult(evaluatedComponents);
 
-        // const adjustedPayroll = await this.applyPayrollAdjustments(
-        //   // tx,
-        //   employee,
-        //   payrollResult,
-        // );
-        // await this.saveEmployee(tx, payrollRun.id, employee, adjustedPayroll);
+        const adjustedPayroll = await this.applyPayrollAdjustments(
+          // tx,
+          employee,
+          payrollResult,
+        );
+        await this.saveEmployee(tx, payrollRun.id, employee, adjustedPayroll);
       }
     });
 
