@@ -255,7 +255,8 @@ export class ExpressionEvaluator {
 
     switch (component.calculationType) {
       case "FIXED":
-        value = new Prisma.Decimal(component.fixedValue!);
+        console.log("Component in case " , component)
+        value = new Prisma.Decimal(0);
 
         break;
 
