@@ -91,7 +91,8 @@ export class PayrollEngine {
           component: true,
         },
       });
-
+      
+      console.log("Employee compensations " , employeeCompensations)
     for (const compensation of employeeCompensations) {
       console.log("Employee compensations " , compensation)
       context.values.set(compensation.componentId, {component : compensation.component , amount : compensation.amount});

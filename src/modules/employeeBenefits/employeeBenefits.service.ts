@@ -1439,6 +1439,7 @@ export class PayrollComponentManagementService {
       },
     });
 
+    console.log("The breakdown is ", payrollResult.breakdowns)
     await tx.payrollBreakdown.createMany({
       data: payrollResult.breakdowns.map((breakdown) => ({
         payrollItemId: payrollItem.id,
