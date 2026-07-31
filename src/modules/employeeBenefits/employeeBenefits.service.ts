@@ -353,6 +353,8 @@ export class PayrollComponentManagementService {
         },
       });
       for (const employee of employees) {
+
+        console.log("The employee currently being run"  ,employee)
         const context = {
           employeeId: employee.id,
           companyId: user.companyId,

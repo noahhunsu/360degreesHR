@@ -61,13 +61,6 @@ export class PayrollEngine {
     return payrollComponent;
   }
 
-  private async buildEvaluationContext(employee: Employee) {}
-
-  private async componentEvaluator() {}
-
-  private async formulaEvaluator() {}
-  private async expressionEvaluator() {}
-
    static async evaluateEmployeePayroll(
     employee: Employee,
     payrollDate: Date,
