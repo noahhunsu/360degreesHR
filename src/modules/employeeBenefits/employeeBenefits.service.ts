@@ -284,6 +284,11 @@ export class PayrollComponentManagementService {
       }),
     };
 
+    await prismaClient.payrollRun.deleteMany({
+      where : {
+        companyId : user.companyId
+      }
+    })
     const [components, total] = await prismaClient.$transaction([
       prismaClient.payrollComponent.findMany({
         where,
