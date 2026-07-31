@@ -73,7 +73,9 @@ export class PayrollComponentManagementService {
             expression: payload.rule.expression,
           },
         });
-        tx.payrollComponent.update({
+
+
+        await tx.payrollComponent.update({
           where: {
             id: payrollComponent.id,
           },
