@@ -68,8 +68,14 @@ export class PayrollEngine {
   ): Promise<Map<string, EvaluatedComponent>> {
     console.log("Employee from engine is " , employee)
 
-    const compoent = await prismaClient.employeeCompensation.findMany()
-       console.log("the components ")
+    const compoent = await prismaClient.employeeCompensation.findMany({
+      where  :{
+        employee : {
+          companyId : employee.companyId
+        }
+      }
+    })
+       console.log("the employee cocomponents " , compoent)
     const employeeCompensations =
       await prismaClient.employeeCompensation.findMany({
         where: {
@@ -97,20 +103,21 @@ export class PayrollEngine {
       });
       
       console.log("Employee compensations " , employeeCompensations)
-    for (const compensation of employeeCompensations) {
-      console.log("Employee compensations " , compensation)
-      context.values.set(compensation.componentId, {component : compensation.component , amount : compensation.amount});
-    }
-    const calculatedComponents = await prismaClient.payrollComponent.findMany({
+      for (const compensation of employeeCompensations) {
+        console.log("Employee compensations " , compensation)
+        context.values.set(compensation.componentId, {component : compensation.component , amount : compensation.amount});
+      }
+      const calculatedComponents = await prismaClient.payrollComponent.findMany({
       where: {
         companyId: employee.companyId,
-
+        
         calculationType: "FORMULA",
-
+        
         isActive: true,
       },
     });
-
+    
+    console.log("Payroll compensations " , calculatedComponents)
     for (const calcComponent of calculatedComponents){
         await ExpressionEvaluator.componentEvaluator(
             calcComponent.id , context
