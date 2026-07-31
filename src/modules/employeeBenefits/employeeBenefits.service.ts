@@ -35,7 +35,6 @@ export class PayrollComponentManagementService {
     payload: CreatePayrollComponentInput,
   ) {
     assertHR(user);
-    console.log("The payload to create " , payload)
 
     const existingPayrollComponent =
       await prismaClient.payrollComponent.findFirst({
@@ -84,7 +83,6 @@ export class PayrollComponentManagementService {
           },
         });
       }
-      console.log("The payrolee component" , payrollComponent)
       return payrollComponent;
     });
     return payrollTransaction;

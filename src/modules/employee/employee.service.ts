@@ -226,7 +226,6 @@ export class EmployeeService {
  for (const [index, row] of rows.entries()) {
   try {
 
-    console.log("The row is ", row)
     const normalizedRow = normalizeEmployeeRow(row)
     const parsed =
       createEmployeeSchema.safeParse(normalizedRow);

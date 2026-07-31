@@ -17,7 +17,6 @@ export class DisciplinaryController {
         });
       }
       const user = (req as any).user;
-      console.log("user is " , user)
       const result = await DisciplinaryService.createDisciplinaryRecordService(
         user,
         employeeId,

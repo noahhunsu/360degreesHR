@@ -66,6 +66,7 @@ export class PayrollEngine {
     payrollDate: Date,
     context: PayrollContext,
   ): Promise<Map<string, EvaluatedComponent>> {
+    console.log("Employee from engine is " , employee)
     const employeeCompensations =
       await prismaClient.employeeCompensation.findMany({
         where: {
