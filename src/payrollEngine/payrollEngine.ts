@@ -67,25 +67,28 @@ export class PayrollEngine {
     context: PayrollContext,
   ): Promise<Map<string, EvaluatedComponent>> {
     console.log("Employee from engine is " , employee)
+
+    const compoent = await prismaClient.employeeCompensation.findMany()
+       console.log("the components ")
     const employeeCompensations =
       await prismaClient.employeeCompensation.findMany({
         where: {
           employeeId: employee.id,
 
-          // effectiveFrom: {
-          //   lte: payrollDate,
-          // },
+          effectiveFrom: {
+            lte: payrollDate,
+          },
 
-          // OR: [
-          //   {
-          //     effectiveTo: null,
-          //   },
-          //   {
-          //     effectiveTo: {
-          //       gte: payrollDate,
-          //     },
-          //   },
-          // ],
+          OR: [
+            {
+              effectiveTo: null,
+            },
+            {
+              effectiveTo: {
+                gte: payrollDate,
+              },
+            },
+          ],
         },
 
         include: {
