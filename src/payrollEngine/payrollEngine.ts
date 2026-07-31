@@ -110,6 +110,7 @@ export class PayrollEngine {
             calcComponent.id , context
         )
     }
+    console.log("the context is " , context.values)
     return context.values
   }
 }
