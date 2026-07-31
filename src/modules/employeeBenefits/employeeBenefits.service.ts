@@ -41,7 +41,7 @@ export class PayrollComponentManagementService {
         where: {
           companyId: user.companyId,
           name: payload.name.toLowerCase(),
-          isActive : true
+          isActive: true,
         },
       });
     if (existingPayrollComponent) {
@@ -62,9 +62,9 @@ export class PayrollComponentManagementService {
             }),
         },
       });
-      console.log("The payload rule is " , payload.rule)
+      console.log("The payload rule is ", payload.rule);
       if (payload.calculationType === "FORMULA" && payload.rule) {
-        console.log("this branch was hit")
+        console.log("this branch was hit");
         const payrollRule = await tx.payrollRule.create({
           data: {
             companyId: user.companyId,
@@ -72,7 +72,6 @@ export class PayrollComponentManagementService {
             expression: payload.rule.expression,
           },
         });
-
 
         await tx.payrollComponent.update({
           where: {
@@ -285,10 +284,10 @@ export class PayrollComponentManagementService {
     };
 
     await prismaClient.payrollRun.deleteMany({
-      where : {
-        companyId : user.companyId
-      }
-    })
+      where: {
+        companyId: user.companyId,
+      },
+    });
     const [components, total] = await prismaClient.$transaction([
       prismaClient.payrollComponent.findMany({
         where,
@@ -329,7 +328,11 @@ export class PayrollComponentManagementService {
     if (payrollRunCheck) {
       throw new BadRequestError("Payroll for selected period already run");
     }
-    const payrollDate = new Date();
+    const payrollDate = new Date(
+      payload.year,
+      payload.month, // next month
+      0, // last day of previous month
+    );
 
     const payrollComponent = await prismaClient.payrollComponent.findMany({
       where: {
@@ -356,8 +359,7 @@ export class PayrollComponentManagementService {
         },
       });
       for (const employee of employees) {
-
-        console.log("The employee currently being run"  ,employee)
+        console.log("The employee currently being run", employee);
         const context = {
           employeeId: employee.id,
           companyId: user.companyId,
@@ -428,7 +430,6 @@ export class PayrollComponentManagementService {
       throw new NotFoundError("Employee not found.");
     }
 
-    
     const componentIds = payload.components.map(
       (component) => component.componentId,
     );
@@ -482,7 +483,7 @@ export class PayrollComponentManagementService {
     });
 
     return {
-      compensation ,
+      compensation,
       message: "Payroll components attached successfully.",
     };
   }
@@ -1415,7 +1416,6 @@ export class PayrollComponentManagementService {
     );
 
     payrollResult.breakdowns.push({
-      
       name: "Salary Advance",
       componentType: "DEDUCTION",
       amount: salaryAdvance.approvedAmount!,
@@ -1441,11 +1441,13 @@ export class PayrollComponentManagementService {
       },
     });
 
-    console.log("The breakdown is ", payrollResult.breakdowns)
+    console.log("The breakdown is ", payrollResult.breakdowns);
     await tx.payrollBreakdown.createMany({
       data: payrollResult.breakdowns.map((breakdown) => ({
         payrollItemId: payrollItem.id,
-        ...(breakdown.payrollComponentId && {componentId: breakdown.payrollComponentId}) ,
+        ...(breakdown.payrollComponentId && {
+          componentId: breakdown.payrollComponentId,
+        }),
         amount: breakdown.amount,
         componentName: breakdown.name,
         type: breakdown.componentType,
