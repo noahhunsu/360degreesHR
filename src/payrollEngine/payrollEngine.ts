@@ -93,6 +93,7 @@ export class PayrollEngine {
       });
 
     for (const compensation of employeeCompensations) {
+      console.log("Employee compensations " , compensation)
       context.values.set(compensation.componentId, {component : compensation.component , amount : compensation.amount});
     }
     const calculatedComponents = await prismaClient.payrollComponent.findMany({
