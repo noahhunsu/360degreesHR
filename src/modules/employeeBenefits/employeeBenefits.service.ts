@@ -63,7 +63,9 @@ export class PayrollComponentManagementService {
             }),
         },
       });
+      console.log("The payload rule is " , payload.rule)
       if (payload.calculationType === "FORMULA" && payload.rule) {
+        console.log("this branch was hit")
         const payrollRule = await tx.payrollRule.create({
           data: {
             companyId: user.companyId,
