@@ -648,7 +648,7 @@ static async getAllPayrollComponentsController(
       );
       return res.status(200).json({
         success: true,
-        message: "Payroll run deleted successfully",
+        message: "Pay successfully",
         data: result,
       });
     } catch (error) {

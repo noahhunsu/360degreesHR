@@ -329,10 +329,6 @@ export class PayrollComponentManagementService {
       payload.month, // next month
       0, // last day of previous month
     );
-    console.log("Year is " , payload.year)
-    console.log("month is " , payload.month)
-
-    console.log("the payroll date" , payrollDate);
     const payrollComponent = await prismaClient.payrollComponent.findMany({
       where: {
         companyId: user.companyId,
@@ -732,7 +728,8 @@ export class PayrollComponentManagementService {
       where: {
         companyId: user.companyId,
         id: payrollId,
-        status: "DRAFT",
+        status: {
+          not : "PAID"},
       },
     });
 
@@ -1440,7 +1437,6 @@ export class PayrollComponentManagementService {
       },
     });
 
-    console.log("The breakdown is ", payrollResult.breakdowns);
     await tx.payrollBreakdown.createMany({
       data: payrollResult.breakdowns.map((breakdown) => ({
         payrollItemId: payrollItem.id,
