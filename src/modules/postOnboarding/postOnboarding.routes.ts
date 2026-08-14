@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { parseAuthHeaderMiddleware } from "./postOnboarding.middleware.js";
 import { PostOnboardingController } from "./postOnboarding.controller.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { createOnboardingTaskSchema, createOnboardingTaskTemplateSchema } from "./postOnboarding.validation.js";
+import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 
 
 

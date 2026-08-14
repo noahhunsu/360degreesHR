@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { parseAuthHeaderMiddleware } from "./employmentHistory.middleware.js";
 import { EmploymentHistoryController } from "./employmentHistory.controller.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { createEmploymentHistorySchema } from "./employmentHistory.validation.js";
+import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 
 
 

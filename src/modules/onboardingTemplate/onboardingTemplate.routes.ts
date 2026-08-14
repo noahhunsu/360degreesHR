@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { parseAuthHeaderMiddleware } from "./onboardingTemplate.middleware.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { OnboardingTemplateController } from "./onboardingTemplate.controller.js";
 import { createOnboardingTemplateSchema, updateSingleOnboardingTemplateSchema } from "./onboardingTemplate.validation.js";
+import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 
 
 

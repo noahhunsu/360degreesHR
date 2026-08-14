@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { parseAuthHeaderMiddleware } from "./department.middleware.js";
 import { DepartmentController } from "./department.controller.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { createDepartmentSchema, updateDepartmentSchema } from "./department.validation.js";
+import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 
 
 

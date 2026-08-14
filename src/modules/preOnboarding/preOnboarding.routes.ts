@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { parseAuthHeaderMiddleware } from "./preOnboarding.middleware.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { createOnboardingInvitationSchema,  getPresignedUrlInputForPreOnboardingSchema,  onboardingActionSubmissionSchema, saveOnboardingSubmissionSchema } from "./preOnboarding.validation.js";
 import { PreOnboardingController } from "./preOnboarding.controller.js";
 import multer from "multer";
+import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 
 
 

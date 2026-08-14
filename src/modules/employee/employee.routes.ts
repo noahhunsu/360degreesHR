@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { EmployeeController } from "./employee.controller.js";
-import { parseAuthHeaderMiddleware } from "./employee.middleware.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { createEmployeeSchema, updateEmployeeSchema } from "./employee.validation.js";
 import multer from "multer";
+import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 
 
 

@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { parseAuthHeaderMiddleware } from "./jobCreation.middleware.js";
 import { JobOpeningCreationController} from "./jobCreation.controller.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { createJobOpeningSchema, updateJobOpeningInputSchema } from "./jobCreation.validation.js";
+import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 
 
 

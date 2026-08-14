@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { parseAuthHeaderMiddleware } from "./companyDebts.middleware.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { LoansAndAdvanceController } from "./companyDebts.controller.js";
 import { approveOrRejectSalaryAdvanceRequestSchema, confirmPaidSalaryAdvanceRequestSchema, createSalaryAdvanceSchema } from "./companyDebts.validation.js";
+import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 
 
 

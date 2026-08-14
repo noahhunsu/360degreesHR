@@ -9,17 +9,21 @@ export class PostOnboardingController {
   ) {
     try {
       const user = (req as any).user;
-      const result = await postOnboardingService.createOnboardingTaskTemplateService(req.body , user)
+      const result =
+        await postOnboardingService.createOnboardingTaskTemplateService(
+          req.body,
+          user,
+        );
       return res.status(201).json({
         success: true,
         message: "Onboarding Task Template Created successfully",
-        data : result
+        data: result,
       });
     } catch (error) {
       next(error);
     }
   }
-  
+
   static async getOnboardingTaskTemplateController(
     req: Request,
     res: Response,
@@ -27,11 +31,12 @@ export class PostOnboardingController {
   ) {
     try {
       const user = (req as any).user;
-      const result = await postOnboardingService.getOnboardingTaskTemplatesService(user)
+      const result =
+        await postOnboardingService.getOnboardingTaskTemplatesService(user);
       return res.status(200).json({
         success: true,
         message: "Onboarding Task Template fetched successfully",
-        data : result
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -44,7 +49,7 @@ export class PostOnboardingController {
     next: NextFunction,
   ) {
     try {
-           const templateId = req.params.templateId;
+      const templateId = req.params.templateId;
 
       if (!templateId || Array.isArray(templateId)) {
         return res.status(400).json({
@@ -53,11 +58,15 @@ export class PostOnboardingController {
         });
       }
       const user = (req as any).user;
-      const result = await postOnboardingService.deactivateOnboardingTaskTemplateService(templateId ,user)
+      const result =
+        await postOnboardingService.deactivateOnboardingTaskTemplateService(
+          templateId,
+          user,
+        );
       return res.status(200).json({
         success: true,
         message: "Onboarding Task Template deactivated successfully",
-        data : result
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -69,7 +78,7 @@ export class PostOnboardingController {
     next: NextFunction,
   ) {
     try {
-           const employeeId = req.params.employeeId;
+      const employeeId = req.params.employeeId;
 
       if (!employeeId || Array.isArray(employeeId)) {
         return res.status(400).json({
@@ -78,11 +87,15 @@ export class PostOnboardingController {
         });
       }
       const user = (req as any).user;
-      const result = await postOnboardingService.createOnboardingTaskService(employeeId ,user , req.body)
+      const result = await postOnboardingService.createOnboardingTaskService(
+        employeeId,
+        user,
+        req.body,
+      );
       return res.status(201).json({
         success: true,
         message: "Onboarding Task created successfully",
-        data : result
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -95,11 +108,12 @@ export class PostOnboardingController {
   ) {
     try {
       const user = (req as any).user;
-      const result = await postOnboardingService.getMyOnboardingTaskService(user )
+      const result =
+        await postOnboardingService.getMyOnboardingTaskService(user);
       return res.status(200).json({
         success: true,
         message: "Onboarding Task gotten successfully",
-        data : result
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -111,7 +125,7 @@ export class PostOnboardingController {
     next: NextFunction,
   ) {
     try {
-             const taskId = req.params.taskId;
+      const taskId = req.params.taskId;
 
       if (!taskId || Array.isArray(taskId)) {
         return res.status(400).json({
@@ -120,11 +134,14 @@ export class PostOnboardingController {
         });
       }
       const user = (req as any).user;
-      const result = await postOnboardingService.startMyOnboardingTaskService(taskId , user )
+      const result = await postOnboardingService.startMyOnboardingTaskService(
+        taskId,
+        user,
+      );
       return res.status(200).json({
         success: true,
         message: "Onboarding Task created successfully",
-        data : result
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -136,7 +153,7 @@ export class PostOnboardingController {
     next: NextFunction,
   ) {
     try {
-             const taskId = req.params.taskId;
+      const taskId = req.params.taskId;
 
       if (!taskId || Array.isArray(taskId)) {
         return res.status(400).json({
@@ -145,24 +162,28 @@ export class PostOnboardingController {
         });
       }
       const user = (req as any).user;
-      const result = await postOnboardingService.completeMyOnboardingTaskService(taskId , user )
+      const result =
+        await postOnboardingService.completeMyOnboardingTaskService(
+          taskId,
+          user,
+        );
       return res.status(200).json({
         success: true,
         message: "Onboarding Task completed successfully",
-        data : result
+        data: result,
       });
     } catch (error) {
       next(error);
     }
   }
-  
+
   static async getIncompleteOnboardingTaskController(
     req: Request,
     res: Response,
     next: NextFunction,
   ) {
     try {
-             const employeeId = req.params.employeeId;
+      const employeeId = req.params.employeeId;
 
       if (!employeeId || Array.isArray(employeeId)) {
         return res.status(400).json({
@@ -171,17 +192,18 @@ export class PostOnboardingController {
         });
       }
       const user = (req as any).user;
-      const result = await postOnboardingService.getIncompleteOnboardingTaskService(user,employeeId )
+      const result =
+        await postOnboardingService.getIncompleteOnboardingTaskService(
+          user,
+          employeeId,
+        );
       return res.status(200).json({
         success: true,
         message: "Incomplete Onboarding Tasks fetched successfully",
-        data : result
+        data: result,
       });
     } catch (error) {
       next(error);
     }
   }
-  
-
-  
 }

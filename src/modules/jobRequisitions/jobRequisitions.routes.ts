@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { parseAuthHeaderMiddleware } from "./jobRequisitions.middleware.js";
 import { JobRequisitionController} from "./jobRequisitions.controller.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { acceptOrRejectRequisitionInputSchema, createJobRequisitionInputSchema, updateJobRequisitionInputSchema } from "./jobRequisitions.validation.js";
+import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 
 const router = Router()
 

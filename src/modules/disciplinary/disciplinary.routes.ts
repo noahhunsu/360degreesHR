@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { parseAuthHeaderMiddleware } from "./disciplinary.middleware.js";
 import { DisciplinaryController } from "./disciplinary.controller.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { createDisciplinarySchema, resolveDisciplinarySchema } from "./disciplinary.validation.js";
+import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
 
 
 

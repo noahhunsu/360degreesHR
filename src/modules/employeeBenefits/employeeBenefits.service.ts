@@ -1346,6 +1346,12 @@ export class PayrollComponentManagementService {
     return dto;
   }
 
+  static async getAllPayrollRunsToFetchPaySlip(user : User) {
+    assertUser(user)
+
+    return 
+  }
+
   // Helper functions
 
   private static buildPayrollResult(

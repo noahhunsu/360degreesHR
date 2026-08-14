@@ -23,6 +23,7 @@ model Company {
   users                 User[]
   onboardingInvitations OnboardingInvitation[]
   employeeDocuments     EmployeeDocument[]
+  companyRole         CompanyRole[]
 
   onboardingSubmissions OnboardingSubmission[]
 
@@ -119,6 +120,7 @@ model User {
   password             String
   phone                String?
   role                 Role
+  userRole             UserRole[]
   isActive             Boolean                @default(true)
   lastLogin            DateTime?
   resetToken           String?
@@ -169,6 +171,78 @@ model User {
 
   @@index([companyId])
   @@map("users")
+}
+
+model UserRole {
+  id        String   @id @default(uuid()) @db.Uuid
+
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  roleId    String   @db.Uuid
+  role      CompanyRole     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model CompanyRole {
+  id          String   @id @default(uuid()) @db.Uuid
+
+  companyId   String   @db.Uuid
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+
+  isActive    Boolean  @default(true)
+
+  permissions RolePermission[]
+  users       UserRole[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+
+  name        String   @unique
+  description String?
+
+  roles       RolePermission[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid()) @db.Uuid
+
+  roleId       String     @db.Uuid
+  role         CompanyRole       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  permissionId String     @db.Uuid
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+
+
+  createdAt    DateTime   @default(now())
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
 }
 
 model Department {
