@@ -5,3 +5,8 @@ export interface User {
       companyId: string,
       role: string,
 }
+export interface AuthorizationContext {
+      userId: string,
+      companyId: string,
+      permissions : string[]
+}

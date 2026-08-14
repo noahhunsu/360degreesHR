@@ -24,6 +24,8 @@ import type {
   ResetPasswordInput,
 } from "./auth.validation.js";
 import { Role } from "@prisma/client";
+import { SystemSettingsService } from "../system_settings/system_settings.service.js";
+import type { User } from "../../shared/types/global.types.js";
 export class AuthService {
   static async registerService(payload: RegisterInput) {
     // destructuring the payload
@@ -99,6 +101,23 @@ export class AuthService {
 
         }
       })
+
+      // We create the super admin role
+      let newUser : User= {
+        userId : user.id , 
+        companyId : company.id , 
+        role : user.role
+      }
+      let {newRole} = await SystemSettingsService.createRoleService(newUser , {name : "system_admin"});
+      let permissions = await tx.permission.findMany();
+      // Getting out only the permission ids
+      let permissionUuids = permissions.map((permission )=> permission.id );
+
+      // Assigning all the permissions to the system_admin role created
+      await SystemSettingsService.assignPermissionsToRoleService(newUser , newRole.id , permissionUuids)
+      // Assigning the role to the new user created.
+      await SystemSettingsService.assignRoleToUserService(newUser , newRole.id , user.id)
+      
       return {
         company,
         user,

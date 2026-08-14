@@ -77,7 +77,10 @@ export class SystemSettingsService {
     roleId: string,
     payload: UpdateRoleInput,
   ) {
-    await checkRoleInCompany(user, roleId);
+    let role = await checkRoleInCompany(user, roleId);
+    if (role.name === "system_admin") {
+      throw new BadRequestError("Sorry , you can't edit 'system_admin' role");
+    }
 
     const updatedRole = await prismaClient.companyRole.update({
       where: {
@@ -92,7 +95,11 @@ export class SystemSettingsService {
     return updatedRole;
   }
   static async deleteRoleService(user: User, roleId: string) {
-    await checkRoleInCompany(user, roleId);
+    let role = await checkRoleInCompany(user, roleId);
+
+    if (role.name === "system_admin") {
+      throw new BadRequestError("Sorry , you can't edit 'system_admin' role");
+    }
 
     const deletedRole = await prismaClient.companyRole.delete({
       where: {
@@ -121,7 +128,11 @@ export class SystemSettingsService {
     roleId: string,
     permissions: string[],
   ) {
-    await checkRoleInCompany(user, roleId);
+    let role = await checkRoleInCompany(user, roleId);
+
+    if (role.name === "system_admin".toLowerCase()) {
+      throw new BadRequestError("Sorry , You can't edit system_admin role");
+    }
 
     await checkPermissionExists(permissions);
 
@@ -131,11 +142,11 @@ export class SystemSettingsService {
   }
 
   static async assignRoleToUserService(user: User, roleId: string, to: string) {
-    if (user.userId === to) {
-      throw new BadRequestError("You can't assign a role to your self");
-    }
+    // if (user.userId === to) {
+    //   throw new BadRequestError("You can't assign a role to your self");
+    // }
 
-    await checkUserInCompany(user , to)
+    await checkUserInCompany(user, to);
     await checkRoleInCompany(user, roleId);
 
     const userRole = await prismaClient.userRole.create({
@@ -148,8 +159,12 @@ export class SystemSettingsService {
     return userRole;
   }
 
-  static async deleteRoleInUserService(user: User, roleId: string, userId: string) {
-    await checkUserInCompany(user , userId)
+  static async deleteRoleInUserService(
+    user: User,
+    roleId: string,
+    userId: string,
+  ) {
+    await checkUserInCompany(user, userId);
 
     await checkRoleInCompany(user, roleId);
     const userRole = await prismaClient.userRole.findFirst({
@@ -171,44 +186,46 @@ export class SystemSettingsService {
 
     return deleteRole;
   }
-  static async getAllRolesInUserService (user : User , userId : string ) {
-    await checkUserInCompany(user , userId)
+  static async getAllRolesInUserService(user: User, userId: string) {
+    await checkUserInCompany(user, userId);
     const userRoles = await prismaClient.userRole.findMany({
-      where : {
-        userId 
-      } , 
-      include : {
-        user : true , 
-        role : {
-          include : {
-            permissions : true
-          }
-        }
-      }
-    })
+      where: {
+        userId,
+      },
+      include: {
+        user: true,
+        role: {
+          include: {
+            permissions: true,
+          },
+        },
+      },
+    });
 
-    return userRoles
-
+    return userRoles;
   }
-  static async getSingleRolesInUserService (user : User ,roleId : string ,  userId : string ) {
-    await checkUserInCompany(user , userId)
-    await checkRoleInCompany(user , roleId)
+  static async getSingleRolesInUserService(
+    user: User,
+    roleId: string,
+    userId: string,
+  ) {
+    await checkUserInCompany(user, userId);
+    await checkRoleInCompany(user, roleId);
     const userRoles = await prismaClient.userRole.findFirst({
-      where : {
-        userId , 
-        roleId
-      } , 
-      include : {
-        user : true , 
-        role : {
-          include : {
-            permissions : true
-          }
-        }
-      }
-    })
+      where: {
+        userId,
+        roleId,
+      },
+      include: {
+        user: true,
+        role: {
+          include: {
+            permissions: true,
+          },
+        },
+      },
+    });
 
-    return userRoles
-
+    return userRoles;
   }
 }

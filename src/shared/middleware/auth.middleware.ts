@@ -3,6 +3,9 @@
 
 import type { NextFunction, Request, Response } from "express";
 import { verifyToken } from "../../shared/utils/jwt.js";
+import { prismaClient } from "../../config/db.js";
+import type { AuthorizationContext, User } from "../types/global.types.js";
+import { BadRequestError, UnauthorizedError } from "../exceptions/app.error.js";
 
 export const parseAuthHeaderMiddleware = () => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -19,6 +22,89 @@ export const parseAuthHeaderMiddleware = () => {
       console.log("token available", token)
       const decoded = verifyToken(token);
       (req as any).user = decoded;
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+export const parseAuthorizationMiddleware = () => {
+  return async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const user: User = (req as any).user;
+
+      const userRoles = await prismaClient.userRole.findMany({
+        where: {
+          userId: user.userId,
+          role: {
+            companyId: user.companyId,
+          },
+        },
+        include: {
+          role: {
+            include: {
+              permissions: {
+                include: {
+                  permission: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const userPermissions = [
+        ...new Set(
+          userRoles.flatMap((userRole) =>
+            userRole.role.permissions.map(
+              (rolePermission) =>
+                rolePermission.permission.name
+            )
+          )
+        ),
+      ];
+
+      const authorizationContext: AuthorizationContext = {
+        userId: user.userId,
+        companyId: user.companyId,
+        permissions: userPermissions,
+      };
+
+      (req as any).authorizationContext = authorizationContext;
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+export const requiredPermission = (permission: string) => {
+  return (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const authorization = (req as any).authorizationContext;
+
+      if (!authorization) {
+        throw new UnauthorizedError("Authorization context not found");
+      }
+
+      const hasPermission =
+        authorization.permissions.includes(permission);
+
+      if (!hasPermission) {
+        throw new BadRequestError(
+          `You do not have permission to perform this action`
+        );
+      }
+
       next();
     } catch (error) {
       next(error);
