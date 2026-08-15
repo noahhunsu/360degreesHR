@@ -15,7 +15,7 @@ router.patch("/template/:templateId", parseAuthHeaderMiddleware(), validate(upda
 router.delete("/template/:templateId", parseAuthHeaderMiddleware(), PerformanceController.deleteSinglePerformanceTemplateController)
 
 // REVIEW ROUTES (specific first, generic last)
-router.post("/review", parseAuthHeaderMiddleware(), validate(performanceReviewSchema), PerformanceController.createPerformanceReviewController)
+// router.post("/review", parseAuthHeaderMiddleware(), validate(performanceReviewSchema), PerformanceController.createPerformanceReviewController)
 router.get("/review/instance", parseAuthHeaderMiddleware(), PerformanceController.getAllReviewInstancesController)  // SPECIFIC FIRST
 router.get("/review", parseAuthHeaderMiddleware(), PerformanceController.getMyReviewsController)
 router.get("/review/:reviewId", parseAuthHeaderMiddleware(), PerformanceController.getMyReviewTasksController)  // GENERIC LAST
