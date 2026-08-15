@@ -8,14 +8,14 @@ import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middlewa
 const router = Router()
 
 // TEMPLATE ROUTES (specific first)
-router.post("/template/create", parseAuthHeaderMiddleware(), validate(performanceTemplateSchema), PerformanceController.createPerformanceReviewController)
+router.post("/template/create", parseAuthHeaderMiddleware(), validate(performanceTemplateSchema), PerformanceController.createPerformanceTemplateController)
 router.get("/template", parseAuthHeaderMiddleware(), PerformanceController.getAllPerformanceTemplateController)
 router.get("/template/:templateId", parseAuthHeaderMiddleware(), PerformanceController.getSinglePerformanceTemplateController)
 router.patch("/template/:templateId", parseAuthHeaderMiddleware(), validate(updatePerformanceTemplateSchema), PerformanceController.updatePerformanceTemplateController)
 router.delete("/template/:templateId", parseAuthHeaderMiddleware(), PerformanceController.deleteSinglePerformanceTemplateController)
 
 // REVIEW ROUTES (specific first, generic last)
-// router.post("/review", parseAuthHeaderMiddleware(), validate(performanceReviewSchema), PerformanceController.createPerformanceReviewController)
+router.post("/review", parseAuthHeaderMiddleware(), validate(performanceReviewSchema), PerformanceController.createPerformanceReviewController)
 router.get("/review/instance", parseAuthHeaderMiddleware(), PerformanceController.getAllReviewInstancesController)  // SPECIFIC FIRST
 router.get("/review", parseAuthHeaderMiddleware(), PerformanceController.getMyReviewsController)
 router.get("/review/:reviewId", parseAuthHeaderMiddleware(), PerformanceController.getMyReviewTasksController)  // GENERIC LAST
