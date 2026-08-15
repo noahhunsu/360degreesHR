@@ -7,7 +7,7 @@ import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middlewa
 
 const router = Router()
 
-router.post("/template" , parseAuthHeaderMiddleware() ,validate(performanceTemplateSchema), PerformanceController.createPerformanceReviewController)
+router.post("/template/create" , parseAuthHeaderMiddleware() ,validate(performanceTemplateSchema), PerformanceController.createPerformanceReviewController)
 router.patch("/template/templateId" , parseAuthHeaderMiddleware(), validate(updatePerformanceTemplateSchema), PerformanceController.updatePerformanceTemplateController)
 router.get("/template" , parseAuthHeaderMiddleware(), PerformanceController.getAllPerformanceTemplateController)
 router.get("/template/:templateId" , parseAuthHeaderMiddleware(), PerformanceController.getSinglePerformanceTemplateController)
