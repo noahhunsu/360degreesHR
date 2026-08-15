@@ -62,6 +62,7 @@ export class PerformanceController {
   ) {
     try {
       const user = (req as any).user;
+      console.log("The user is " , user);
       const result =
         await PerformanceService.getAllPerformanceTemplateService(user);
 
