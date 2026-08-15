@@ -61,7 +61,7 @@ app.use("/api/v1/leave-applications" , leaveApplicationRouter)
 app.use("/api/v1/company-debts" , companyDebtRouter)
 app.use("/api/v1/payroll-components" , payrollComponentRouter)
 app.use("/api/v1/performance" , performanceRouter)
-app.use("/api/v1/system-settings" , performanceRouter)
+app.use("/api/v1/system-settings" , systemSettingsRouter)
 
 
 
