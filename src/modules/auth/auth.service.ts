@@ -108,15 +108,23 @@ export class AuthService {
         companyId : company.id , 
         role : user.role
       }
-      let {newRole} = await SystemSettingsService.createRoleService(newUser , {name : "system_admin"});
+
+      let systemAdminRole = await tx.companyRole.create({
+        data : {
+          companyId : company.id , 
+          name : "system_admin",
+          description : "This role gives every permission to user"
+        }
+      });
+      // let {newRole} = await tx.createRoleService(newUser , {name : "system_admin"});
       let permissions = await tx.permission.findMany();
       // Getting out only the permission ids
       let permissionUuids = permissions.map((permission )=> permission.id );
 
       // Assigning all the permissions to the system_admin role created
-      await SystemSettingsService.assignPermissionsToRoleService(newUser , newRole.id , permissionUuids)
+      await SystemSettingsService.assignPermissionsToRoleService(newUser , systemAdminRole.id , permissionUuids)
       // Assigning the role to the new user created.
-      await SystemSettingsService.assignRoleToUserService(newUser , newRole.id , user.id)
+      await SystemSettingsService.assignRoleToUserService(newUser , systemAdminRole.id , user.id)
       
       return {
         company,
