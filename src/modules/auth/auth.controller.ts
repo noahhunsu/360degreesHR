@@ -53,8 +53,8 @@ export class AuthController {
         });
       }
       const token = authHeader.split(" ")[1] || "";
-
-      const result = await AuthService.authMeService(token);
+      let authorizationContext = (req as any).authorizationContext;
+      const result = await AuthService.authMeService(token , authorizationContext);
 
       return res.status(200).json({
         success: true,

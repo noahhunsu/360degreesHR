@@ -25,7 +25,7 @@ import type {
 } from "./auth.validation.js";
 import { Role } from "@prisma/client";
 import { SystemSettingsService } from "../system_settings/system_settings.service.js";
-import type { User } from "../../shared/types/global.types.js";
+import type { AuthorizationContext, User } from "../../shared/types/global.types.js";
 export class AuthService {
   static async registerService(payload: RegisterInput) {
     // destructuring the payload
@@ -210,7 +210,7 @@ export class AuthService {
     };
   }
 
-  static async authMeService(authToken: string) {
+  static async authMeService(authToken: string , authorizationContext : AuthorizationContext) {
     let data = verifyToken(authToken);
 
     const user = await prismaClient.user.findUnique({
@@ -228,6 +228,7 @@ export class AuthService {
       email: user.email,
       role: user.role,
       companyId: user.companyId,
+      permission : authorizationContext.permissions
     };
   }
 
