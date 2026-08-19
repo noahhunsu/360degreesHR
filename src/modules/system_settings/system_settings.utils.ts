@@ -3,7 +3,7 @@ import { NotFoundError } from "../../shared/exceptions/app.error.js"
 import type { User } from "../../shared/types/global.types.js"
 
 
-export const checkPermissionExists = async(permissions : string[]) =>{
+export const checkPermissionExists = async(  permissions : string[]) =>{
 
     for (const permission of permissions) {
         const perm = await prismaClient.permission.findFirst({

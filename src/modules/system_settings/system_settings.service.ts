@@ -231,5 +231,6 @@ export class SystemSettingsService {
 
   static async getSystemPermissions(){
     return  await prismaClient.permission.findMany()
+
   }
 }
