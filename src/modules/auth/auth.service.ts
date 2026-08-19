@@ -108,6 +108,7 @@ export class AuthService {
         companyId : company.id , 
         role : user.role
       }
+      // We create the system admin role right here
 
       let systemAdminRole = await tx.companyRole.create({
         data : {
