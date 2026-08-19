@@ -91,6 +91,7 @@ export const requiredPermission = (permission: string) => {
   ) => {
     try {
       const authorization = (req as any).authorizationContext;
+      console.log("the authorization context is " , authorization)
 
       if (!authorization) {
         throw new UnauthorizedError("Authorization context not found");
