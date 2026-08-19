@@ -228,4 +228,8 @@ export class SystemSettingsService {
 
     return userRoles;
   }
+
+  static async getSystemPermissions(){
+    return  await prismaClient.permission.findMany()
+  }
 }

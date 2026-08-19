@@ -309,4 +309,22 @@ export class SystemSettingsController {
         next(error)
     }
   }
+  static async getPermissionsController(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ){
+    try {
+       
+       
+        const result = await SystemSettingsService.getSystemPermissions()
+        return res.status(200).json({
+            success: true , 
+            message : "Single Role on user fetched Successfully",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+  }
 }
