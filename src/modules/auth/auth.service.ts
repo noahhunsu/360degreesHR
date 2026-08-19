@@ -25,7 +25,10 @@ import type {
 } from "./auth.validation.js";
 import { Role } from "@prisma/client";
 import { SystemSettingsService } from "../system_settings/system_settings.service.js";
-import type { AuthorizationContext, User } from "../../shared/types/global.types.js";
+import type {
+  AuthorizationContext,
+  User,
+} from "../../shared/types/global.types.js";
 export class AuthService {
   static async registerService(payload: RegisterInput) {
     // destructuring the payload
@@ -37,7 +40,8 @@ export class AuthService {
       password,
       companyAddress,
       companyPhone,
-      lastName , gender
+      lastName,
+      gender,
     } = payload;
     // We take out every whitespace from input
 
@@ -67,7 +71,6 @@ export class AuthService {
     // Next , we hash the password
     const hashedPassword = await hashpassword(password);
 
-
     // Next , we start a transaction
     const result = await prismaClient.$transaction(async (tx) => {
       // We create the company record . We require the email , name , phone(optional ) , address ( optional)
@@ -93,58 +96,47 @@ export class AuthService {
 
       const employee = await tx.employee.create({
         data: {
-          companyId : company.id , 
-          userId : user.id , 
-          firstName : firstName, 
-          lastName, 
-          gender, employeeCode : "001"
+          companyId: company.id,
+          userId: user.id,
+          firstName: firstName,
+          lastName,
+          gender,
+          employeeCode: "001",
+        },
+      });
 
-        }
-      })
-
-      // We create the super admin role
-      let newUser : User= {
-        userId : user.id , 
-        companyId : company.id , 
-        role : user.role
-      }
       // We create the system admin role
       let systemAdminRole = await tx.companyRole.create({
-        data : {
-          companyId : company.id, 
-          name : "system_admin",
-          description : "This role gives all permissions to user"
-        }
+        data: {
+          companyId: company.id,
+          name: "system_admin",
+          description: "This role gives all permissions to user",
+        },
       });
       // We fetch all the company permissions
       let permissions = await tx.permission.findMany();
       // Getting out only the permission ids
-      let permissionUuids = permissions.map((permission )=> permission.id );
+      let permissionUuids = permissions.map((permission) => permission.id);
       // Then we give all teh permissions to this role
-       for (const permission of permissionUuids) {
-        const rolePermission = await tx.rolePermission.create({
-            data : {
-                roleId : systemAdminRole.id , 
-                permissionId : permission
-            }
-        })
-    }
-
-    // Next we give this role id to the new user
+      await tx.rolePermission.createMany({
+        data: permissionUuids.map((permissionId) => ({
+          roleId: systemAdminRole.id,
+          permissionId,
+        })),
+      });
+      // Next we give this role id to the new user
 
       await tx.userRole.create({
-      data: {
-        userId: user.id,
-        roleId : systemAdminRole.id,
-      },
-    });
+        data: {
+          userId: user.id,
+          roleId: systemAdminRole.id,
+        },
+      });
 
-
-      
       return {
         company,
         user,
-        employee
+        employee,
       };
     });
     // This token will be required to be sent as an auth token
@@ -167,7 +159,6 @@ export class AuthService {
       <p>Your company onboarding was successful.</p>
     `,
       });
-
     } catch (error) {
       console.error("Onboarding email failed:", error);
     }
@@ -233,7 +224,10 @@ export class AuthService {
     };
   }
 
-  static async authMeService(authToken: string , authorizationContext : AuthorizationContext) {
+  static async authMeService(
+    authToken: string,
+    authorizationContext: AuthorizationContext,
+  ) {
     let data = verifyToken(authToken);
 
     const user = await prismaClient.user.findUnique({
@@ -251,7 +245,7 @@ export class AuthService {
       email: user.email,
       role: user.role,
       companyId: user.companyId,
-      permission : authorizationContext.permissions
+      permission: authorizationContext.permissions,
     };
   }
 
@@ -341,7 +335,6 @@ export class AuthService {
 
     const hashedPassword = await hashpassword(payload.password);
 
-
     await prismaClient.user.update({
       where: {
         id: user.id,
@@ -375,7 +368,6 @@ export class AuthService {
   static async getAllCompaniesService() {
     const companies = await prismaClient.company.findMany();
     const users = await prismaClient.user.findMany();
-
 
     return {
       companies,
