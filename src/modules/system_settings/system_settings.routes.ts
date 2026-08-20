@@ -2,14 +2,14 @@ import { Router } from "express";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { SystemSettingsController } from "./system_settings.controller.js";
 import { createRoleSchema, permissionToRoleSchema, updateRoleSchema } from "./system_settings.validation.js";
-import { parseAuthHeaderMiddleware } from "../../shared/middleware/auth.middleware.js";
+import { parseAuthHeaderMiddleware, requiredPermission } from "../../shared/middleware/auth.middleware.js";
 
 
 const router = Router()
 
 router.post("/create" ,parseAuthHeaderMiddleware()  , validate(createRoleSchema), SystemSettingsController.createRoleController)
 router.get("/" , parseAuthHeaderMiddleware() ,SystemSettingsController.getAllRoleController)
-router.get("/system/permissions" , parseAuthHeaderMiddleware() ,SystemSettingsController.getPermissionsController)
+router.get("/system/permissions" , parseAuthHeaderMiddleware() , requiredPermission(["view_permissions"]) , SystemSettingsController.getPermissionsController)
 router.get("/:roleId" , parseAuthHeaderMiddleware() , SystemSettingsController.getSingleRoleController)
 router.patch("/:roleId" , parseAuthHeaderMiddleware() ,  validate(updateRoleSchema), SystemSettingsController.updateSingleRoleController)
 router.delete("/:roleId" , parseAuthHeaderMiddleware() ,SystemSettingsController.deleteRoleController)

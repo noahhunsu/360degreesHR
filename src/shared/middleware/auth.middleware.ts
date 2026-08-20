@@ -83,7 +83,7 @@ export const parseAuthorizationMiddleware = () => {
     }
   };
 };
-export const requiredPermission = (permission: string) => {
+export const requiredPermission = (permissions: string[]) => {
   return (
     req: Request,
     res: Response,
@@ -91,18 +91,26 @@ export const requiredPermission = (permission: string) => {
   ) => {
     try {
       const authorization = (req as any).authorizationContext;
-      console.log("the authorization context is " , authorization)
+
+      console.log(
+        "the authorization context is ",
+        authorization
+      );
 
       if (!authorization) {
-        throw new UnauthorizedError("Authorization context not found");
+        throw new UnauthorizedError(
+          "Authorization context not found"
+        );
       }
 
-      const hasPermission =
-        authorization.permissions.includes(permission);
+      const hasPermission = permissions.some(
+        (permission) =>
+          authorization.permissions.includes(permission)
+      );
 
       if (!hasPermission) {
         throw new BadRequestError(
-          `You do not have permission to perform this action`
+          "You do not have permission to perform this action"
         );
       }
 
