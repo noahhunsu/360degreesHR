@@ -8,12 +8,7 @@ export class EmploymentHistoryService {
     user : User,
     employeeId: string,
     payload: CreateEmploymentHistoryInput,
-  ) {
-
-    if (!user || user.role !== "HR_ADMIN") {
-          throw new UnauthorizedError("You Are Not Authorized To Do This");
-        }
-        
+  ) {    
     // check employee exists
     const employee = await prismaClient.employee.findFirst({
       where: {
@@ -80,13 +75,8 @@ export class EmploymentHistoryService {
     return result;
   }
   
-
   static async getEmploymentHistoryService(user : User,
     employeeId: string){
-      if (!user || user.role !== "HR_ADMIN") {
-          throw new UnauthorizedError("You Are Not Authorized To Do This");
-        }
-        
     // check employee exists
     const employee = await prismaClient.employee.findFirst({
       where: {

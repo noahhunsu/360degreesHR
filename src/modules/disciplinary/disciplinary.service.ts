@@ -21,17 +21,6 @@ export class DisciplinaryService {
   employeeId: string,
   payload: CreateDisciplinaryInput
 ) {
-
-  // =========================
-  // AUTHORIZATION
-  // =========================
-
-  if (!user || user.role !== "HR_ADMIN") {
-    throw new UnauthorizedError(
-      "You are not authorized to do this"
-    );
-  }
-
   // =========================
   // EMPLOYEE CHECK
   // =========================
@@ -83,17 +72,6 @@ static async getDisciplinaryRecordService(
   user: User,
   employeeId: string
 ) {
-
-  // =========================
-  // AUTHORIZATION
-  // =========================
-
-  if (!user || user.role !== "HR_ADMIN") {
-    throw new UnauthorizedError(
-      "You are not authorized to do this"
-    );
-  }
-
   // =========================
   // EMPLOYEE CHECK
   // =========================
@@ -172,16 +150,6 @@ static async resolveDisciplinaryRecordService(
   disciplinaryId: string,
   payload: ResolveDisciplinaryInput
 ) {
-
-  // =========================
-  // AUTHORIZATION
-  // =========================
-
-  if (!user || user.role !== "HR_ADMIN") {
-    throw new UnauthorizedError(
-      "You are not authorized to do this"
-    );
-  }
 
   // =========================
   // FIND RECORD

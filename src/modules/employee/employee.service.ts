@@ -29,15 +29,13 @@ import { templateSampleData } from "./employee.types.js";
 export class EmployeeService {
   static async createEmployeeService(
     payload: CreateEmployeeInput,
-    hrUser: User,
+    companyUser: User,
   ) {
-    if (!hrUser || hrUser.role !== "HR_ADMIN") {
-      throw new UnauthorizedError("You Are Not Authorized To Do This");
-    }
+   
 
     const existingUser = await prismaClient.user.findFirst({
       where: {
-        email: payload.email,companyId : hrUser.companyId
+        email: payload.email,companyId : companyUser.companyId
       },
     });
 
@@ -49,7 +47,7 @@ export class EmployeeService {
     if(payload.departmentId){
       department = await prismaClient.department.findFirst({
         where : {
-          companyId : hrUser.companyId , 
+          companyId : companyUser.companyId , 
           id : payload.departmentId
         }
       })
@@ -63,7 +61,7 @@ export class EmployeeService {
       HOD = await prismaClient.employee.findFirst({
         where: {
           id: payload.managerId,
-          companyId: hrUser.companyId,
+          companyId: companyUser.companyId,
         },
 
         include: {
@@ -85,7 +83,7 @@ export class EmployeeService {
       const department = await prismaClient.department.findFirst({
         where: {
           id: payload.departmentId,
-          companyId: hrUser.companyId,
+          companyId: companyUser.companyId,
         },
       });
 
@@ -97,7 +95,7 @@ export class EmployeeService {
 
     const lastEmployee = await prismaClient.employee.findFirst({
       where: {
-        companyId: hrUser.companyId,
+        companyId: companyUser.companyId,
       },
       orderBy: {
         createdAt: "desc",
@@ -126,12 +124,12 @@ export class EmployeeService {
           email: payload.email,
           password: hashedPassword,
           role: Role.EMPLOYEE,
-          companyId: hrUser.companyId,
+          companyId: companyUser.companyId,
         },
       });
 
       const employeeData = {
-        companyId: hrUser.companyId,
+        companyId: companyUser.companyId,
         employeeCode,
         firstName: payload.firstName,
         lastName: payload.lastName,
@@ -156,7 +154,7 @@ export class EmployeeService {
       });
 
       const employmentHistoryData = {
-        companyId: hrUser.companyId,
+        companyId: companyUser.companyId,
         employeeId  : employee.id,
         startDate : new Date(),
         isCurrent : true,
@@ -192,13 +190,9 @@ export class EmployeeService {
 
   static async createBulkEmployeeViaSheetService(
   file: Express.Multer.File,
-  hrUser: User,
+  user: User,
 ) {
-  if (!hrUser || hrUser.role !== "HR_ADMIN") {
-    throw new UnauthorizedError(
-      "You Are Not Authorized To Do This",
-    );
-  }
+  
 
 
 
@@ -242,7 +236,7 @@ export class EmployeeService {
     const employee =
       await EmployeeService.createEmployeeService(
         parsed.data,
-        hrUser,
+        user,
       );
 
     successfulRows.push({
@@ -268,7 +262,7 @@ export class EmployeeService {
   };
 }
 
- static async downloadBulkUploadTemplateService(hrUser : User){
+ static async downloadBulkUploadTemplateService(){
     const worksheet = XLSX.utils.json_to_sheet(templateSampleData)
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, worksheet , "Employee_Record")
@@ -286,10 +280,6 @@ export class EmployeeService {
     user: User,
     querySearch: FilterQueryInput,
   ) {
-    if (!user) {
-      throw new UnauthorizedError("You Are Not Authorized To Do This");
-    }
-
     const { page = 1, limit = 10, name } = querySearch;
 
     /**
@@ -518,13 +508,6 @@ export class EmployeeService {
     payload: UpdateEmployeeInput,
   ) {
     /**
-     * Authorization
-     */
-    if (!user || user.role !== "HR_ADMIN") {
-      throw new UnauthorizedError("You Are Not Authorized To Do This");
-    }
-
-    /**
      * Check employee exists
      */
     const existingEmployee = await prismaClient.employee.findFirst({
@@ -677,13 +660,6 @@ export class EmployeeService {
 
   static async deleteEmployeeService(user: User, employeeId: string) {
     /**
-     * Authorization
-     */
-    if (!user || user.role !== "HR_ADMIN") {
-      throw new UnauthorizedError("You Are Not Authorized To Do This");
-    }
-
-    /**
      * Check employee exists
      */
     const existingEmployee = await prismaClient.employee.findFirst({
@@ -751,10 +727,6 @@ export class EmployeeService {
     user: User,
     querySearch: FilterQueryInput,
   ) {
-    if (!user) {
-      throw new UnauthorizedError("You Are Not Authorized To Do This");
-    }
-
     const { page = 1, limit = 10, name } = querySearch;
 
     /**

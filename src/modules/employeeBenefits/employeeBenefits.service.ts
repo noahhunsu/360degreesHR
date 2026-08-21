@@ -34,8 +34,6 @@ export class PayrollComponentManagementService {
     user: User,
     payload: CreatePayrollComponentInput,
   ) {
-    assertHR(user);
-
     const existingPayrollComponent =
       await prismaClient.payrollComponent.findFirst({
         where: {
@@ -62,7 +60,6 @@ export class PayrollComponentManagementService {
             }),
         },
       });
-      console.log("The payload rule is ", payload.rule);
       if (payload.calculationType === "FORMULA" && payload.rule) {
         console.log("this branch was hit");
         const payrollRule = await tx.payrollRule.create({
@@ -91,8 +88,6 @@ export class PayrollComponentManagementService {
     payrollComponentId: string,
     payload: UpdatePayrollComponentInput,
   ) {
-    assertHR(user);
-
     const existingComponent = await prismaClient.payrollComponent.findFirst({
       where: {
         id: payrollComponentId,
@@ -212,8 +207,6 @@ export class PayrollComponentManagementService {
     user: User,
     payrollComponentId: string,
   ) {
-    assertHR(user);
-
     const existingPayrollComponent =
       await prismaClient.payrollComponent.findFirst({
         where: {
@@ -242,8 +235,6 @@ export class PayrollComponentManagementService {
     user: User,
     payrollComponentId: string,
   ) {
-    assertUser(user);
-
     const payrollComponent = await prismaClient.payrollComponent.findFirst({
       where: {
         id: payrollComponentId,
@@ -267,8 +258,6 @@ export class PayrollComponentManagementService {
     limit = 10,
     search?: string,
   ) {
-    assertUser(user);
-
     const skip = (page - 1) * limit;
 
     const where: Prisma.PayrollComponentWhereInput = {
@@ -312,7 +301,6 @@ export class PayrollComponentManagementService {
   }
 
   static async runPayrollForMonthService(user: User, payload: RunPayrollInput) {
-    assertHR(user);
     const payrollRunCheck = await prismaClient.payrollRun.findFirst({
       where: {
         month: payload.month,
@@ -383,7 +371,6 @@ export class PayrollComponentManagementService {
     return transaction;
   }
   static async getEmployeeComponentService(user: User, employeeId: string) {
-    assertHR(user);
     const employee = await prismaClient.employee.findFirst({
       where: {
         id: employeeId,
@@ -412,8 +399,6 @@ export class PayrollComponentManagementService {
     employeeId: string,
     payload: AttachEmployeeComponentInput,
   ) {
-    assertHR(user);
-
     const employee = await prismaClient.employee.findFirst({
       where: {
         id: employeeId,
@@ -488,8 +473,6 @@ export class PayrollComponentManagementService {
     employeeId: string,
     payload: UpdateEmployeeComponentInput,
   ) {
-    assertHR(user);
-
     const employee = await prismaClient.employee.findFirst({
       where: {
         id: employeeId,
@@ -606,9 +589,7 @@ export class PayrollComponentManagementService {
     employeeId: string,
     payload: RemoveEmployeeComponentInput,
   ) {
-    assertHR(user);
-
-    const employee = await prismaClient.employee.findFirst({
+   const employee = await prismaClient.employee.findFirst({
       where: {
         id: employeeId,
         companyId: user.companyId,
@@ -699,7 +680,6 @@ export class PayrollComponentManagementService {
   }
 
   static async lockPayrollService(user: User, payrollId: string) {
-    assertHR(user);
     const payroll = await prismaClient.payrollRun.findFirst({
       where: {
         companyId: user.companyId,
@@ -722,8 +702,6 @@ export class PayrollComponentManagementService {
     });
   }
   static async markPayrollAsPaidService(user: User, payrollId: string) {
-    assertHR(user);
-
     const payroll = await prismaClient.payrollRun.findFirst({
       where: {
         companyId: user.companyId,
@@ -752,9 +730,7 @@ export class PayrollComponentManagementService {
     breakdownId: string,
     payload: EditPayrollSnapshotInput,
   ) {
-    assertHR(user);
-
-    // get the breakdown id
+   // get the breakdown id
     const breakdown = await prismaClient.payrollBreakdown.findFirst({
       where: {
         id: breakdownId,
@@ -900,8 +876,6 @@ export class PayrollComponentManagementService {
     payrollItemId: string,
     payload: RemovePayrollBreakdownInput,
   ) {
-    assertHR(user);
-
     const payrollItem = await prismaClient.payrollItem.findFirst({
       where: {
         id: payrollItemId,
@@ -1014,8 +988,6 @@ export class PayrollComponentManagementService {
     return employees;
   }
   static async getAllPayrollRunsService(user: User) {
-    assertHR(user);
-
     const payrollRuns = await prismaClient.payrollRun.findMany({
       where: {
         companyId: user.companyId,
@@ -1031,9 +1003,7 @@ export class PayrollComponentManagementService {
     return payrollRuns;
   }
   static async getSinglePayrollRunsService(user: User, payrollId: string) {
-    assertHR(user);
-
-    const payrollRun = await prismaClient.payrollRun.findFirst({
+   const payrollRun = await prismaClient.payrollRun.findFirst({
       where: {
         companyId: user.companyId,
         id: payrollId,
@@ -1053,8 +1023,7 @@ export class PayrollComponentManagementService {
     user: User,
     employeeId: string,
   ) {
-    assertHR(user);
-    const employee = await prismaClient.employee.findFirst({
+     const employee = await prismaClient.employee.findFirst({
       where: {
         companyId: user.companyId,
         id: employeeId,
@@ -1080,8 +1049,7 @@ export class PayrollComponentManagementService {
     employeeId: string,
     payrollItemId: string,
   ) {
-    assertHR(user);
-    const employee = await prismaClient.employee.findFirst({
+   const employee = await prismaClient.employee.findFirst({
       where: {
         companyId: user.companyId,
         id: employeeId,
@@ -1104,8 +1072,6 @@ export class PayrollComponentManagementService {
   }
 
   static async getPayrollSummaryService(user: User, payrollRunId: string) {
-    assertHR(user);
-
     const payrollRun = await prismaClient.payrollRun.findFirst({
       where: {
         id: payrollRunId,
@@ -1165,9 +1131,7 @@ export class PayrollComponentManagementService {
   }
 
   static async deletePayrollRunService(user: User, payrollRunId: string) {
-    assertHR(user);
-
-    const payrollRun = await prismaClient.payrollRun.findFirst({
+     const payrollRun = await prismaClient.payrollRun.findFirst({
       where: {
         id: payrollRunId,
         companyId: user.companyId,
@@ -1198,10 +1162,7 @@ export class PayrollComponentManagementService {
     user: User,
     employeeId: string,
   ) {
-    assertHR(user);
-
-    if (user.role !== "HR_ADMIN") {
-    }
+   
     const employee = await prismaClient.employee.findFirst({
       where: {
         id: employeeId,
@@ -1250,9 +1211,7 @@ export class PayrollComponentManagementService {
   }
 
   static async getMyPayslipService(user: User, payrollRunId: string) {
-    assertUser(user);
-
-    const employee = await prismaClient.employee.findFirst({
+     const employee = await prismaClient.employee.findFirst({
       where: {
         userId: user.userId,
         companyId: user.companyId,

@@ -18,13 +18,7 @@ export class JobOpeningCreationService {
     payload: CreateJobOpeningInput,
     hrUser: User,
   ) {
-    if (!hrUser || hrUser.role !== "HR_ADMIN") {
-      throw new UnauthorizedError(
-        "You are not authorized to perform this action",
-      );
-    }
-
-    const requisition = await prismaClient.jobRequisition.findFirst({
+  const requisition = await prismaClient.jobRequisition.findFirst({
       where: {
         id: payload.requisitionId,
 
@@ -146,10 +140,6 @@ export class JobOpeningCreationService {
   }
 
   static async getAllJobOpeningService(hrUser : User) {
-
-    if(!hrUser || hrUser.role !== "HR_ADMIN"){
-      throw new UnauthorizedError("You are unauthorized")
-    }
     let companyId = hrUser.companyId
     return prismaClient.jobOpening.findMany({
       where: {
@@ -199,11 +189,6 @@ export class JobOpeningCreationService {
     hrUser : User,
     openingId: string,
   ) {
-
-    if (!hrUser || hrUser.role !== "HR_ADMIN"){
-      throw new UnauthorizedError("You need to be authorized to do this")
-    }
-
     let companyId = hrUser.companyId; 
 
     const jobOpening = await prismaClient.jobOpening.findFirst({
@@ -250,12 +235,6 @@ export class JobOpeningCreationService {
     payload: UpdateJobOpeningInput,
     hrUser: User,
   ) {
-    if (!hrUser || hrUser.role !== "HR_ADMIN") {
-      throw new UnauthorizedError(
-        "You are not authorized to perform this action",
-      );
-    }
-
     const existingOpening = await prismaClient.jobOpening.findFirst({
       where: {
         id: openingId,
@@ -458,12 +437,6 @@ export class JobOpeningCreationService {
   }
 
   static async publishJobOpeningService(openingId: string, hrUser: User) {
-    if (!hrUser || hrUser.role !== "HR_ADMIN") {
-      throw new UnauthorizedError(
-        "You are not authorized to perform this action",
-      );
-    }
-
     const existingOpening = await prismaClient.jobOpening.findFirst({
       where: {
         id: openingId,
@@ -519,12 +492,6 @@ export class JobOpeningCreationService {
     return publishedJobOpening;
   }
   static async closeJobOpeningService(openingId: string, hrUser: User) {
-    if (!hrUser || hrUser.role !== "HR_ADMIN") {
-      throw new UnauthorizedError(
-        "You are not authorized to perform this action",
-      );
-    }
-
     const existingOpening = await prismaClient.jobOpening.findFirst({
       where: {
         id: openingId,
@@ -562,12 +529,6 @@ export class JobOpeningCreationService {
   }
 
   static async reOpenJobOpeningService(openingId: string, hrUser: User) {
-    if (!hrUser || hrUser.role !== "HR_ADMIN") {
-      throw new UnauthorizedError(
-        "You are not authorized to perform this action",
-      );
-    }
-
     const existingOpening = await prismaClient.jobOpening.findFirst({
       where: {
         id: openingId,
@@ -647,10 +608,6 @@ export class JobOpeningCreationService {
   }
 
   static async getJobOpeningStats(hrUser: User) {
-    if (!hrUser || hrUser.role !== "HR_ADMIN") {
-      throw new UnauthorizedError("You need to be authorized");
-    }
-
     let companyId = hrUser.companyId;
     const [total, draft, published, closed] = await Promise.all([
       prismaClient.jobOpening.count({

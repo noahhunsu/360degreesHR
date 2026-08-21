@@ -16,20 +16,18 @@ import type { CreateDepartmentInput, UpdateDepartmentInput } from "./department.
 export class DepartmentService {
   static async createDepartmentService(
     payload: CreateDepartmentInput,
-    hrUser: User,
+    user: User,
   ) {
     const { name, description, parentDepartmentId, headEmployeeId } = payload;
     const parentId =
       typeof parentDepartmentId === "string" ? parentDepartmentId : null;
 
     const headId = typeof headEmployeeId === "string" ? headEmployeeId : null;
-    if (!hrUser || hrUser.role !== "HR_ADMIN") {
-      throw new UnauthorizedError("You Are Not Authorized To Do This");
-    }
+
 
     const existingDepartment = await prismaClient.department.findFirst({
       where: {
-        companyId: hrUser.companyId,
+        companyId: user.companyId,
         name: name,
       },
     });
@@ -43,7 +41,7 @@ export class DepartmentService {
       const parent = await prismaClient.department.findFirst({
         where: {
           parentDepartmentId,
-          companyId: hrUser.companyId,
+          companyId: user.companyId,
         },
       });
 
@@ -57,7 +55,7 @@ export class DepartmentService {
       const employee = await prismaClient.employee.findFirst({
         where: {
           id: headEmployeeId,
-          companyId: hrUser.companyId,
+          companyId: user.companyId,
         },
         include: {
           user: true,
@@ -74,7 +72,7 @@ export class DepartmentService {
 
     const department = await prismaClient.department.create({
       data: {
-        companyId: hrUser.companyId,
+        companyId: user.companyId,
         name,
         description,
         parentDepartmentId: parentId,
@@ -296,24 +294,16 @@ static async getSingleDepartmentService(
   };
 }
 static async updateDepartmentService(
-  hrUser: User,
+  user: User,
   departmentId: string,
   payload: UpdateDepartmentInput
 ) {
-  if (!hrUser) {
-    throw new UnauthorizedError("You are not authenticated");
-  }
-
-  if (hrUser.role !== "HR_ADMIN") {
-    throw new UnauthorizedError(
-      "Only HR_ADMIN can update departments"
-    );
-  }
+  
 
   const department = await prismaClient.department.findFirst({
     where: {
       id: departmentId,
-      companyId: hrUser.companyId,
+      companyId: user.companyId,
       deletedAt: null,
     },
   });
@@ -356,21 +346,14 @@ static async updateDepartmentService(
 }
 
 static async deleteDepartmentService(
-  hrUser: User,
+  user: User,
   departmentId: string,
 ) {
-  if (!hrUser) {
-    throw new UnauthorizedError("You are not authenticated");
-  }
-
-  if (hrUser.role !== "HR_ADMIN") {
-    throw new UnauthorizedError("Only HR_ADMIN can delete departments");
-  }
 
   const department = await prismaClient.department.findFirst({
     where: {
       id: departmentId,
-      companyId: hrUser.companyId,
+      companyId: user.companyId,
       deletedAt: null,
     },
     include: {
@@ -410,23 +393,15 @@ static async deleteDepartmentService(
   };
 }
 
-static async getDepartmentTreeService(hrUser: User) {
-  if (!hrUser) {
-    throw new UnauthorizedError("You are not authenticated");
-  }
-
-  if (hrUser.role !== "HR_ADMIN") {
-    throw new UnauthorizedError(
-      "Only HR_ADMIN can view department tree"
-    );
-  }
+static async getDepartmentTreeService(user: User) {
+  
 
   /**
    * Fetch departments + employees in one go
    */
   const departments = await prismaClient.department.findMany({
     where: {
-      companyId: hrUser.companyId,
+      companyId: user.companyId,
       deletedAt: null,
     },
     include: {

@@ -283,11 +283,7 @@ export class JobApplicationService {
     user: User,
     payload: MoveJobApplicationInput,
   ) {
-    if (!user) {
-      throw new UnauthorizedError("You need to be authorized");
-    }
-
-    const jobApplication = await prismaClient.jobApplication.findFirst({
+     const jobApplication = await prismaClient.jobApplication.findFirst({
       where: {
         id: payload.applicationId,
         companyId: user.companyId,
