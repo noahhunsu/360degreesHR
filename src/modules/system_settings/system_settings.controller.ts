@@ -171,7 +171,7 @@ export class SystemSettingsController {
       }
       let permissions : string[] = req.body.permissions
        
-        await SystemSettingsService.assignPermissionsToRoleService(user , roleId , permissions)
+        await SystemSettingsService.updatePermissionsToRoleService(user , roleId , permissions)
         return res.status(200).json({
             success: true , 
             message : "Permissions updated on role Successfully",
