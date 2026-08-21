@@ -26,6 +26,8 @@ import performanceRouter from "./src/modules/performance/performance.routes.js";
 import systemSettingsRouter from "./src/modules/system_settings/system_settings.routes.js";
 import { swaggerSpec } from "./src/config/swagger.js";
 import { errorMiddleware } from "./src/shared/middleware/error.middleware.js";
+import { parseAuthHeaderMiddleware } from "./src/utils/global.utils.js";
+import { parseAuthorizationMiddleware } from "./src/shared/middleware/auth.middleware.js";
 
 const app = express();
 
@@ -61,7 +63,7 @@ app.use("/api/v1/leave-applications" , leaveApplicationRouter)
 app.use("/api/v1/company-debts" , companyDebtRouter)
 app.use("/api/v1/payroll-components" , payrollComponentRouter)
 app.use("/api/v1/performance" , performanceRouter)
-app.use("/api/v1/system-settings" , systemSettingsRouter)
+app.use("/api/v1/system-settings" , parseAuthHeaderMiddleware(), parseAuthorizationMiddleware(), systemSettingsRouter)
 
 
 
