@@ -53,7 +53,7 @@ export class EmployeeController {
 
      const user = (req as any).user;
     const fileBuffer =
-      await EmployeeService.downloadBulkUploadTemplateService(user);
+      await EmployeeService.downloadBulkUploadTemplateService();
 
     res.setHeader(
       "Content-Type",
