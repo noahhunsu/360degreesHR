@@ -47,7 +47,7 @@ app.use("/api/v1/docs" ,
 
 
 app.use("/api/v1/auth" ,authRouter )
-app.use("/api/v1/employees" , parseAuthHeaderMiddleware() ,parseAuthorizationMiddleware(), employeeRouter )
+app.use("/api/v1/employees" , employeeRouter )
 app.use("/api/v1/departments" ,departmentRouter )
 app.use("/api/v1/employment-history" ,employmentHistoryRouter )
 app.use("/api/v1/disciplinary" , disciplinaryRouter )
@@ -63,7 +63,7 @@ app.use("/api/v1/leave-applications" , leaveApplicationRouter)
 app.use("/api/v1/company-debts" , companyDebtRouter)
 app.use("/api/v1/payroll-components" , payrollComponentRouter)
 app.use("/api/v1/performance" , performanceRouter)
-app.use("/api/v1/system-settings" , parseAuthHeaderMiddleware(), parseAuthorizationMiddleware(), systemSettingsRouter)
+app.use("/api/v1/system-settings" ,  systemSettingsRouter)
 
 
 

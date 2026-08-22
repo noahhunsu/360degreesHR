@@ -9,7 +9,7 @@ const router = Router()
 
 router.post("/create" ,parseAuthHeaderMiddleware()  , validate(createRoleSchema), SystemSettingsController.createRoleController)
 router.get("/" , parseAuthHeaderMiddleware() ,SystemSettingsController.getAllRoleController)
-router.get("/system/permissions" ,requiredPermission(["view_permission"]) , SystemSettingsController.getPermissionsController)
+router.get("/system/permissions" ,parseAuthHeaderMiddleware() ,parseAuthorizationMiddleware(), requiredPermission(["view_permission"]) , SystemSettingsController.getPermissionsController)
 router.get("/:roleId" , parseAuthHeaderMiddleware() , SystemSettingsController.getSingleRoleController)
 router.patch("/:roleId" , parseAuthHeaderMiddleware() ,  validate(updateRoleSchema), SystemSettingsController.updateSingleRoleController)
 router.delete("/:roleId" , parseAuthHeaderMiddleware() ,SystemSettingsController.deleteRoleController)

@@ -3,7 +3,7 @@ import { EmployeeController } from "./employee.controller.js";
 import { validate } from "../../shared/middleware/validate.middleware.js";
 import { createEmployeeSchema, updateEmployeeSchema } from "./employee.validation.js";
 import multer from "multer";
-import { parseAuthHeaderMiddleware, requiredPermission } from "../../shared/middleware/auth.middleware.js";
+import { parseAuthHeaderMiddleware, parseAuthorizationMiddleware, requiredPermission } from "../../shared/middleware/auth.middleware.js";
 
 
 
@@ -12,7 +12,7 @@ const upload = multer({
     storage : multer.memoryStorage()
 })
 
-router.post("/" , requiredPermission(["create_employee"]), validate(createEmployeeSchema ) , EmployeeController.createEmployeeController)
+router.post("/" , parseAuthHeaderMiddleware() ,parseAuthorizationMiddleware(), requiredPermission(["create_employee"]), validate(createEmployeeSchema ) , EmployeeController.createEmployeeController)
 router.get("/bulk-upload/template", parseAuthHeaderMiddleware(), EmployeeController.downloadBulkUploadTemplateController,
 );
 router.post("/bulk-uploads" , parseAuthHeaderMiddleware(), upload.single("file"), EmployeeController.createBulkEmployeeViaSheetController)
