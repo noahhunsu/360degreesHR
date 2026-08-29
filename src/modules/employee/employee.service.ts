@@ -74,23 +74,23 @@ export class EmployeeService {
       }
 
     }
-    if (HOD?.id !== department?.headEmployeeId) {
+    if (HOD !== undefined && HOD?.id !== department?.headEmployeeId) {
       throw new ConflictError("Selected employee is not the HOD");
     }
 
-    // Check if department exists
-    if (payload.departmentId) {
-      const department = await prismaClient.department.findFirst({
-        where: {
-          id: payload.departmentId,
-          companyId: companyUser.companyId,
-        },
-      });
+    // // Check if department exists
+    // if (payload.departmentId) {
+    //   const department = await prismaClient.department.findFirst({
+    //     where: {
+    //       id: payload.departmentId,
+    //       companyId: companyUser.companyId,
+    //     },
+    //   });
 
-      if (!department) {
-        throw new NotFoundError("Department not found");
-      }
-    }
+    //   if (!department) {
+    //     throw new NotFoundError("Department not found");
+    //   }
+    // }
     // to generate employeecode , we get the last employee from the database
 
     const lastEmployee = await prismaClient.employee.findFirst({
