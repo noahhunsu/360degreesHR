@@ -12,7 +12,7 @@ const upload = multer({
     storage : multer.memoryStorage()
 })
 
-router.post("/" , parseAuthHeaderMiddleware() ,parseAuthorizationMiddleware(), requiredPermission(["create_employee"]), validate(createEmployeeSchema ) , EmployeeController.createEmployeeController)
+router.post("/" , parseAuthHeaderMiddleware() ,parseAuthorizationMiddleware(), requiredPermission(["create_employe"]), validate(createEmployeeSchema ) , EmployeeController.createEmployeeController)
 router.get("/bulk-upload/template", parseAuthHeaderMiddleware(), EmployeeController.downloadBulkUploadTemplateController,
 );
 router.post("/bulk-uploads" , parseAuthHeaderMiddleware(), upload.single("file"), EmployeeController.createBulkEmployeeViaSheetController)
